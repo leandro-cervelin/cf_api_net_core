@@ -1,0 +1,15 @@
+﻿version: "3"
+services:
+    api:
+        build: 
+          context: ..
+          dockerfile: CF.Api/Dockerfile 
+        ports:
+            - "8888:80"
+        depends_on:
+            - db
+    db:
+        image: "mcr.microsoft.com/mssql/server"
+        environment:
+            SA_PASSWORD: "CF@!1234FC6549"
+            ACCEPT_EULA: "Y"
