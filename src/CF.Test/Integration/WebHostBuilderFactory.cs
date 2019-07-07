@@ -4,10 +4,7 @@ using CF.CustomerMngt.Infrastructure.Repositories;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
-using ServiceCollection = Microsoft.Extensions.DependencyInjection.ServiceCollection;
 
 namespace CF.Test.Integration
 {
@@ -17,15 +14,6 @@ namespace CF.Test.Integration
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
             builder.UseEnvironment("CfTest");
-
-            builder.ConfigureServices(services =>
-            {
-                services.AddEntityFrameworkInMemoryDatabase()
-                    .AddDbContext<CustomerMngtContext>((serviceProvider, options) =>
-                        options.UseInMemoryDatabase("CF")
-                            .UseInternalServiceProvider(serviceProvider));
-            });
-
             base.ConfigureWebHost(builder);
         }
 
