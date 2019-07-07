@@ -1,4 +1,3 @@
-﻿using System.IO;
 using System.Threading.Tasks;
 using CorrelationId;
 using Microsoft.AspNetCore.Http;
@@ -21,24 +20,11 @@ namespace CF.Api.Middlewares
 
         public async Task Invoke(HttpContext context)
         {
-            var bodyStream = context.Response.Body;
-            var responseBodyStream = new MemoryStream();
-            
-            context.Response.Body = responseBodyStream;
-            
             await _next(context);
-            
-            responseBodyStream.Seek(0, SeekOrigin.Begin);
-            
-            var responseBody = new StreamReader(responseBodyStream).ReadToEnd();
             
             var correlationId = _correlationContext.CorrelationContext.CorrelationId;
 
             _logger.LogInformation($"StatusCode: {context.Response.StatusCode}. (CorrelationId: {correlationId})");
-            
-            responseBodyStream.Seek(0, SeekOrigin.Begin);
-            
-            await responseBodyStream.CopyToAsync(bodyStream);
         }
     }
 }
