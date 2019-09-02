@@ -41,7 +41,7 @@ namespace CF.Test.Customer.Facade
             var mockService = new Mock<ICustomerService>();
             var mockMapper = new Mock<IMapper>();
             mockMapper.Setup(x => x.Map<CustomerMngt.Domain.Entities.Customer>(customerRequestDto)).Returns(customer);
-            mockService.Setup(x => x.Create(customer)).Returns(Task.FromResult(id));
+            mockService.Setup(x => x.Create(customer)).ReturnsAsync(id);
             //Assert
             var mockFacade = new CustomerFacade(mockService.Object, mockMapper.Object);
             var result = await mockFacade.Create(customerRequestDto);
@@ -78,7 +78,7 @@ namespace CF.Test.Customer.Facade
             var mockMapper = new Mock<IMapper>();
             mockMapper.Setup(x => x.Map<CustomerResponseDto>(customer)).Returns(customerResponseDto);
             mockMapper.Setup(x => x.Map<CustomerFilter>(filterDto)).Returns(filter);
-            mockService.Setup(x => x.GetByFilter(filter)).Returns(Task.FromResult(customer));
+            mockService.Setup(x => x.GetByFilter(filter)).ReturnsAsync(customer);
 
             //Assert
             var mockFacade = new CustomerFacade(mockService.Object, mockMapper.Object);
@@ -165,7 +165,7 @@ namespace CF.Test.Customer.Facade
             var mockMapper = new Mock<IMapper>();
             mockMapper.Setup(x => x.Map<CustomerFilter>(filterDto)).Returns(filter);
             mockMapper.Setup(x => x.Map<PaginationDto<CustomerResponseDto>>(pagination)).Returns(paginationDto);
-            mockService.Setup(x => x.GetListByFilter(filter)).Returns(Task.FromResult(pagination));
+            mockService.Setup(x => x.GetListByFilter(filter)).ReturnsAsync(pagination);
 
             //Assert
             var mockFacade = new CustomerFacade(mockService.Object, mockMapper.Object);

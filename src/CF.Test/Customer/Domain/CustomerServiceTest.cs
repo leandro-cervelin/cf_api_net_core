@@ -35,7 +35,7 @@ namespace CF.Test.Customer.Domain
             var mockRepository = new Mock<ICustomerRepository>();
             var mockPassword = new Mock<IPasswordHasher>();
             var filter = new CustomerFilter {Id = 1};
-            mockRepository.Setup(x => x.GetByFilter(filter)).Returns(Task.FromResult(customer));
+            mockRepository.Setup(x => x.GetByFilter(filter)).ReturnsAsync(customer);
             var mockService = new CustomerService(mockRepository.Object, mockPassword.Object);
             var result = await mockService.GetByFilter(filter);
 
@@ -79,8 +79,10 @@ namespace CF.Test.Customer.Domain
             var mockRepository = new Mock<ICustomerRepository>();
             var mockPassword = new Mock<IPasswordHasher>();
             var filter = new CustomerFilter {PageSize = 10, CurrentPage = 1};
-            mockRepository.Setup(x => x.CountByFilter(filter)).Returns(Task.FromResult(customers.Count));
-            mockRepository.Setup(x => x.GetListByFilter(filter)).Returns(Task.FromResult(customers));
+            mockRepository.Setup(x => x.CountByFilter(filter))
+                .ReturnsAsync(customers.Count);
+            mockRepository.Setup(x => x.GetListByFilter(filter))
+                .ReturnsAsync(customers);
             var mockService = new CustomerService(mockRepository.Object, mockPassword.Object);
             var result = await mockService.GetListByFilter(filter);
 
@@ -362,7 +364,7 @@ namespace CF.Test.Customer.Domain
         {
             //Arrange
             const long id = 1;
-            
+
             //Act
             var mockRepository = new Mock<ICustomerRepository>();
             var mockPassword = new Mock<IPasswordHasher>();
@@ -378,7 +380,7 @@ namespace CF.Test.Customer.Domain
         {
             //Arrange
             const long id = 1;
-            
+
             var customer = new CustomerMngt.Domain.Entities.Customer
             {
                 Id = 1,
@@ -403,7 +405,7 @@ namespace CF.Test.Customer.Domain
         {
             //Arrange
             const long id = 0;
-            
+
             //Act
             var mockRepository = new Mock<ICustomerRepository>();
             var mockPassword = new Mock<IPasswordHasher>();
@@ -419,7 +421,7 @@ namespace CF.Test.Customer.Domain
         {
             //Arrange
             const long id = 1;
-            
+
             //Act
             var mockRepository = new Mock<ICustomerRepository>();
             var mockPassword = new Mock<IPasswordHasher>();
@@ -447,7 +449,7 @@ namespace CF.Test.Customer.Domain
             var mockRepository = new Mock<ICustomerRepository>();
             var mockPassword = new Mock<IPasswordHasher>();
             var filter = new CustomerFilter {Email = customer.Email};
-            mockRepository.Setup(x => x.GetByFilter(filter)).Returns(Task.FromResult(customer));
+            mockRepository.Setup(x => x.GetByFilter(filter)).ReturnsAsync(customer);
 
             //Assert
             var mockService = new CustomerService(mockRepository.Object, mockPassword.Object);
