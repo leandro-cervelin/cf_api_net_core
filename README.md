@@ -1,4 +1,6 @@
-# cf_api_net_core
+# .Net Core API using SQL Server with Entity Framework Core
+# Unit Test and Integration Test
+# Docker with Compose
 
 Docker steps:
 
