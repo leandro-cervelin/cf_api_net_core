@@ -1,6 +1,7 @@
-# .Net Core API using SQL Server with Entity Framework Core
-# Unit Test and Integration Test
-# Docker with Compose
+# .Net Core 3.0 Example App / API
+## .Net Core API using SQL Server with Entity Framework Core
+## Unit Test and Integration Test
+## Docker with Compose
 
 Docker steps:
 
