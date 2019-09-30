@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NLog.Web;
 
@@ -11,10 +12,10 @@ namespace CF.Api
     {
         public static void Main(string[] args)
         {
-            CreateWebHostBuilder(args).Build().Run();
+            CreateHostBuilder(args).Build().Run();
         }
 
-        public static IWebHostBuilder CreateWebHostBuilder(string[] args)
+        public static IHostBuilder CreateHostBuilder(string[] args)
         {
             var config = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
@@ -23,18 +24,22 @@ namespace CF.Api
                 .AddCommandLine(args)
                 .Build();
 
-            return WebHost.CreateDefaultBuilder(args)
-                .UseConfiguration(config)
-                .ConfigureLogging(options =>
+            var host = Host.CreateDefaultBuilder(args)
+                .ConfigureWebHostDefaults(webBuilder =>
                 {
-                    options.ClearProviders();
-                    options.SetMinimumLevel(LogLevel.Trace);
+                    webBuilder.UseStartup<Startup>();
+                    webBuilder.ConfigureLogging(options =>
+                    {
+                        options.AddConfiguration(config);
+                        options.ClearProviders();
+                        options.SetMinimumLevel(LogLevel.Trace);
+                    });
                 })
-                .UseNLog()
+                .UseNLog();
 #if DEBUG
-                .UseEnvironment("Development")
+            host.UseEnvironment("Development");
 #endif
-                .UseStartup<Startup>();
+            return host;
         }
     }
 }

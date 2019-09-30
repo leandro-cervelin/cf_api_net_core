@@ -1,5 +1,4 @@
-﻿using System;
-using System.IO.Compression;
+﻿using System.IO.Compression;
 using AutoMapper;
 using CF.Api.Middlewares;
 using CF.CustomerMngt.Application.Facades;
@@ -14,12 +13,13 @@ using CF.CustomerMngt.Infrastructure.Repositories;
 using CorrelationId;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Swagger;
 
 namespace CF.Api
@@ -40,8 +40,9 @@ namespace CF.Api
             services.AddTransient<ICustomerService, CustomerService>();
             services.AddTransient<ICustomerRepository, CustomerRepository>();
             services.AddSingleton<IPasswordHasher, PasswordHasher>();
-            services.AddSwaggerGen(c => { c.SwaggerDoc("v1", new Info {Title = "CF API", Version = "v1"}); });
+            services.AddSwaggerGen(c => { c.SwaggerDoc("v1", new OpenApiInfo {Title = "CF API", Version = "v1"}); });
             services.AddCorrelationId();
+            services.AddControllers();
             services.AddAutoMapper(typeof(CustomerMngtProfile));
             services.AddDbContext<CustomerMngtContext>(options =>
             {
@@ -50,11 +51,10 @@ namespace CF.Api
             });
             services.Configure<GzipCompressionProviderOptions>(options => options.Level = CompressionLevel.Optimal);
             services.AddResponseCompression(options => { options.Providers.Add<GzipCompressionProvider>(); });
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, IMapper autoMapper)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IMapper autoMapper)
         {
             if (env.IsDevelopment())
             {
@@ -74,11 +74,10 @@ namespace CF.Api
             app.UseSwagger();
             app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", "CF API V1"); });
             app.UseHttpsRedirection();
-            app.UseMvc(routes =>
+            app.UseRouting();
+            app.UseEndpoints(endpoints =>
             {
-                routes.MapRoute(
-                    name: "default",
-                    template: "{controller}/{action}");
+                endpoints.MapControllers();
             });
 
             RunMigration(app);
@@ -86,11 +85,9 @@ namespace CF.Api
 
         private static void RunMigration(IApplicationBuilder app)
         {
-            using (var serviceScope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope())
-            {
-                if (serviceScope.ServiceProvider.GetService<CustomerMngtContext>().Database.GetPendingMigrations().Any())
-                    serviceScope.ServiceProvider.GetService<CustomerMngtContext>().Database.Migrate();
-            }
+            using var serviceScope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope();
+            if (serviceScope.ServiceProvider.GetService<CustomerMngtContext>().Database.GetPendingMigrations().Any())
+                serviceScope.ServiceProvider.GetService<CustomerMngtContext>().Database.Migrate();
         }
     }
 }
