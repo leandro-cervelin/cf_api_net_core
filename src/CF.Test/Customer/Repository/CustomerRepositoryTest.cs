@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data.Common;
 using System.Threading.Tasks;
 using CF.CustomerMngt.Domain.Models;
 using CF.CustomerMngt.Infrastructure.DbContext;
@@ -21,7 +22,7 @@ namespace CF.Test.Customer.Repository
             {
                 var options = SetDbContextOptionsBuilder(connection);
 
-                using (var context = new CustomerMngtContext(options))
+                await using (var context = new CustomerMngtContext(options))
                 {
                     context.Database.EnsureCreated();
                 }
@@ -48,7 +49,7 @@ namespace CF.Test.Customer.Repository
                 };
 
                 //Act
-                using (var context = new CustomerMngtContext(options))
+                await using (var context = new CustomerMngtContext(options))
                 { 
                     var repository = new CustomerRepository(context);
                     await repository.Add(customerOne);
@@ -57,7 +58,7 @@ namespace CF.Test.Customer.Repository
                 }
 
                 //Assert
-                using (var context = new CustomerMngtContext(options))
+                await using (var context = new CustomerMngtContext(options))
                 {
                     var repository = new CustomerRepository(context);
                     var filter = new CustomerFilter {Email = "test"};
@@ -81,7 +82,7 @@ namespace CF.Test.Customer.Repository
             {
                 var options = SetDbContextOptionsBuilder(connection);
 
-                using (var context = new CustomerMngtContext(options))
+                await using (var context = new CustomerMngtContext(options))
                 {
                     context.Database.EnsureCreated();
                 }
@@ -98,7 +99,7 @@ namespace CF.Test.Customer.Repository
                 };
 
                 //Act
-                using (var context = new CustomerMngtContext(options))
+                await using (var context = new CustomerMngtContext(options))
                 { 
                     var repository = new CustomerRepository(context);
                     await repository.Add(customerOne);
@@ -106,7 +107,7 @@ namespace CF.Test.Customer.Repository
                 }
 
                 //Assert
-                using (var context = new CustomerMngtContext(options))
+                await using (var context = new CustomerMngtContext(options))
                 {
                     var repository = new CustomerRepository(context);
                     var filter = new CustomerFilter {Email = "test1@test.com"};
@@ -130,7 +131,7 @@ namespace CF.Test.Customer.Repository
             {
                 var options = SetDbContextOptionsBuilder(connection);
 
-                using (var context = new CustomerMngtContext(options))
+                await using (var context = new CustomerMngtContext(options))
                 {
                     context.Database.EnsureCreated();
                 }
@@ -147,7 +148,7 @@ namespace CF.Test.Customer.Repository
                 };
                
                 //Act
-                using (var context = new CustomerMngtContext(options))
+                await using (var context = new CustomerMngtContext(options))
                 {
                     var repository = new CustomerRepository(context);
                     await repository.Add(customer);
@@ -172,7 +173,7 @@ namespace CF.Test.Customer.Repository
             {
                 var options = SetDbContextOptionsBuilder(connection);
 
-                using (var context = new CustomerMngtContext(options))
+                await using (var context = new CustomerMngtContext(options))
                 {
                     context.Database.EnsureCreated();
                 }
@@ -189,14 +190,14 @@ namespace CF.Test.Customer.Repository
                 };
 
                 //Act
-                using (var context = new CustomerMngtContext(options))
+                await using (var context = new CustomerMngtContext(options))
                 { 
                     var repository = new CustomerRepository(context);
                     await repository.Add(newCustomer);
                     await repository.SaveChanges();
                 }
 
-                using (var context = new CustomerMngtContext(options))
+                await using (var context = new CustomerMngtContext(options))
                 { 
                     var repository = new CustomerRepository(context);
                     var filterStored = new CustomerFilter {Id = newCustomer.Id};
@@ -206,7 +207,7 @@ namespace CF.Test.Customer.Repository
                 }
 
                 //Assert
-                using (var context = new CustomerMngtContext(options))
+                await using (var context = new CustomerMngtContext(options))
                 {
                     var filterNonExistentUser = new CustomerFilter {Id = newCustomer.Id};
                     var repository = new CustomerRepository(context);
@@ -230,7 +231,7 @@ namespace CF.Test.Customer.Repository
             {
                 var options = SetDbContextOptionsBuilder(connection);
 
-                using (var context = new CustomerMngtContext(options))
+                await using (var context = new CustomerMngtContext(options))
                 {
                     context.Database.EnsureCreated();
                 }
@@ -255,7 +256,7 @@ namespace CF.Test.Customer.Repository
                 };
 
                 //Act
-                using (var context = new CustomerMngtContext(options))
+                await using (var context = new CustomerMngtContext(options))
                 { 
                     var repository = new CustomerRepository(context);
                     await repository.Add(customerOne);
@@ -263,7 +264,7 @@ namespace CF.Test.Customer.Repository
                 }
 
                 //Assert
-                using (var context = new CustomerMngtContext(options))
+                await using (var context = new CustomerMngtContext(options))
                 { 
                     var repository = new CustomerRepository(context);
                     await repository.Add(customerTwo);
@@ -287,7 +288,7 @@ namespace CF.Test.Customer.Repository
             {
                 var options = SetDbContextOptionsBuilder(connection);
 
-                using (var context = new CustomerMngtContext(options))
+                await using (var context = new CustomerMngtContext(options))
                 {
                     context.Database.EnsureCreated();
                 }
@@ -303,7 +304,7 @@ namespace CF.Test.Customer.Repository
                 };
                
                 //Act
-                using (var context = new CustomerMngtContext(options))
+                await using (var context = new CustomerMngtContext(options))
                 {
                     var repository = new CustomerRepository(context);
                     await repository.Add(customer);
@@ -329,7 +330,7 @@ namespace CF.Test.Customer.Repository
             {
                 var options = SetDbContextOptionsBuilder(connection);
 
-                using (var context = new CustomerMngtContext(options))
+                await using (var context = new CustomerMngtContext(options))
                 {
                     context.Database.EnsureCreated();
                 }
@@ -345,7 +346,7 @@ namespace CF.Test.Customer.Repository
                 };
                
                 //Act
-                using (var context = new CustomerMngtContext(options))
+                await using (var context = new CustomerMngtContext(options))
                 {
                     var repository = new CustomerRepository(context);
                     await repository.Add(customer);
@@ -371,7 +372,7 @@ namespace CF.Test.Customer.Repository
             {
                 var options = SetDbContextOptionsBuilder(connection);
 
-                using (var context = new CustomerMngtContext(options))
+                await using (var context = new CustomerMngtContext(options))
                 {
                     context.Database.EnsureCreated();
                 }
@@ -387,7 +388,7 @@ namespace CF.Test.Customer.Repository
                 };
                
                 //Act
-                using (var context = new CustomerMngtContext(options))
+                await using (var context = new CustomerMngtContext(options))
                 {
                     var repository = new CustomerRepository(context);
                     await repository.Add(customer);
@@ -413,7 +414,7 @@ namespace CF.Test.Customer.Repository
             {
                 var options = SetDbContextOptionsBuilder(connection);
 
-                using (var context = new CustomerMngtContext(options))
+                await using (var context = new CustomerMngtContext(options))
                 {
                     context.Database.EnsureCreated();
                 }
@@ -429,7 +430,7 @@ namespace CF.Test.Customer.Repository
                 };
                
                 //Act
-                using (var context = new CustomerMngtContext(options))
+                await using (var context = new CustomerMngtContext(options))
                 {
                     var repository = new CustomerRepository(context);
                     await repository.Add(customer);
@@ -445,7 +446,7 @@ namespace CF.Test.Customer.Repository
             }
         }
 
-        private static DbContextOptions<CustomerMngtContext> SetDbContextOptionsBuilder(SqliteConnection connection)
+        private static DbContextOptions<CustomerMngtContext> SetDbContextOptionsBuilder(DbConnection connection)
         {
             return new DbContextOptionsBuilder<CustomerMngtContext>()
                 .UseSqlite(connection)

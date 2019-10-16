@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Threading.Tasks;
-using CF.CustomerMngt.Domain.Exceptions;
 using CorrelationId;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;

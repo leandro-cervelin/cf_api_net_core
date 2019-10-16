@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using AutoMapper;
-using CF.CustomerMngt.Application.Dtos;
-using CF.CustomerMngt.Application.Facades;
 using CF.CustomerMngt.Domain.Exceptions;
 using CF.CustomerMngt.Domain.Helpers.PasswordHasher;
 using CF.CustomerMngt.Domain.Models;

@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace CF.CustomerMngt.Application.Dtos
+﻿namespace CF.CustomerMngt.Application.Dtos
 {
     public class CustomerResponseDto
     {

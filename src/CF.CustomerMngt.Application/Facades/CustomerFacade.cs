@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using AutoMapper;
 using CF.CustomerMngt.Application.Dtos;
 using CF.CustomerMngt.Application.Facades.Interfaces;

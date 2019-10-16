@@ -1,6 +1,4 @@
 ﻿using CF.Api;
-using CF.CustomerMngt.Infrastructure.DbContext;
-using CF.CustomerMngt.Infrastructure.Repositories;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;

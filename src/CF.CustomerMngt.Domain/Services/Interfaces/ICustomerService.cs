@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using CF.CustomerMngt.Domain.Entities;
 using CF.CustomerMngt.Domain.Models;
 

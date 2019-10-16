@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using CF.CustomerMngt.Application.Dtos;
 
 namespace CF.CustomerMngt.Application.Facades.Interfaces

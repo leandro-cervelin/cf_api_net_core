@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using AutoMapper;
 using CF.CustomerMngt.Application.Dtos;
 using CF.CustomerMngt.Domain.Entities;
