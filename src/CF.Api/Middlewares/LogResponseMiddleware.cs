@@ -20,11 +20,11 @@ namespace CF.Api.Middlewares
 
         public async Task Invoke(HttpContext context)
         {
-            await _next(context);
-            
             var correlationId = _correlationContext.CorrelationContext.CorrelationId;
 
             _logger.LogInformation($"StatusCode: {context.Response.StatusCode}. (CorrelationId: {correlationId})");
+            
+            await _next(context);
         }
     }
 }
