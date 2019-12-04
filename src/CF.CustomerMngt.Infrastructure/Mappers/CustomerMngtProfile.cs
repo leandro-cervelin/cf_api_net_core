@@ -4,7 +4,7 @@ using CF.CustomerMngt.Application.Dtos;
 using CF.CustomerMngt.Domain.Entities;
 using CF.CustomerMngt.Domain.Models;
 
-namespace CF.CustomerMngt.Application.Mappers
+namespace CF.CustomerMngt.Infrastructure.Mappers
 {
     public class CustomerMngtProfile : Profile
     {
