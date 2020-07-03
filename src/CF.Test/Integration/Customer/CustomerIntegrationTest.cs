@@ -34,7 +34,7 @@ namespace CF.Test.Integration.Customer
                 ConfirmPassword = "Password1@"
             };
 
-            var content = new StringContent(JsonConvert.SerializeObject(dto));
+            var content = await CreateStringContent(dto);
             content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
             var client = _factory.CreateClient();
@@ -55,7 +55,7 @@ namespace CF.Test.Integration.Customer
                 Password = "Password1@"
             };
 
-            var content = new StringContent(JsonConvert.SerializeObject(dto));
+            var content = await CreateStringContent(dto);
             content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
             var client = _factory.CreateClient();
@@ -78,7 +78,7 @@ namespace CF.Test.Integration.Customer
                 ConfirmPassword = "Password1@"
             };
 
-            var content = new StringContent(JsonConvert.SerializeObject(dto));
+            var content = await CreateStringContent(dto);
             content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
             var client = _factory.CreateClient();
@@ -102,7 +102,7 @@ namespace CF.Test.Integration.Customer
                 ConfirmPassword = "Password1@"
             };
 
-            var content = new StringContent(JsonConvert.SerializeObject(dto));
+            var content = await CreateStringContent(dto);
             content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
             var client = _factory.CreateClient();
@@ -123,7 +123,7 @@ namespace CF.Test.Integration.Customer
                 ConfirmPassword = "Password1@"
             };
 
-            var content = new StringContent(JsonConvert.SerializeObject(dto));
+            var content = await CreateStringContent(dto);
             content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
             var client = _factory.CreateClient();
@@ -144,7 +144,7 @@ namespace CF.Test.Integration.Customer
                 ConfirmPassword = "Password1@"
             };
 
-            var content = new StringContent(JsonConvert.SerializeObject(dto));
+            var content = await CreateStringContent(dto);
             content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
             var client = _factory.CreateClient();
@@ -166,7 +166,7 @@ namespace CF.Test.Integration.Customer
                 ConfirmPassword = "Password1@"
             };
 
-            var content = new StringContent(JsonConvert.SerializeObject(dto));
+            var content = await CreateStringContent(dto);
             content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
             var client = _factory.CreateClient();
@@ -187,7 +187,7 @@ namespace CF.Test.Integration.Customer
                 ConfirmPassword = "Password1@"
             };
 
-            var content = new StringContent(JsonConvert.SerializeObject(dto));
+            var content = await CreateStringContent(dto);
             content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
             var client = _factory.CreateClient();
@@ -209,7 +209,7 @@ namespace CF.Test.Integration.Customer
                 ConfirmPassword = "Password1@"
             };
 
-            var content = new StringContent(JsonConvert.SerializeObject(dto));
+            var content = await CreateStringContent(dto);
             content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
             var client = _factory.CreateClient();
@@ -230,7 +230,7 @@ namespace CF.Test.Integration.Customer
                 ConfirmPassword = "Password1@"
             };
 
-            var content = new StringContent(JsonConvert.SerializeObject(dto));
+            var content = await CreateStringContent(dto);
             content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
             var client = _factory.CreateClient();
@@ -250,7 +250,7 @@ namespace CF.Test.Integration.Customer
                 Password = ""
             };
 
-            var content = new StringContent(JsonConvert.SerializeObject(dto));
+            var content = await CreateStringContent(dto);
             content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
             var client = _factory.CreateClient();
@@ -271,7 +271,7 @@ namespace CF.Test.Integration.Customer
                 ConfirmPassword = "Password3!"
             };
 
-            var content = new StringContent(JsonConvert.SerializeObject(dto));
+            var content = await CreateStringContent(dto);
             content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
             var client = _factory.CreateClient();
@@ -292,7 +292,7 @@ namespace CF.Test.Integration.Customer
                 ConfirmPassword = "@123RF"
             };
 
-            var content = new StringContent(JsonConvert.SerializeObject(dto));
+            var content = await CreateStringContent(dto);
             content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
             var client = _factory.CreateClient();
@@ -313,7 +313,7 @@ namespace CF.Test.Integration.Customer
                 ConfirmPassword = "01234567901234567901234@Df"
             };
 
-            var content = new StringContent(JsonConvert.SerializeObject(dto));
+            var content = await CreateStringContent(dto);
             content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
             var client = _factory.CreateClient();
@@ -334,7 +334,7 @@ namespace CF.Test.Integration.Customer
                 ConfirmPassword = "01234567901234"
             };
 
-            var content = new StringContent(JsonConvert.SerializeObject(dto));
+            var content = await CreateStringContent(dto);
             content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
             var client = _factory.CreateClient();
@@ -357,7 +357,7 @@ namespace CF.Test.Integration.Customer
                 ConfirmPassword = "Password1@"
             };
 
-            var content = new StringContent(JsonConvert.SerializeObject(dto));
+            var content = await CreateStringContent(dto);
             content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
             var client = _factory.CreateClient();
@@ -369,7 +369,7 @@ namespace CF.Test.Integration.Customer
             var customer = JsonConvert.DeserializeObject<CustomerResponseDto>(await getResponse.Content.ReadAsStringAsync());
 
             dto.FirstName = "New Name";
-            var contentUpdate = new StringContent(JsonConvert.SerializeObject(dto));
+            var contentUpdate = await CreateStringContent(dto);
             contentUpdate.Headers.ContentType = new MediaTypeHeaderValue("application/json");
             var putResponse = await client.PutAsync($"{CustomerUrl}/{customer.Id}", contentUpdate);
             Assert.True(putResponse.IsSuccessStatusCode);
@@ -389,7 +389,7 @@ namespace CF.Test.Integration.Customer
                 ConfirmPassword = "Password1@"
             };
 
-            var contentCustomerOne = new StringContent(JsonConvert.SerializeObject(dto));
+            var contentCustomerOne = await CreateStringContent(dto);
             contentCustomerOne.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
             var client = _factory.CreateClient();
@@ -398,7 +398,7 @@ namespace CF.Test.Integration.Customer
 
             dto.Email = CreateValidEmail();
 
-            var contentCustomerTwo = new StringContent(JsonConvert.SerializeObject(dto));
+            var contentCustomerTwo = await CreateStringContent(dto);
             contentCustomerTwo.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
             client = _factory.CreateClient();
@@ -413,7 +413,7 @@ namespace CF.Test.Integration.Customer
             var customer = JsonConvert.DeserializeObject<CustomerResponseDto>(await getResponse.Content.ReadAsStringAsync());
 
             dto.Email = customerOneEmail;
-            var content = new StringContent(JsonConvert.SerializeObject(dto));
+            var content = await CreateStringContent(dto);
             content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
             client = _factory.CreateClient();
             var response = await client.PutAsync($"{CustomerUrl}/{customer.Id}", content);
@@ -434,7 +434,7 @@ namespace CF.Test.Integration.Customer
                 ConfirmPassword = "Password1@"
             };
             
-            var content = new StringContent(JsonConvert.SerializeObject(dto));
+            var content = await CreateStringContent(dto);
             content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
             var client = _factory.CreateClient();
@@ -458,7 +458,7 @@ namespace CF.Test.Integration.Customer
                 ConfirmPassword = "Password1@",
             };
 
-            var content = new StringContent(JsonConvert.SerializeObject(dto));
+            var content = await CreateStringContent(dto);
             content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
             var client = _factory.CreateClient();
@@ -466,7 +466,7 @@ namespace CF.Test.Integration.Customer
             Assert.True(response.IsSuccessStatusCode);
 
             dto.Email = CreateValidEmail();
-            var contentTwo = new StringContent(JsonConvert.SerializeObject(dto));
+            var contentTwo = await CreateStringContent(dto);
             contentTwo.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
             client = _factory.CreateClient();
@@ -490,6 +490,11 @@ namespace CF.Test.Integration.Customer
             Assert.True(customers.Count > 1);
         }
 
+        private static async Task<StringContent> CreateStringContent(CustomerRequestDto dto)
+        {
+            return new StringContent(await Task.Factory.StartNew(() => JsonConvert.SerializeObject(dto)));
+        }
+
         [Fact]
         public async Task DeleteCustomerOkTest()
         {
@@ -504,7 +509,7 @@ namespace CF.Test.Integration.Customer
                 ConfirmPassword = "Password1@"
             };
 
-            var content = new StringContent(JsonConvert.SerializeObject(dto));
+            var content = new StringContent(await Task.Factory.StartNew(() => JsonConvert.SerializeObject(dto)));
             content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
             var client = _factory.CreateClient();
