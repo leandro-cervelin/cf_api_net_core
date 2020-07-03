@@ -8,8 +8,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-namespace CF.Test.Integration.Factories
+namespace CF.Test.Integration
 {
+    //for more about WebApplicationFactory: https://fullstackmark.com/post/20/painless-integration-testing-with-aspnet-core-web-api
     public class CustomWebApplicationFactory<TStartup> : WebApplicationFactory<Startup>
     {
         private readonly string _connectionString = $"DataSource={Guid.NewGuid()}.db";
@@ -18,6 +19,7 @@ namespace CF.Test.Integration.Factories
         {
             builder.ConfigureServices(services =>
             {
+                // Removing Existing Db Context
                 var descriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<CustomerMngtContext>));
                 if (descriptor != null)
                     services.Remove(descriptor);
@@ -35,10 +37,10 @@ namespace CF.Test.Integration.Factories
                 });
 
                 // Build the service provider.
-                var sp = services.BuildServiceProvider();
+                var buildServiceProvider = services.BuildServiceProvider();
 
                 // Create a scope to obtain a reference to the database contexts
-                using var scope = sp.CreateScope();
+                using var scope = buildServiceProvider.CreateScope();
                 var scopedServices = scope.ServiceProvider;
                 var appDb = scopedServices.GetRequiredService<CustomerMngtContext>();
 
@@ -50,12 +52,10 @@ namespace CF.Test.Integration.Factories
                 try
                 {
                     // Seed the database with some specific test data.
-                    //SeedData.PopulateTestData(appDb);
                 }
                 catch (Exception ex)
                 {
-                    logger.LogError(ex, "An error occurred seeding the " +
-                                        "database with test messages. Error: {ex.Message}");
+                    logger.LogError(ex, $"An error occurred seeding the database with test messages. Error: {ex.Message}");
                 }
             });
         }

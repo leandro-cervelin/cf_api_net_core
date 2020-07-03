@@ -5,7 +5,6 @@ using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using CF.Api;
 using CF.CustomerMngt.Application.Dtos;
-using CF.Test.Integration.Factories;
 using Microsoft.AspNetCore.WebUtilities;
 using Newtonsoft.Json;
 using Xunit;
