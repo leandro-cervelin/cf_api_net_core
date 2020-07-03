@@ -1,10 +1,9 @@
-﻿using System;
-using System.Net;
+﻿using System.Net;
 using System.Threading.Tasks;
 using CF.CustomerMngt.Application.Dtos;
 using CF.CustomerMngt.Application.Facades.Interfaces;
 using CF.CustomerMngt.Domain.Exceptions;
-using CorrelationId;
+using CorrelationId.Abstractions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Swashbuckle.AspNetCore.Annotations;
@@ -16,20 +15,22 @@ namespace CF.Api.Controllers
     public class CustomerController : ControllerBase
     {
         private readonly ILogger _logger;
-        private readonly string _correlationId;
+        private readonly ICorrelationContextAccessor _correlationContext;
         private readonly ICustomerFacade _customerFacade;
 
         public CustomerController(ICorrelationContextAccessor correlationContext, ILogger<CustomerController> logger,
             ICustomerFacade customerFacade)
         {
             _logger = logger;
-            _correlationId = correlationContext.CorrelationContext.CorrelationId;
+            _correlationContext = correlationContext;
             _customerFacade = customerFacade;
         }
 
         [HttpGet]
-        [SwaggerResponse((int)HttpStatusCode.OK, "Customer successfully returned.", typeof(PaginationDto<CustomerResponseDto>))]
-        public async Task<ActionResult<PaginationDto<CustomerResponseDto>>> Get([FromQuery] CustomerFilterDto customerFilterDto)
+        [SwaggerResponse((int) HttpStatusCode.OK, "Customer successfully returned.",
+            typeof(PaginationDto<CustomerResponseDto>))]
+        public async Task<ActionResult<PaginationDto<CustomerResponseDto>>> Get(
+            [FromQuery] CustomerFilterDto customerFilterDto)
         {
             try
             {
@@ -38,15 +39,16 @@ namespace CF.Api.Controllers
             }
             catch (ValidationException e)
             {
-                _logger.LogError($"Exception Details: {e.Message}, {e.InnerException}, {e.StackTrace}. CorrelationId: {_correlationId}");
+                _logger.LogError(
+                    $"Exception Details: {e.Message}, {e.InnerException}, {e.StackTrace}. CorrelationId: {_correlationContext.CorrelationContext.CorrelationId}");
                 return BadRequest(e.Message);
             }
         }
 
         [HttpGet("{id}")]
-        [SwaggerResponse((int)HttpStatusCode.BadRequest, "Invalid id.")]
-        [SwaggerResponse((int)HttpStatusCode.NotFound, "Customer not found.")]
-        [SwaggerResponse((int)HttpStatusCode.OK, "Customer successfully returned.")]
+        [SwaggerResponse((int) HttpStatusCode.BadRequest, "Invalid id.")]
+        [SwaggerResponse((int) HttpStatusCode.NotFound, "Customer not found.")]
+        [SwaggerResponse((int) HttpStatusCode.OK, "Customer successfully returned.")]
         public async Task<ActionResult<CustomerResponseDto>> Get(long id)
         {
             try
@@ -62,14 +64,15 @@ namespace CF.Api.Controllers
             }
             catch (ValidationException e)
             {
-                _logger.LogError($"Exception Details: {e.Message}, {e.InnerException}, {e.StackTrace}. CorrelationId: {_correlationId}");
+                _logger.LogError(
+                    $"Exception Details: {e.Message}, {e.InnerException}, {e.StackTrace}. CorrelationId: {_correlationContext.CorrelationContext.CorrelationId}");
                 return BadRequest(e.Message);
             }
         }
 
         [HttpPost]
-        [SwaggerResponse((int)HttpStatusCode.BadRequest, "Invalid id.")]
-        [SwaggerResponse((int)HttpStatusCode.Created, "Customer has been created successfully.")]
+        [SwaggerResponse((int) HttpStatusCode.BadRequest, "Invalid Request.")]
+        [SwaggerResponse((int) HttpStatusCode.Created, "Customer has been created successfully.")]
         public async Task<IActionResult> Post([FromBody] CustomerRequestDto customerRequestDto)
         {
             try
@@ -82,15 +85,16 @@ namespace CF.Api.Controllers
             }
             catch (ValidationException e)
             {
-                _logger.LogError($"Exception Details: {e.Message}, {e.InnerException}, {e.StackTrace}. CorrelationId: {_correlationId}");
+                _logger.LogError(
+                    $"Exception Details: {e.Message}, {e.InnerException}, {e.StackTrace}. CorrelationId: {_correlationContext.CorrelationContext.CorrelationId}");
                 return BadRequest(e.Message);
             }
         }
 
         [HttpPut("{id}")]
-        [SwaggerResponse((int)HttpStatusCode.BadRequest, "Invalid id.")]
-        [SwaggerResponse((int)HttpStatusCode.NotFound, "Customer not found")]
-        [SwaggerResponse((int)HttpStatusCode.NoContent, "Customer has been updated successfully.")]
+        [SwaggerResponse((int) HttpStatusCode.BadRequest, "Invalid id.")]
+        [SwaggerResponse((int) HttpStatusCode.NotFound, "Customer not found")]
+        [SwaggerResponse((int) HttpStatusCode.NoContent, "Customer has been updated successfully.")]
         public async Task<IActionResult> Put(long id, [FromBody] CustomerRequestDto customerRequestDto)
         {
             try
@@ -104,20 +108,22 @@ namespace CF.Api.Controllers
             }
             catch (EntityNotFoundException e)
             {
-                _logger.LogError($"Exception Details: {e.Message}, {e.InnerException}, {e.StackTrace}. CorrelationId: {_correlationId}");
+                _logger.LogError(
+                    $"Exception Details: {e.Message}, {e.InnerException}, {e.StackTrace}. CorrelationId: {_correlationContext.CorrelationContext.CorrelationId}");
                 return NotFound();
             }
             catch (ValidationException e)
             {
-                _logger.LogError($"Exception Details: {e.Message}, {e.InnerException}, {e.StackTrace}. CorrelationId: {_correlationId}");
+                _logger.LogError(
+                    $"Exception Details: {e.Message}, {e.InnerException}, {e.StackTrace}. CorrelationId: {_correlationContext.CorrelationContext.CorrelationId}");
                 return BadRequest(e.Message);
             }
         }
 
         [HttpDelete("{id}")]
-        [SwaggerResponse((int)HttpStatusCode.BadRequest, "Invalid id.")]
-        [SwaggerResponse((int)HttpStatusCode.NotFound, "Customer not found.")]
-        [SwaggerResponse((int)HttpStatusCode.NoContent, "Customer has been deleted successfully.")]
+        [SwaggerResponse((int) HttpStatusCode.BadRequest, "Invalid id.")]
+        [SwaggerResponse((int) HttpStatusCode.NotFound, "Customer not found.")]
+        [SwaggerResponse((int) HttpStatusCode.NoContent, "Customer has been deleted successfully.")]
         public async Task<IActionResult> Delete(long id)
         {
             try
@@ -125,17 +131,19 @@ namespace CF.Api.Controllers
                 if (id <= 0) return BadRequest("Invalid id.");
 
                 await _customerFacade.Delete(id);
-                
+
                 return NoContent();
             }
             catch (EntityNotFoundException e)
             {
-                _logger.LogError($"Exception Details: {e.Message}, {e.InnerException}, {e.StackTrace}. CorrelationId: {_correlationId}");
+                _logger.LogError(
+                    $"Exception Details: {e.Message}, {e.InnerException}, {e.StackTrace}. CorrelationId: {_correlationContext.CorrelationContext.CorrelationId}");
                 return NotFound();
             }
             catch (ValidationException e)
             {
-                _logger.LogError($"Exception Details: {e.Message}, {e.InnerException}, {e.StackTrace}. CorrelationId: {_correlationId}");
+                _logger.LogError(
+                    $"Exception Details: {e.Message}, {e.InnerException}, {e.StackTrace}. CorrelationId: {_correlationContext.CorrelationContext.CorrelationId}");
                 return BadRequest(e.Message);
             }
         }

@@ -1,4 +1,5 @@
 ﻿using System.IO.Compression;
+using System.Linq;
 using AutoMapper;
 using CF.Api.Middlewares;
 using CF.CustomerMngt.Application.Facades;
@@ -11,11 +12,11 @@ using CF.CustomerMngt.Infrastructure.DbContext;
 using CF.CustomerMngt.Infrastructure.Mappers;
 using CF.CustomerMngt.Infrastructure.Repositories;
 using CorrelationId;
+using CorrelationId.DependencyInjection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -40,16 +41,18 @@ namespace CF.Api
             services.AddTransient<ICustomerRepository, CustomerRepository>();
             services.AddSingleton<IPasswordHasher, PasswordHasher>();
             services.AddSwaggerGen(c => { c.SwaggerDoc("v1", new OpenApiInfo {Title = "CF API", Version = "v1"}); });
-            services.AddCorrelationId();
+            services.AddDefaultCorrelationId();
             services.AddControllers();
             services.AddAutoMapper(typeof(CustomerMngtProfile));
+            
+            services.Configure<GzipCompressionProviderOptions>(options => options.Level = CompressionLevel.Optimal);
+            services.AddResponseCompression(options => { options.Providers.Add<GzipCompressionProvider>(); });
+
             services.AddDbContext<CustomerMngtContext>(options =>
             {
                 options.UseSqlServer(Configuration.GetConnectionString("DbConnection"),
                     a => { a.MigrationsAssembly("CF.Api"); });
             });
-            services.Configure<GzipCompressionProviderOptions>(options => options.Level = CompressionLevel.Optimal);
-            services.AddResponseCompression(options => { options.Providers.Add<GzipCompressionProvider>(); });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

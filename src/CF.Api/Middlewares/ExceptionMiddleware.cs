@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
-using CorrelationId;
+using CorrelationId.Abstractions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 

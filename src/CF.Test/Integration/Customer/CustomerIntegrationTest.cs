@@ -1,14 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
+using CF.Api;
 using CF.CustomerMngt.Application.Dtos;
+using CF.Test.Integration.Factories;
+using Microsoft.AspNetCore.WebUtilities;
 using Newtonsoft.Json;
 using Xunit;
 
 namespace CF.Test.Integration.Customer
 {
-    public class CustomerIntegrationTest : BaseIntegrationTest
+    public class CustomerIntegrationTest : IClassFixture<CustomWebApplicationFactory<Startup>>
     {
+        private readonly CustomWebApplicationFactory<Startup> _factory;
+
+        public CustomerIntegrationTest(CustomWebApplicationFactory<Startup> factory)
+        {
+            _factory = factory;
+        }
+
         private const string CustomerUrl = "api/v1/customer";
 
         [Fact]
@@ -23,8 +35,12 @@ namespace CF.Test.Integration.Customer
                 ConfirmPassword = "Password1@"
             };
 
-            var httpRequestMessage = BuildPostHttpRequest(CustomerUrl, dto);
-            var response = await Client.SendAsync(httpRequestMessage);
+            var content = new StringContent(JsonConvert.SerializeObject(dto));
+            content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+
+            var client = _factory.CreateClient();
+            var response = await client.PostAsync(CustomerUrl, content);
+            response.EnsureSuccessStatusCode();
 
             Assert.True(response.IsSuccessStatusCode);
         }
@@ -40,8 +56,11 @@ namespace CF.Test.Integration.Customer
                 Password = "Password1@"
             };
 
-            var httpRequestMessage = BuildPostHttpRequest(CustomerUrl, dto);
-            var response = await Client.SendAsync(httpRequestMessage);
+            var content = new StringContent(JsonConvert.SerializeObject(dto));
+            content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+
+            var client = _factory.CreateClient();
+            var response = await client.PostAsync(CustomerUrl, content);
 
             Assert.False(response.IsSuccessStatusCode);
         }
@@ -60,15 +79,16 @@ namespace CF.Test.Integration.Customer
                 ConfirmPassword = "Password1@"
             };
 
-            var httpRequestMessage = BuildPostHttpRequest(CustomerUrl, dto);
-            var response = await Client.SendAsync(httpRequestMessage);
+            var content = new StringContent(JsonConvert.SerializeObject(dto));
+            content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
+            var client = _factory.CreateClient();
+            var response = await client.PostAsync(CustomerUrl, content);
             Assert.True(response.IsSuccessStatusCode);
 
-            var errorHttpRequestMessage = BuildPostHttpRequest(CustomerUrl, dto);
-            var errorResponse = await Client.SendAsync(errorHttpRequestMessage);
-
-            Assert.False(errorResponse.IsSuccessStatusCode);
+            var clientNotOk = _factory.CreateClient();
+            var responseNotOk = await clientNotOk.PostAsync(CustomerUrl, content);
+            Assert.False(responseNotOk.IsSuccessStatusCode);
         }
 
         [Fact]
@@ -83,8 +103,11 @@ namespace CF.Test.Integration.Customer
                 ConfirmPassword = "Password1@"
             };
 
-            var httpRequestMessage = BuildPostHttpRequest(CustomerUrl, dto);
-            var response = await Client.SendAsync(httpRequestMessage);
+            var content = new StringContent(JsonConvert.SerializeObject(dto));
+            content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+
+            var client = _factory.CreateClient();
+            var response = await client.PostAsync(CustomerUrl, content);
 
             Assert.False(response.IsSuccessStatusCode);
         }
@@ -101,14 +124,17 @@ namespace CF.Test.Integration.Customer
                 ConfirmPassword = "Password1@"
             };
 
-            var httpRequestMessage = BuildPostHttpRequest(CustomerUrl, dto);
-            var response = await Client.SendAsync(httpRequestMessage);
+            var content = new StringContent(JsonConvert.SerializeObject(dto));
+            content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+
+            var client = _factory.CreateClient();
+            var response = await client.PostAsync(CustomerUrl, content);
 
             Assert.False(response.IsSuccessStatusCode);
         }
 
         [Fact]
-        public async Task CreateCustomerRequiredSurnameNameTest()
+        public async Task CreateCustomerRequiredSurnameTest()
         {
             var dto = new CustomerRequestDto
             {
@@ -119,8 +145,11 @@ namespace CF.Test.Integration.Customer
                 ConfirmPassword = "Password1@"
             };
 
-            var httpRequestMessage = BuildPostHttpRequest(CustomerUrl, dto);
-            var response = await Client.SendAsync(httpRequestMessage);
+            var content = new StringContent(JsonConvert.SerializeObject(dto));
+            content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+
+            var client = _factory.CreateClient();
+            var response = await client.PostAsync(CustomerUrl, content);
 
             Assert.False(response.IsSuccessStatusCode);
         }
@@ -138,8 +167,11 @@ namespace CF.Test.Integration.Customer
                 ConfirmPassword = "Password1@"
             };
 
-            var httpRequestMessage = BuildPostHttpRequest(CustomerUrl, dto);
-            var response = await Client.SendAsync(httpRequestMessage);
+            var content = new StringContent(JsonConvert.SerializeObject(dto));
+            content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+
+            var client = _factory.CreateClient();
+            var response = await client.PostAsync(CustomerUrl, content);
 
             Assert.False(response.IsSuccessStatusCode);
         }
@@ -156,8 +188,11 @@ namespace CF.Test.Integration.Customer
                 ConfirmPassword = "Password1@"
             };
 
-            var httpRequestMessage = BuildPostHttpRequest(CustomerUrl, dto);
-            var response = await Client.SendAsync(httpRequestMessage);
+            var content = new StringContent(JsonConvert.SerializeObject(dto));
+            content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+
+            var client = _factory.CreateClient();
+            var response = await client.PostAsync(CustomerUrl, content);
 
             Assert.False(response.IsSuccessStatusCode);
         }
@@ -175,8 +210,11 @@ namespace CF.Test.Integration.Customer
                 ConfirmPassword = "Password1@"
             };
 
-            var httpRequestMessage = BuildPostHttpRequest(CustomerUrl, dto);
-            var response = await Client.SendAsync(httpRequestMessage);
+            var content = new StringContent(JsonConvert.SerializeObject(dto));
+            content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+
+            var client = _factory.CreateClient();
+            var response = await client.PostAsync(CustomerUrl, content);
 
             Assert.False(response.IsSuccessStatusCode);
         }
@@ -193,8 +231,11 @@ namespace CF.Test.Integration.Customer
                 ConfirmPassword = "Password1@"
             };
 
-            var httpRequestMessage = BuildPostHttpRequest(CustomerUrl, dto);
-            var response = await Client.SendAsync(httpRequestMessage);
+            var content = new StringContent(JsonConvert.SerializeObject(dto));
+            content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+
+            var client = _factory.CreateClient();
+            var response = await client.PostAsync(CustomerUrl, content);
 
             Assert.False(response.IsSuccessStatusCode);
         }
@@ -210,14 +251,17 @@ namespace CF.Test.Integration.Customer
                 Password = ""
             };
 
-            var httpRequestMessage = BuildPostHttpRequest(CustomerUrl, dto);
-            var response = await Client.SendAsync(httpRequestMessage);
+            var content = new StringContent(JsonConvert.SerializeObject(dto));
+            content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+
+            var client = _factory.CreateClient();
+            var response = await client.PostAsync(CustomerUrl, content);
 
             Assert.False(response.IsSuccessStatusCode);
         }
 
         [Fact]
-        public async Task CreatePasswordsDontMatchTest()
+        public async Task CreatePasswordsDoesNotMatchTest()
         {
             var dto = new CustomerRequestDto
             {
@@ -228,8 +272,11 @@ namespace CF.Test.Integration.Customer
                 ConfirmPassword = "Password3!"
             };
 
-            var httpRequestMessage = BuildPostHttpRequest(CustomerUrl, dto);
-            var response = await Client.SendAsync(httpRequestMessage);
+            var content = new StringContent(JsonConvert.SerializeObject(dto));
+            content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+
+            var client = _factory.CreateClient();
+            var response = await client.PostAsync(CustomerUrl, content);
 
             Assert.False(response.IsSuccessStatusCode);
         }
@@ -246,8 +293,11 @@ namespace CF.Test.Integration.Customer
                 ConfirmPassword = "@123RF"
             };
 
-            var httpRequestMessage = BuildPostHttpRequest(CustomerUrl, dto);
-            var response = await Client.SendAsync(httpRequestMessage);
+            var content = new StringContent(JsonConvert.SerializeObject(dto));
+            content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+
+            var client = _factory.CreateClient();
+            var response = await client.PostAsync(CustomerUrl, content);
 
             Assert.False(response.IsSuccessStatusCode);
         }
@@ -264,8 +314,11 @@ namespace CF.Test.Integration.Customer
                 ConfirmPassword = "01234567901234567901234@Df"
             };
 
-            var httpRequestMessage = BuildPostHttpRequest(CustomerUrl, dto);
-            var response = await Client.SendAsync(httpRequestMessage);
+            var content = new StringContent(JsonConvert.SerializeObject(dto));
+            content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+
+            var client = _factory.CreateClient();
+            var response = await client.PostAsync(CustomerUrl, content);
 
             Assert.False(response.IsSuccessStatusCode);
         }
@@ -282,12 +335,15 @@ namespace CF.Test.Integration.Customer
                 ConfirmPassword = "01234567901234"
             };
 
-            var httpRequestMessage = BuildPostHttpRequest(CustomerUrl, dto);
-            var response = await Client.SendAsync(httpRequestMessage);
+            var content = new StringContent(JsonConvert.SerializeObject(dto));
+            content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+
+            var client = _factory.CreateClient();
+            var response = await client.PostAsync(CustomerUrl, content);
 
             Assert.False(response.IsSuccessStatusCode);
         }
-        
+
         [Fact]
         public async Task UpdateCustomerOkTest()
         {
@@ -302,17 +358,21 @@ namespace CF.Test.Integration.Customer
                 ConfirmPassword = "Password1@"
             };
 
-            var createHttpRequestMessage = BuildPostHttpRequest(CustomerUrl, dto);
-            var createResponse = await Client.SendAsync(createHttpRequestMessage);
+            var content = new StringContent(JsonConvert.SerializeObject(dto));
+            content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+
+            var client = _factory.CreateClient();
+            var createResponse = await client.PostAsync(CustomerUrl, content);
             Assert.True(createResponse.IsSuccessStatusCode);
 
-            var getHttpRequestMessage = BuildGetHttpRequest(createResponse.Headers.Location.ToString(), null);
-            var getResponse = await Client.SendAsync(getHttpRequestMessage);
+            client = _factory.CreateClient();
+            var getResponse = await client.GetAsync(createResponse.Headers.Location.ToString());
             var customer = JsonConvert.DeserializeObject<CustomerResponseDto>(await getResponse.Content.ReadAsStringAsync());
 
             dto.FirstName = "New Name";
-            var putHttpRequestMessage = BuildPutHttpRequest($"{CustomerUrl}/{customer.Id}", dto);
-            var putResponse = await Client.SendAsync(putHttpRequestMessage);
+            var contentUpdate = new StringContent(JsonConvert.SerializeObject(dto));
+            contentUpdate.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+            var putResponse = await client.PutAsync($"{CustomerUrl}/{customer.Id}", contentUpdate);
             Assert.True(putResponse.IsSuccessStatusCode);
         }
 
@@ -330,25 +390,35 @@ namespace CF.Test.Integration.Customer
                 ConfirmPassword = "Password1@"
             };
 
-            var createCustomerOneHttpRequestMessage = BuildPostHttpRequest(CustomerUrl, dto);
-            var createCustomerOneResponse = await Client.SendAsync(createCustomerOneHttpRequestMessage);
+            var contentCustomerOne = new StringContent(JsonConvert.SerializeObject(dto));
+            contentCustomerOne.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+
+            var client = _factory.CreateClient();
+            var createCustomerOneResponse = await client.PostAsync(CustomerUrl, contentCustomerOne);
             Assert.True(createCustomerOneResponse.IsSuccessStatusCode);
 
             dto.Email = CreateValidEmail();
-            var createCustomerTwoHttpRequestMessage = BuildPostHttpRequest(CustomerUrl, dto);
-            var createCustomerTwoResponse = await Client.SendAsync(createCustomerTwoHttpRequestMessage);
+
+            var contentCustomerTwo = new StringContent(JsonConvert.SerializeObject(dto));
+            contentCustomerTwo.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+
+            client = _factory.CreateClient();
+            var createCustomerTwoResponse = await client.PostAsync(CustomerUrl, contentCustomerTwo);
             Assert.True(createCustomerTwoResponse.IsSuccessStatusCode);
 
-            var parameters = new Dictionary<string, string> {{"email", dto.Email}};
-            var getHttpRequestMessage = BuildGetHttpRequest(CustomerUrl, parameters);
-            var getResponse = await Client.SendAsync(getHttpRequestMessage);
+            var parameters = new Dictionary<string, string> { { "email", dto.Email } };
+            var requestUri = QueryHelpers.AddQueryString(CustomerUrl, parameters);
+            client = _factory.CreateClient();
+            var getResponse = await client.GetAsync(requestUri);
             Assert.True(getResponse.IsSuccessStatusCode);
             var customer = JsonConvert.DeserializeObject<CustomerResponseDto>(await getResponse.Content.ReadAsStringAsync());
 
             dto.Email = customerOneEmail;
-            var putHttpRequestMessage = BuildPutHttpRequest($"{CustomerUrl}/{customer.Id}", dto);
-            var putResponse = await Client.SendAsync(putHttpRequestMessage);
-            Assert.False(putResponse.IsSuccessStatusCode);
+            var content = new StringContent(JsonConvert.SerializeObject(dto));
+            content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+            client = _factory.CreateClient();
+            var response = await client.PutAsync($"{CustomerUrl}/{customer.Id}", content);
+            Assert.False(response.IsSuccessStatusCode);
         }
 
         [Fact]
@@ -364,13 +434,16 @@ namespace CF.Test.Integration.Customer
                 Password = "Password1@",
                 ConfirmPassword = "Password1@"
             };
+            
+            var content = new StringContent(JsonConvert.SerializeObject(dto));
+            content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
-            var createCustomerOneHttpRequestMessage = BuildPostHttpRequest(CustomerUrl, dto);
-            var createCustomerOneResponse = await Client.SendAsync(createCustomerOneHttpRequestMessage);
-            Assert.True(createCustomerOneResponse.IsSuccessStatusCode);
+            var client = _factory.CreateClient();
+            var response = await client.PostAsync(CustomerUrl, content);
+            Assert.True(response.IsSuccessStatusCode);
 
-            var getHttpRequestMessage = BuildGetHttpRequest(createCustomerOneResponse.Headers.Location.ToString(), null);
-            var getResponse = await Client.SendAsync(getHttpRequestMessage);
+            client = _factory.CreateClient();
+            var getResponse = await client.GetAsync(response.Headers.Location.ToString());
             Assert.True(getResponse.IsSuccessStatusCode);
         }
 
@@ -386,14 +459,20 @@ namespace CF.Test.Integration.Customer
                 ConfirmPassword = "Password1@",
             };
 
-            var createCustomerOneHttpRequestMessage = BuildPostHttpRequest(CustomerUrl, dto);
-            var createCustomerOneResponse = await Client.SendAsync(createCustomerOneHttpRequestMessage);
-            Assert.True(createCustomerOneResponse.IsSuccessStatusCode);
+            var content = new StringContent(JsonConvert.SerializeObject(dto));
+            content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+
+            var client = _factory.CreateClient();
+            var response = await client.PostAsync(CustomerUrl, content);
+            Assert.True(response.IsSuccessStatusCode);
 
             dto.Email = CreateValidEmail();
-            var createCustomerTwoHttpRequestMessage = BuildPostHttpRequest(CustomerUrl, dto);
-            var createCustomerTwoResponse = await Client.SendAsync(createCustomerTwoHttpRequestMessage);
-            Assert.True(createCustomerTwoResponse.IsSuccessStatusCode);
+            var contentTwo = new StringContent(JsonConvert.SerializeObject(dto));
+            contentTwo.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+
+            client = _factory.CreateClient();
+            var responseTwo = await client.PostAsync(CustomerUrl, contentTwo);
+            Assert.True(responseTwo.IsSuccessStatusCode);
 
             var parameters = new Dictionary<string, string>
             {
@@ -403,13 +482,15 @@ namespace CF.Test.Integration.Customer
                 {"sortBy", "asc"}
             };
 
-            var getHttpRequestMessage = BuildGetHttpRequest(CustomerUrl, parameters);
-            var getResponse = await Client.SendAsync(getHttpRequestMessage);
+            var requestUri = QueryHelpers.AddQueryString(CustomerUrl, parameters);
+
+            client = _factory.CreateClient();
+            var getResponse = await client.GetAsync(requestUri);
             Assert.True(getResponse.IsSuccessStatusCode);
             var customers = JsonConvert.DeserializeObject<PaginationDto<CustomerResponseDto>>(await getResponse.Content.ReadAsStringAsync());
             Assert.True(customers.Count > 1);
         }
-       
+
         [Fact]
         public async Task DeleteCustomerOkTest()
         {
@@ -424,16 +505,20 @@ namespace CF.Test.Integration.Customer
                 ConfirmPassword = "Password1@"
             };
 
-            var createHttpRequestMessage = BuildPostHttpRequest(CustomerUrl, dto);
-            var createResponse = await Client.SendAsync(createHttpRequestMessage);
-            Assert.True(createResponse.IsSuccessStatusCode);
+            var content = new StringContent(JsonConvert.SerializeObject(dto));
+            content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
-            var getHttpRequestMessage = BuildGetHttpRequest(createResponse.Headers.Location.ToString(), null);
-            var getResponse = await Client.SendAsync(getHttpRequestMessage);
+            var client = _factory.CreateClient();
+            var response = await client.PostAsync(CustomerUrl, content);
+            Assert.True(response.IsSuccessStatusCode);
+
+            client = _factory.CreateClient();
+            var getResponse = await client.GetAsync(response.Headers.Location.ToString());
+            Assert.True(getResponse.IsSuccessStatusCode);
             var customer = JsonConvert.DeserializeObject<CustomerResponseDto>(await getResponse.Content.ReadAsStringAsync());
 
-            var deleteHttpRequestMessage = BuildDeleteHttpRequest($"{CustomerUrl}/{customer.Id}");
-            var deleteResponse = await Client.SendAsync(deleteHttpRequestMessage);
+            client = _factory.CreateClient();
+            var deleteResponse = await client.DeleteAsync($"{CustomerUrl}/{customer.Id}");
             Assert.True(deleteResponse.IsSuccessStatusCode);
         }
 

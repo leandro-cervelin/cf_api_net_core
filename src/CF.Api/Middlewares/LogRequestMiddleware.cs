@@ -1,5 +1,5 @@
 ﻿using System.Threading.Tasks;
-using CorrelationId;
+using CorrelationId.Abstractions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.Extensions.Logging;
@@ -22,7 +22,6 @@ namespace CF.Api.Middlewares
 
         public async Task Invoke(HttpContext context)
         {
-
             var url = context.Request.GetDisplayUrl();
            
             var correlationId = _correlationContext.CorrelationContext.CorrelationId;
@@ -34,8 +33,7 @@ namespace CF.Api.Middlewares
                 $"Method: {context.Request.Method}, " +
                 $"Url: {url}, " +
                 $"CorrelationId: {correlationId}");
-
-          
+            
             await _next(context);
         }
     }
