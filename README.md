@@ -1,6 +1,6 @@
 # .Net Core 3.1 Example App / API
 ## .Net Core API using SQL Server with Entity Framework Core
-## Unit Test and Integration Test
+## Unit Tests and Integration Tests
 ## Docker with Compose
 
 Docker steps:
