@@ -35,8 +35,6 @@ namespace CF.Test.Integration.Customer
             };
 
             var content = await CreateStringContent(dto);
-            content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-
             var client = _factory.CreateClient();
             var response = await client.PostAsync(CustomerUrl, content);
             response.EnsureSuccessStatusCode();
@@ -56,8 +54,6 @@ namespace CF.Test.Integration.Customer
             };
 
             var content = await CreateStringContent(dto);
-            content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-
             var client = _factory.CreateClient();
             var response = await client.PostAsync(CustomerUrl, content);
 
@@ -79,8 +75,6 @@ namespace CF.Test.Integration.Customer
             };
 
             var content = await CreateStringContent(dto);
-            content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-
             var client = _factory.CreateClient();
             var response = await client.PostAsync(CustomerUrl, content);
             Assert.True(response.IsSuccessStatusCode);
@@ -103,8 +97,6 @@ namespace CF.Test.Integration.Customer
             };
 
             var content = await CreateStringContent(dto);
-            content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-
             var client = _factory.CreateClient();
             var response = await client.PostAsync(CustomerUrl, content);
 
@@ -124,8 +116,6 @@ namespace CF.Test.Integration.Customer
             };
 
             var content = await CreateStringContent(dto);
-            content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-
             var client = _factory.CreateClient();
             var response = await client.PostAsync(CustomerUrl, content);
 
@@ -145,8 +135,6 @@ namespace CF.Test.Integration.Customer
             };
 
             var content = await CreateStringContent(dto);
-            content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-
             var client = _factory.CreateClient();
             var response = await client.PostAsync(CustomerUrl, content);
 
@@ -167,8 +155,6 @@ namespace CF.Test.Integration.Customer
             };
 
             var content = await CreateStringContent(dto);
-            content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-
             var client = _factory.CreateClient();
             var response = await client.PostAsync(CustomerUrl, content);
 
@@ -188,8 +174,6 @@ namespace CF.Test.Integration.Customer
             };
 
             var content = await CreateStringContent(dto);
-            content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-
             var client = _factory.CreateClient();
             var response = await client.PostAsync(CustomerUrl, content);
 
@@ -210,8 +194,6 @@ namespace CF.Test.Integration.Customer
             };
 
             var content = await CreateStringContent(dto);
-            content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-
             var client = _factory.CreateClient();
             var response = await client.PostAsync(CustomerUrl, content);
 
@@ -231,8 +213,6 @@ namespace CF.Test.Integration.Customer
             };
 
             var content = await CreateStringContent(dto);
-            content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-
             var client = _factory.CreateClient();
             var response = await client.PostAsync(CustomerUrl, content);
 
@@ -251,8 +231,6 @@ namespace CF.Test.Integration.Customer
             };
 
             var content = await CreateStringContent(dto);
-            content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-
             var client = _factory.CreateClient();
             var response = await client.PostAsync(CustomerUrl, content);
 
@@ -272,8 +250,6 @@ namespace CF.Test.Integration.Customer
             };
 
             var content = await CreateStringContent(dto);
-            content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-
             var client = _factory.CreateClient();
             var response = await client.PostAsync(CustomerUrl, content);
 
@@ -293,8 +269,6 @@ namespace CF.Test.Integration.Customer
             };
 
             var content = await CreateStringContent(dto);
-            content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-
             var client = _factory.CreateClient();
             var response = await client.PostAsync(CustomerUrl, content);
 
@@ -314,8 +288,6 @@ namespace CF.Test.Integration.Customer
             };
 
             var content = await CreateStringContent(dto);
-            content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-
             var client = _factory.CreateClient();
             var response = await client.PostAsync(CustomerUrl, content);
 
@@ -335,8 +307,6 @@ namespace CF.Test.Integration.Customer
             };
 
             var content = await CreateStringContent(dto);
-            content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-
             var client = _factory.CreateClient();
             var response = await client.PostAsync(CustomerUrl, content);
 
@@ -358,8 +328,6 @@ namespace CF.Test.Integration.Customer
             };
 
             var content = await CreateStringContent(dto);
-            content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-
             var client = _factory.CreateClient();
             var createResponse = await client.PostAsync(CustomerUrl, content);
             Assert.True(createResponse.IsSuccessStatusCode);
@@ -370,7 +338,6 @@ namespace CF.Test.Integration.Customer
 
             dto.FirstName = "New Name";
             var contentUpdate = await CreateStringContent(dto);
-            contentUpdate.Headers.ContentType = new MediaTypeHeaderValue("application/json");
             var putResponse = await client.PutAsync($"{CustomerUrl}/{customer.Id}", contentUpdate);
             Assert.True(putResponse.IsSuccessStatusCode);
         }
@@ -390,8 +357,6 @@ namespace CF.Test.Integration.Customer
             };
 
             var contentCustomerOne = await CreateStringContent(dto);
-            contentCustomerOne.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-
             var client = _factory.CreateClient();
             var createCustomerOneResponse = await client.PostAsync(CustomerUrl, contentCustomerOne);
             Assert.True(createCustomerOneResponse.IsSuccessStatusCode);
@@ -399,8 +364,6 @@ namespace CF.Test.Integration.Customer
             dto.Email = CreateValidEmail();
 
             var contentCustomerTwo = await CreateStringContent(dto);
-            contentCustomerTwo.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-
             client = _factory.CreateClient();
             var createCustomerTwoResponse = await client.PostAsync(CustomerUrl, contentCustomerTwo);
             Assert.True(createCustomerTwoResponse.IsSuccessStatusCode);
@@ -414,7 +377,6 @@ namespace CF.Test.Integration.Customer
 
             dto.Email = customerOneEmail;
             var content = await CreateStringContent(dto);
-            content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
             client = _factory.CreateClient();
             var response = await client.PutAsync($"{CustomerUrl}/{customer.Id}", content);
             Assert.False(response.IsSuccessStatusCode);
@@ -435,8 +397,6 @@ namespace CF.Test.Integration.Customer
             };
             
             var content = await CreateStringContent(dto);
-            content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-
             var client = _factory.CreateClient();
             var response = await client.PostAsync(CustomerUrl, content);
             Assert.True(response.IsSuccessStatusCode);
@@ -459,16 +419,12 @@ namespace CF.Test.Integration.Customer
             };
 
             var content = await CreateStringContent(dto);
-            content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-
             var client = _factory.CreateClient();
             var response = await client.PostAsync(CustomerUrl, content);
             Assert.True(response.IsSuccessStatusCode);
 
             dto.Email = CreateValidEmail();
             var contentTwo = await CreateStringContent(dto);
-            contentTwo.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-
             client = _factory.CreateClient();
             var responseTwo = await client.PostAsync(CustomerUrl, contentTwo);
             Assert.True(responseTwo.IsSuccessStatusCode);
@@ -490,11 +446,6 @@ namespace CF.Test.Integration.Customer
             Assert.True(customers.Count > 1);
         }
 
-        private static async Task<StringContent> CreateStringContent(CustomerRequestDto dto)
-        {
-            return new StringContent(await Task.Factory.StartNew(() => JsonConvert.SerializeObject(dto)));
-        }
-
         [Fact]
         public async Task DeleteCustomerOkTest()
         {
@@ -509,9 +460,8 @@ namespace CF.Test.Integration.Customer
                 ConfirmPassword = "Password1@"
             };
 
-            var content = new StringContent(await Task.Factory.StartNew(() => JsonConvert.SerializeObject(dto)));
-            content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-
+            var content = await CreateStringContent(dto);
+            
             var client = _factory.CreateClient();
             var response = await client.PostAsync(CustomerUrl, content);
             Assert.True(response.IsSuccessStatusCode);
@@ -524,6 +474,13 @@ namespace CF.Test.Integration.Customer
             client = _factory.CreateClient();
             var deleteResponse = await client.DeleteAsync($"{CustomerUrl}/{customer.Id}");
             Assert.True(deleteResponse.IsSuccessStatusCode);
+        }
+        
+        private static async Task<StringContent> CreateStringContent(CustomerRequestDto dto)
+        {
+            var content = new StringContent(await Task.Factory.StartNew(() => JsonConvert.SerializeObject(dto)));
+            content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+            return content;
         }
 
         private static string CreateValidEmail()
