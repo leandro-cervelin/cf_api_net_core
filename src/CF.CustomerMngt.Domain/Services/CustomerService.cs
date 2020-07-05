@@ -67,7 +67,7 @@ namespace CF.CustomerMngt.Domain.Services
             if (entity == null) 
                 throw new EntityNotFoundException(id);
 
-            customer.Validate();
+            Validate(customer);
 
             if (entity.Email != customer.Email && !await IsAvailableEmail(customer.Email))
                 throw new ValidationException("Email is not available.");
@@ -88,7 +88,7 @@ namespace CF.CustomerMngt.Domain.Services
             if (customer == null)
                 throw new ValidationException("Customer is null.");
 
-            customer.Validate();
+            Validate(customer);
 
             var isAvailableEmail = await IsAvailableEmail(customer.Email);
             if (!isAvailableEmail) throw new ValidationException("Email is not available.");
@@ -118,6 +118,17 @@ namespace CF.CustomerMngt.Domain.Services
         {
             var existingEmail = await _customerRepository.GetByFilter(new CustomerFilter {Email = email});
             return existingEmail == null;
+        }
+
+        private static void Validate(Customer customer)
+        {
+            customer.ValidateFistName();
+
+            customer.ValidateSurname();
+
+            customer.ValidateEmail();
+
+            customer.ValidatePassword();
         }
     }
 }

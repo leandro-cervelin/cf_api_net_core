@@ -40,7 +40,9 @@ namespace CF.Api.Controllers
             catch (ValidationException e)
             {
                 _logger.LogError(
-                    $"Exception Details: {e.Message}, {e.InnerException}, {e.StackTrace}. CorrelationId: {_correlationContext.CorrelationContext.CorrelationId}");
+                    "Exception Details: {message}, {innerException}, {stackTrace}. CorrelationId: {correlationId}",
+                        e.Message, e.InnerException?.Message, e.StackTrace, _correlationContext.CorrelationContext.CorrelationId);
+
                 return BadRequest(e.Message);
             }
         }
@@ -65,7 +67,9 @@ namespace CF.Api.Controllers
             catch (ValidationException e)
             {
                 _logger.LogError(
-                    $"Exception Details: {e.Message}, {e.InnerException}, {e.StackTrace}. CorrelationId: {_correlationContext.CorrelationContext.CorrelationId}");
+                    "Exception Details: {message}, {innerException}, {stackTrace}. CorrelationId: {correlationId}",
+                    e.Message, e.InnerException?.Message, e.StackTrace, _correlationContext.CorrelationContext.CorrelationId);
+
                 return BadRequest(e.Message);
             }
         }
@@ -86,7 +90,9 @@ namespace CF.Api.Controllers
             catch (ValidationException e)
             {
                 _logger.LogError(
-                    $"Exception Details: {e.Message}, {e.InnerException}, {e.StackTrace}. CorrelationId: {_correlationContext.CorrelationContext.CorrelationId}");
+                    "Exception Details: {message}, {innerException}, {stackTrace}. CorrelationId: {correlationId}",
+                    e.Message, e.InnerException?.Message, e.StackTrace, _correlationContext.CorrelationContext.CorrelationId);
+
                 return BadRequest(e.Message);
             }
         }
@@ -109,13 +115,17 @@ namespace CF.Api.Controllers
             catch (EntityNotFoundException e)
             {
                 _logger.LogError(
-                    $"Exception Details: {e.Message}, {e.InnerException}, {e.StackTrace}. CorrelationId: {_correlationContext.CorrelationContext.CorrelationId}");
+                    "Exception Details: {message}, {innerException}, {stackTrace}. CorrelationId: {correlationId}",
+                    e.Message, e.InnerException?.Message, e.StackTrace, _correlationContext.CorrelationContext.CorrelationId);
+
                 return NotFound();
             }
             catch (ValidationException e)
             {
                 _logger.LogError(
-                    $"Exception Details: {e.Message}, {e.InnerException}, {e.StackTrace}. CorrelationId: {_correlationContext.CorrelationContext.CorrelationId}");
+                    "Exception Details: {message}, {innerException}, {stackTrace}. CorrelationId: {correlationId}",
+                    e.Message, e.InnerException?.Message, e.StackTrace, _correlationContext.CorrelationContext.CorrelationId);
+
                 return BadRequest(e.Message);
             }
         }
@@ -137,13 +147,17 @@ namespace CF.Api.Controllers
             catch (EntityNotFoundException e)
             {
                 _logger.LogError(
-                    $"Exception Details: {e.Message}, {e.InnerException}, {e.StackTrace}. CorrelationId: {_correlationContext.CorrelationContext.CorrelationId}");
+                    "Exception Details: {message}, {innerException}, {stackTrace}. CorrelationId: {correlationId}",
+                    e.Message, e.InnerException?.Message, e.StackTrace, _correlationContext.CorrelationContext.CorrelationId);
+                
                 return NotFound();
             }
             catch (ValidationException e)
             {
                 _logger.LogError(
-                    $"Exception Details: {e.Message}, {e.InnerException}, {e.StackTrace}. CorrelationId: {_correlationContext.CorrelationContext.CorrelationId}");
+                    "Exception Details: {message}, {innerException}, {stackTrace}. CorrelationId: {correlationId}",
+                    e.Message, e.InnerException?.Message, e.StackTrace, _correlationContext.CorrelationContext.CorrelationId); 
+                
                 return BadRequest(e.Message);
             }
         }

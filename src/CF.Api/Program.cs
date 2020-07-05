@@ -17,23 +17,15 @@ namespace CF.Api
 
         public static IHostBuilder CreateHostBuilder(string[] args)
         {
-            var config = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("hosting.json", optional: true)
-                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-                .AddCommandLine(args)
-                .Build();
-
             var host = Host.CreateDefaultBuilder(args)
+                .ConfigureAppConfiguration((hostingContext, config) =>
+                {
+                    config.AddJsonFile("hosting.json", optional: true);
+                    config.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
+                })
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
-                    webBuilder.ConfigureLogging(options =>
-                    {
-                        options.AddConfiguration(config);
-                        options.ClearProviders();
-                        options.SetMinimumLevel(LogLevel.Trace);
-                    });
                 })
                 .UseNLog();
 #if DEBUG
