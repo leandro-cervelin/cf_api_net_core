@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Linq;
+using System.Threading.Tasks;
 using CF.Api;
 using CF.CustomerMngt.Infrastructure.DbContext;
+using CF.Test.Integration.Seed;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
@@ -42,16 +44,17 @@ namespace CF.Test.Integration
                 // Create a scope to obtain a reference to the database contexts
                 using var scope = buildServiceProvider.CreateScope();
                 var scopedServices = scope.ServiceProvider;
-                var appDb = scopedServices.GetRequiredService<CustomerMngtContext>();
+                var dbContext = scopedServices.GetRequiredService<CustomerMngtContext>();
 
                 var logger = scopedServices.GetRequiredService<ILogger<CustomWebApplicationFactory<TStartup>>>();
 
                 // Ensure the database is created.
-                appDb.Database.EnsureCreated();
+                dbContext.Database.EnsureCreated();
 
                 try
                 {
                     // Seed the database with some specific test data.
+                    Task.Run(() => CustomerSeed.Populate(dbContext));
                 }
                 catch (Exception ex)
                 {
