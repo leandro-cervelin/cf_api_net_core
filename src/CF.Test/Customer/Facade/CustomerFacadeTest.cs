@@ -41,10 +41,10 @@ namespace CF.Test.Customer.Facade
             var mockService = new Mock<ICustomerService>();
             var mockMapper = new Mock<IMapper>();
             mockMapper.Setup(x => x.Map<CustomerMngt.Domain.Entities.Customer>(customerRequestDto)).Returns(customer);
-            mockService.Setup(x => x.Create(customer)).ReturnsAsync(id);
+            mockService.Setup(x => x.CreateAsync(customer)).ReturnsAsync(id);
             //Assert
             var mockFacade = new CustomerFacade(mockService.Object, mockMapper.Object);
-            var result = await mockFacade.Create(customerRequestDto);
+            var result = await mockFacade.CreateAsync(customerRequestDto);
             Assert.Equal(id, result);
         }
 
@@ -78,11 +78,11 @@ namespace CF.Test.Customer.Facade
             var mockMapper = new Mock<IMapper>();
             mockMapper.Setup(x => x.Map<CustomerResponseDto>(customer)).Returns(customerResponseDto);
             mockMapper.Setup(x => x.Map<CustomerFilter>(filterDto)).Returns(filter);
-            mockService.Setup(x => x.GetByFilter(filter)).ReturnsAsync(customer);
+            mockService.Setup(x => x.GetByFilterAsync(filter)).ReturnsAsync(customer);
 
             //Assert
             var mockFacade = new CustomerFacade(mockService.Object, mockMapper.Object);
-            var result = await mockFacade.GetByFilter(filterDto);
+            var result = await mockFacade.GetByFilterAsync(filterDto);
             Assert.Equal(customer.Id, result.Id);
         }
 
@@ -165,11 +165,11 @@ namespace CF.Test.Customer.Facade
             var mockMapper = new Mock<IMapper>();
             mockMapper.Setup(x => x.Map<CustomerFilter>(filterDto)).Returns(filter);
             mockMapper.Setup(x => x.Map<PaginationDto<CustomerResponseDto>>(pagination)).Returns(paginationDto);
-            mockService.Setup(x => x.GetListByFilter(filter)).ReturnsAsync(pagination);
+            mockService.Setup(x => x.GetListByFilterAsync(filter)).ReturnsAsync(pagination);
 
             //Assert
             var mockFacade = new CustomerFacade(mockService.Object, mockMapper.Object);
-            var result = await mockFacade.GetListByFilter(filterDto);
+            var result = await mockFacade.GetListByFilterAsync(filterDto);
             Assert.Equal(paginationDto.Count, result.Count);
         }
 
@@ -205,7 +205,7 @@ namespace CF.Test.Customer.Facade
             var mockFacade = new CustomerFacade(mockService.Object, mockMapper.Object);
             try
             {
-                await Assert.ThrowsAsync<Exception>(() => mockFacade.Update(id, customerRequestDto));
+                await Assert.ThrowsAsync<Exception>(() => mockFacade.UpdateAsync(id, customerRequestDto));
             }
             catch (AssertActualExpectedException exception)
             {
@@ -227,7 +227,7 @@ namespace CF.Test.Customer.Facade
             var mockFacade = new CustomerFacade(mockService.Object, mockMapper.Object);
             try
             {
-                await Assert.ThrowsAsync<Exception>(() => mockFacade.Delete(id));
+                await Assert.ThrowsAsync<Exception>(() => mockFacade.DeleteAsync(id));
             }
             catch (AssertActualExpectedException exception)
             {

@@ -19,47 +19,47 @@ namespace CF.CustomerMngt.Application.Facades
             _mapper = mapper;
         }
 
-        public async Task<PaginationDto<CustomerResponseDto>> GetListByFilter(CustomerFilterDto filterDto)
+        public async Task<PaginationDto<CustomerResponseDto>> GetListByFilterAsync(CustomerFilterDto filterDto)
         {
             var filter = _mapper.Map<CustomerFilter>(filterDto);
 
-            var result = await _customerService.GetListByFilter(filter);
+            var result = await _customerService.GetListByFilterAsync(filter);
 
             var paginationDto = _mapper.Map<PaginationDto<CustomerResponseDto>>(result);
 
             return paginationDto;
         }
 
-        public async Task<CustomerResponseDto> GetByFilter(CustomerFilterDto filterDto)
+        public async Task<CustomerResponseDto> GetByFilterAsync(CustomerFilterDto filterDto)
         {
             var filter = _mapper.Map<CustomerFilter>(filterDto);
 
-            var result = await _customerService.GetByFilter(filter);
+            var result = await _customerService.GetByFilterAsync(filter);
 
             var resultDto = _mapper.Map<CustomerResponseDto>(result);
 
             return resultDto;
         }
 
-        public async Task Update(long id, CustomerRequestDto customerRequestDto)
+        public async Task UpdateAsync(long id, CustomerRequestDto customerRequestDto)
         {
             var customer = _mapper.Map<Customer>(customerRequestDto);
 
-            await _customerService.Update(id, customer);
+            await _customerService.UpdateAsync(id, customer);
         }
 
-        public async Task<long> Create(CustomerRequestDto customerRequestDto)
+        public async Task<long> CreateAsync(CustomerRequestDto customerRequestDto)
         {
             var customer = _mapper.Map<Customer>(customerRequestDto);
 
-            var id = await _customerService.Create(customer);
+            var id = await _customerService.CreateAsync(customer);
 
             return id;
         }
 
-        public async Task Delete(long id)
+        public async Task DeleteAsync(long id)
         {
-            await _customerService.Delete(id);
+            await _customerService.DeleteAsync(id);
         }
     }
 }

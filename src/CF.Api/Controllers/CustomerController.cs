@@ -34,7 +34,7 @@ namespace CF.Api.Controllers
         {
             try
             {
-                var result = await _customerFacade.GetListByFilter(customerFilterDto);
+                var result = await _customerFacade.GetListByFilterAsync(customerFilterDto);
                 return result;
             }
             catch (ValidationException e)
@@ -58,7 +58,7 @@ namespace CF.Api.Controllers
                 if (id <= 0) return BadRequest("Invalid Id.");
 
                 var filter = new CustomerFilterDto {Id = id};
-                var result = await _customerFacade.GetByFilter(filter);
+                var result = await _customerFacade.GetByFilterAsync(filter);
 
                 if (result == null) return NotFound();
 
@@ -83,7 +83,7 @@ namespace CF.Api.Controllers
             {
                 if (!ModelState.IsValid) return BadRequest(ModelState);
 
-                var id = await _customerFacade.Create(customerRequestDto);
+                var id = await _customerFacade.CreateAsync(customerRequestDto);
 
                 return CreatedAtAction(nameof(Get), new {id}, new {id});
             }
@@ -109,7 +109,7 @@ namespace CF.Api.Controllers
 
                 if (id <= 0) return BadRequest("Invalid id.");
 
-                await _customerFacade.Update(id, customerRequestDto);
+                await _customerFacade.UpdateAsync(id, customerRequestDto);
                 return NoContent();
             }
             catch (EntityNotFoundException e)
@@ -140,7 +140,7 @@ namespace CF.Api.Controllers
             {
                 if (id <= 0) return BadRequest("Invalid id.");
 
-                await _customerFacade.Delete(id);
+                await _customerFacade.DeleteAsync(id);
 
                 return NoContent();
             }

@@ -5,10 +5,10 @@ namespace CF.CustomerMngt.Application.Facades.Interfaces
 {
     public interface ICustomerFacade
     {
-        Task<CustomerResponseDto> GetByFilter(CustomerFilterDto filterDto);
-        Task<PaginationDto<CustomerResponseDto>> GetListByFilter(CustomerFilterDto filterDto);
-        Task<long> Create(CustomerRequestDto customerRequestDto);
-        Task Update(long id, CustomerRequestDto customerRequestDto);
-        Task Delete(long id);
+        Task<CustomerResponseDto> GetByFilterAsync(CustomerFilterDto filterDto);
+        Task<PaginationDto<CustomerResponseDto>> GetListByFilterAsync(CustomerFilterDto filterDto);
+        Task<long> CreateAsync(CustomerRequestDto customerRequestDto);
+        Task UpdateAsync(long id, CustomerRequestDto customerRequestDto);
+        Task DeleteAsync(long id);
     }
 }

@@ -26,12 +26,12 @@ namespace CF.Test.Integration
                 if (descriptor != null)
                     services.Remove(descriptor);
 
-                // Create a new service provider.
+                // CreateAsync a new service provider.
                 var serviceProvider = new ServiceCollection()
                     .AddEntityFrameworkSqlite()
                     .BuildServiceProvider();
 
-                // Add a database context (AppDbContext) using an in-memory database for testing.
+                // AddAsync a database context (AppDbContext) using an in-memory database for testing.
                 services.AddDbContext<CustomerMngtContext>(options =>
                 {
                     options.UseSqlite(_connectionString);
@@ -41,7 +41,7 @@ namespace CF.Test.Integration
                 // Build the service provider.
                 var buildServiceProvider = services.BuildServiceProvider();
 
-                // Create a scope to obtain a reference to the database contexts
+                // CreateAsync a scope to obtain a reference to the database contexts
                 using var scope = buildServiceProvider.CreateScope();
                 var scopedServices = scope.ServiceProvider;
                 var dbContext = scopedServices.GetRequiredService<CustomerMngtContext>();

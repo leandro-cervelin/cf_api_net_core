@@ -6,10 +6,10 @@ namespace CF.CustomerMngt.Domain.Services.Interfaces
 {
     public interface ICustomerService
     {
-        Task<Pagination<Customer>> GetListByFilter(CustomerFilter filter);
-        Task<Customer> GetByFilter(CustomerFilter filter);
-        Task Update(long id, Customer customer);
-        Task<long> Create(Customer customer);
-        Task Delete(long id);
+        Task<Pagination<Customer>> GetListByFilterAsync(CustomerFilter filter);
+        Task<Customer> GetByFilterAsync(CustomerFilter filter);
+        Task UpdateAsync(long id, Customer customer);
+        Task<long> CreateAsync(Customer customer);
+        Task DeleteAsync(long id);
     }
 }

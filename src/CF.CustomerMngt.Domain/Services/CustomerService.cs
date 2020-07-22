@@ -20,7 +20,7 @@ namespace CF.CustomerMngt.Domain.Services
             _passwordHasher = passwordHasher;
         }
 
-        public async Task<Pagination<Customer>> GetListByFilter(CustomerFilter filter)
+        public async Task<Pagination<Customer>> GetListByFilterAsync(CustomerFilter filter)
         {
             if (filter == null)
                 throw new ValidationException("Filter is null.");
@@ -30,11 +30,11 @@ namespace CF.CustomerMngt.Domain.Services
 
             if (filter.CurrentPage <= 0) filter.PageSize = 1;
 
-            var total = await _customerRepository.CountByFilter(filter);
+            var total = await _customerRepository.CountByFilterAsync(filter);
 
             if (total == 0) return new Pagination<Customer>();
 
-            var paginateResult = await _customerRepository.GetListByFilter(filter);
+            var paginateResult = await _customerRepository.GetListByFilterAsync(filter);
 
             var result = new Pagination<Customer>
             {
@@ -47,29 +47,29 @@ namespace CF.CustomerMngt.Domain.Services
             return result;
         }
 
-        public async Task<Customer> GetByFilter(CustomerFilter filter)
+        public async Task<Customer> GetByFilterAsync(CustomerFilter filter)
         {
             if (filter == null)
                 throw new ValidationException("Filter is null.");
 
-            return await _customerRepository.GetByFilter(filter);
+            return await _customerRepository.GetByFilterAsync(filter);
         }
 
-        public async Task Update(long id, Customer customer)
+        public async Task UpdateAsync(long id, Customer customer)
         {
             if (id <= 0) throw new ValidationException("Id is invalid.");
 
             if (customer == null)
                 throw new ValidationException("Customer is null.");
             
-            var entity = await _customerRepository.GetById(id);
+            var entity = await _customerRepository.GetByIdAsync(id);
 
             if (entity == null) 
                 throw new EntityNotFoundException(id);
 
             Validate(customer);
 
-            if (entity.Email != customer.Email && !await IsAvailableEmail(customer.Email))
+            if (entity.Email != customer.Email && !await IsAvailableEmailAsync(customer.Email))
                 throw new ValidationException("Email is not available.");
 
             entity.Email = customer.Email;
@@ -80,43 +80,43 @@ namespace CF.CustomerMngt.Domain.Services
             if (!password.Verified) entity.Password = _passwordHasher.Hash(customer.Password);
 
             entity.SetUpdatedDate();
-            await _customerRepository.SaveChanges();
+            await _customerRepository.SaveChangesAsync();
         }
 
-        public async Task<long> Create(Customer customer)
+        public async Task<long> CreateAsync(Customer customer)
         {
             if (customer == null)
                 throw new ValidationException("Customer is null.");
 
             Validate(customer);
 
-            var isAvailableEmail = await IsAvailableEmail(customer.Email);
+            var isAvailableEmail = await IsAvailableEmailAsync(customer.Email);
             if (!isAvailableEmail) throw new ValidationException("Email is not available.");
             
             customer.Password = _passwordHasher.Hash(customer.Password);
             customer.SetCreatedDate();
-            await _customerRepository.Add(customer);
-            await _customerRepository.SaveChanges();
+            await _customerRepository.AddAsync(customer);
+            await _customerRepository.SaveChangesAsync();
 
             return customer.Id;
         }
 
-        public async Task Delete(long id)
+        public async Task DeleteAsync(long id)
         {
             if (id <= 0) throw new ValidationException("Id is invalid.");
 
-            var entity = await _customerRepository.GetById(id);
+            var entity = await _customerRepository.GetByIdAsync(id);
 
             if (entity == null) throw new EntityNotFoundException(id);
 
             _customerRepository.Remove(entity.Id);
 
-            await _customerRepository.SaveChanges();
+            await _customerRepository.SaveChangesAsync();
         }
 
-        public async Task<bool> IsAvailableEmail(string email)
+        public async Task<bool> IsAvailableEmailAsync(string email)
         {
-            var existingEmail = await _customerRepository.GetByFilter(new CustomerFilter {Email = email});
+            var existingEmail = await _customerRepository.GetByFilterAsync(new CustomerFilter {Email = email});
             return existingEmail == null;
         }
 

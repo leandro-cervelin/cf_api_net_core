@@ -6,11 +6,11 @@ namespace CF.CustomerMngt.Domain.Repositories
 {
     public interface IRepositoryBase<TEntity> : IDisposable where TEntity : class
     {
-        Task Add(TEntity entity);
-        Task<TEntity> GetById(long id);
-        Task<IList<TEntity>> GetAll();
+        Task AddAsync(TEntity entity);
+        Task<TEntity> GetByIdAsync(long id);
+        Task<IList<TEntity>> GetAllAsync();
         void Update(TEntity entity);
         void Remove(long id);
-        Task<int> SaveChanges();
+        Task<int> SaveChangesAsync();
     }
 }

@@ -15,7 +15,7 @@ namespace CF.CustomerMngt.Infrastructure.Repositories
         {
         }
 
-        public async Task<int> CountByFilter(CustomerFilter filter)
+        public async Task<int> CountByFilterAsync(CustomerFilter filter)
         {
             var query = DbContext.Customers.AsQueryable();
 
@@ -24,7 +24,7 @@ namespace CF.CustomerMngt.Infrastructure.Repositories
             return await query.CountAsync();
         }
 
-        public async Task<Customer> GetByFilter(CustomerFilter filter)
+        public async Task<Customer> GetByFilterAsync(CustomerFilter filter)
         {
             var query = DbContext.Customers.AsQueryable();
 
@@ -33,7 +33,7 @@ namespace CF.CustomerMngt.Infrastructure.Repositories
             return await query.FirstOrDefaultAsync();
         }
 
-        public async Task<List<Customer>> GetListByFilter(CustomerFilter filter)
+        public async Task<List<Customer>> GetListByFilterAsync(CustomerFilter filter)
         {
             var query = DbContext.Customers.AsQueryable();
             

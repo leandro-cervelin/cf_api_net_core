@@ -52,9 +52,9 @@ namespace CF.Test.Customer.Repository
                 await using (var context = new CustomerMngtContext(options))
                 { 
                     var repository = new CustomerRepository(context);
-                    await repository.Add(customerOne);
-                    await repository.Add(customerTwo);
-                    await repository.SaveChanges();
+                    await repository.AddAsync(customerOne);
+                    await repository.AddAsync(customerTwo);
+                    await repository.SaveChangesAsync();
                 }
 
                 //Assert
@@ -62,7 +62,7 @@ namespace CF.Test.Customer.Repository
                 {
                     var repository = new CustomerRepository(context);
                     var filter = new CustomerFilter {Email = "test"};
-                    var result = await repository.GetListByFilter(filter);
+                    var result = await repository.GetListByFilterAsync(filter);
                     Assert.Equal(2, result.Count);
                 }
             }
@@ -102,8 +102,8 @@ namespace CF.Test.Customer.Repository
                 await using (var context = new CustomerMngtContext(options))
                 { 
                     var repository = new CustomerRepository(context);
-                    await repository.Add(customerOne);
-                    await repository.SaveChanges();
+                    await repository.AddAsync(customerOne);
+                    await repository.SaveChangesAsync();
                 }
 
                 //Assert
@@ -111,7 +111,7 @@ namespace CF.Test.Customer.Repository
                 {
                     var repository = new CustomerRepository(context);
                     var filter = new CustomerFilter {Email = "test1@test.com"};
-                    var result = await repository.GetByFilter(filter);
+                    var result = await repository.GetByFilterAsync(filter);
                     Assert.Equal("test1@test.com", result.Email);
                 }
             }
@@ -151,8 +151,8 @@ namespace CF.Test.Customer.Repository
                 await using (var context = new CustomerMngtContext(options))
                 {
                     var repository = new CustomerRepository(context);
-                    await repository.Add(customer);
-                    var result = await repository.SaveChanges();
+                    await repository.AddAsync(customer);
+                    var result = await repository.SaveChangesAsync();
                     //Assert
                     Assert.Equal(1, result);
                 }
@@ -193,17 +193,17 @@ namespace CF.Test.Customer.Repository
                 await using (var context = new CustomerMngtContext(options))
                 { 
                     var repository = new CustomerRepository(context);
-                    await repository.Add(newCustomer);
-                    await repository.SaveChanges();
+                    await repository.AddAsync(newCustomer);
+                    await repository.SaveChangesAsync();
                 }
 
                 await using (var context = new CustomerMngtContext(options))
                 { 
                     var repository = new CustomerRepository(context);
                     var filterStored = new CustomerFilter {Id = newCustomer.Id};
-                    var storedCustomer = await repository.GetByFilter(filterStored);
+                    var storedCustomer = await repository.GetByFilterAsync(filterStored);
                     repository.Remove(storedCustomer.Id);
-                    await repository.SaveChanges();
+                    await repository.SaveChangesAsync();
                 }
 
                 //Assert
@@ -211,7 +211,7 @@ namespace CF.Test.Customer.Repository
                 {
                     var filterNonExistentUser = new CustomerFilter {Id = newCustomer.Id};
                     var repository = new CustomerRepository(context);
-                    var nonExistentUser = await repository.GetByFilter(filterNonExistentUser);
+                    var nonExistentUser = await repository.GetByFilterAsync(filterNonExistentUser);
                     Assert.Null(nonExistentUser);
                 }
             }
@@ -259,16 +259,16 @@ namespace CF.Test.Customer.Repository
                 await using (var context = new CustomerMngtContext(options))
                 { 
                     var repository = new CustomerRepository(context);
-                    await repository.Add(customerOne);
-                    await repository.SaveChanges();
+                    await repository.AddAsync(customerOne);
+                    await repository.SaveChangesAsync();
                 }
 
                 //Assert
                 await using (var context = new CustomerMngtContext(options))
                 { 
                     var repository = new CustomerRepository(context);
-                    await repository.Add(customerTwo);
-                    var exception = await Assert.ThrowsAsync<DbUpdateException>(() => repository.SaveChanges());
+                    await repository.AddAsync(customerTwo);
+                    var exception = await Assert.ThrowsAsync<DbUpdateException>(() => repository.SaveChangesAsync());
                     Assert.NotNull(exception);
                 }
             }
@@ -307,10 +307,10 @@ namespace CF.Test.Customer.Repository
                 await using (var context = new CustomerMngtContext(options))
                 {
                     var repository = new CustomerRepository(context);
-                    await repository.Add(customer);
+                    await repository.AddAsync(customer);
                     
                     //Assert
-                    var exception = await Assert.ThrowsAsync<DbUpdateException>(() => repository.SaveChanges());
+                    var exception = await Assert.ThrowsAsync<DbUpdateException>(() => repository.SaveChangesAsync());
                     Assert.NotNull(exception);
                 }
             }
@@ -349,10 +349,10 @@ namespace CF.Test.Customer.Repository
                 await using (var context = new CustomerMngtContext(options))
                 {
                     var repository = new CustomerRepository(context);
-                    await repository.Add(customer);
+                    await repository.AddAsync(customer);
                     
                     //Assert
-                    var exception = await Assert.ThrowsAsync<DbUpdateException>(() => repository.SaveChanges());
+                    var exception = await Assert.ThrowsAsync<DbUpdateException>(() => repository.SaveChangesAsync());
                     Assert.NotNull(exception);
                 }
             }
@@ -391,10 +391,10 @@ namespace CF.Test.Customer.Repository
                 await using (var context = new CustomerMngtContext(options))
                 {
                     var repository = new CustomerRepository(context);
-                    await repository.Add(customer);
+                    await repository.AddAsync(customer);
                     
                     //Assert
-                    var exception = await Assert.ThrowsAsync<DbUpdateException>(() => repository.SaveChanges());
+                    var exception = await Assert.ThrowsAsync<DbUpdateException>(() => repository.SaveChangesAsync());
                     Assert.NotNull(exception);
                 }
             }
@@ -433,10 +433,10 @@ namespace CF.Test.Customer.Repository
                 await using (var context = new CustomerMngtContext(options))
                 {
                     var repository = new CustomerRepository(context);
-                    await repository.Add(customer);
+                    await repository.AddAsync(customer);
                 
                     //Assert
-                    var exception = await Assert.ThrowsAsync<DbUpdateException>(() => repository.SaveChanges());
+                    var exception = await Assert.ThrowsAsync<DbUpdateException>(() => repository.SaveChangesAsync());
                     Assert.NotNull(exception);
                 }
             }

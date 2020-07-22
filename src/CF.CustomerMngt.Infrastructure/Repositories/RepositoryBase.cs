@@ -19,17 +19,17 @@ namespace CF.CustomerMngt.Infrastructure.Repositories
             DbSet = DbContext.Set<TEntity>();
         }
 
-        public virtual async Task Add(TEntity entity)
+        public virtual async Task AddAsync(TEntity entity)
         {
             await DbSet.AddAsync(entity);
         }
 
-        public virtual async Task<TEntity> GetById(long id)
+        public virtual async Task<TEntity> GetByIdAsync(long id)
         {
             return await DbSet.FindAsync(id);
         }
         
-        public virtual async Task<IList<TEntity>> GetAll()
+        public virtual async Task<IList<TEntity>> GetAllAsync()
         {
             return await DbSet.ToListAsync();
         }
@@ -44,7 +44,7 @@ namespace CF.CustomerMngt.Infrastructure.Repositories
             DbSet.Remove(DbSet.Find(id));
         }
 
-        public async Task<int> SaveChanges()
+        public async Task<int> SaveChangesAsync()
         {
             return await DbContext.SaveChangesAsync();
         }
