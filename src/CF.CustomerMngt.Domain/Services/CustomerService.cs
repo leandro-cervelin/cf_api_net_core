@@ -76,8 +76,8 @@ namespace CF.CustomerMngt.Domain.Services
             entity.FirstName = customer.FirstName;
             entity.Surname = customer.Surname;
 
-            var password = _passwordHasher.Check(entity.Password, customer.Password);
-            if (!password.Verified) entity.Password = _passwordHasher.Hash(customer.Password);
+            var (verified, _) = _passwordHasher.Check(entity.Password, customer.Password);
+            if (!verified) entity.Password = _passwordHasher.Hash(customer.Password);
 
             entity.SetUpdatedDate();
             await _customerRepository.SaveChangesAsync();
@@ -95,7 +95,7 @@ namespace CF.CustomerMngt.Domain.Services
             
             customer.Password = _passwordHasher.Hash(customer.Password);
             customer.SetCreatedDate();
-            await _customerRepository.AddAsync(customer);
+            _customerRepository.Add(customer);
             await _customerRepository.SaveChangesAsync();
 
             return customer.Id;
@@ -109,7 +109,7 @@ namespace CF.CustomerMngt.Domain.Services
 
             if (entity == null) throw new EntityNotFoundException(id);
 
-            _customerRepository.Remove(entity.Id);
+            _customerRepository.Remove(entity);
 
             await _customerRepository.SaveChangesAsync();
         }

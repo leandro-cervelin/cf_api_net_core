@@ -202,7 +202,7 @@ namespace CF.Test.Customer.Repository
                     var repository = new CustomerRepository(context);
                     var filterStored = new CustomerFilter {Id = newCustomer.Id};
                     var storedCustomer = await repository.GetByFilterAsync(filterStored);
-                    repository.Remove(storedCustomer.Id);
+                    repository.Remove(storedCustomer);
                     await repository.SaveChangesAsync();
                 }
 
