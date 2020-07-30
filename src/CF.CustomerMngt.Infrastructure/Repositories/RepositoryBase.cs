@@ -21,14 +21,11 @@ namespace CF.CustomerMngt.Infrastructure.Repositories
 
         public void Add(TEntity entity)
         {
-            DbSet.AddAsync(entity);
+            DbSet.Add(entity);
         }
 
         /// <summary>
-        ///     This method is async only to allow special value generators,
-        ///     such as the one used by 'Microsoft.EntityFrameworkCore.Metadata.SqlServerValueGenerationStrategy.SequenceHiLo',
-        ///     to access the database asynchronously.
-        ///     For all other cases the non async method should be used.
+        ///     This method is async only to allow special value generators, such as the one used by 'Microsoft.EntityFrameworkCore.Metadata.SqlServerValueGenerationStrategy.SequenceHiLo', to access the database asynchronously. For all other cases the non async method should be used.
         ///     https://docs.microsoft.com/en-us/dotnet/api/microsoft.entityframeworkcore.dbset-1?view=efcore-3.1#Microsoft_EntityFrameworkCore_DbSet_1_AddAsync__0_System_Threading_CancellationToken_
         /// </summary>
         public virtual async Task AddAsync(TEntity entity)

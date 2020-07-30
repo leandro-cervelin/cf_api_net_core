@@ -31,7 +31,7 @@ namespace CF.Test.Integration
                     .AddEntityFrameworkSqlite()
                     .BuildServiceProvider();
 
-                // AddAsync a database context (AppDbContext) using an in-memory database for testing.
+                // Add a database context (AppDbContext) using an in-memory database for testing.
                 services.AddDbContext<CustomerMngtContext>(options =>
                 {
                     options.UseSqlite(_connectionString);

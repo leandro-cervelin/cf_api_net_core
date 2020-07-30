@@ -15,17 +15,15 @@ namespace CF.Test.Customer.Repository
         [Fact]
         public async Task GetListTest()
         {
-            var connection = CreateSqliteConnection();
+            var connection = CreateSqLiteConnection();
             connection.Open();
 
             try
             {
                 var options = SetDbContextOptionsBuilder(connection);
 
-                await using (var context = new CustomerMngtContext(options))
-                {
-                    context.Database.EnsureCreated();
-                }
+                await using var context = new CustomerMngtContext(options);
+                Assert.True(await context.Database.EnsureCreatedAsync());
 
                 //Arrange
                 var customerOne = new CustomerMngt.Domain.Entities.Customer
@@ -49,22 +47,15 @@ namespace CF.Test.Customer.Repository
                 };
 
                 //Act
-                await using (var context = new CustomerMngtContext(options))
-                { 
-                    var repository = new CustomerRepository(context);
-                    await repository.AddAsync(customerOne);
-                    await repository.AddAsync(customerTwo);
-                    await repository.SaveChangesAsync();
-                }
+                var repository = new CustomerRepository(context);
+                repository.Add(customerOne);
+                repository.Add(customerTwo);
+                await repository.SaveChangesAsync();
 
                 //Assert
-                await using (var context = new CustomerMngtContext(options))
-                {
-                    var repository = new CustomerRepository(context);
-                    var filter = new CustomerFilter {Email = "test"};
-                    var result = await repository.GetListByFilterAsync(filter);
-                    Assert.Equal(2, result.Count);
-                }
+                var filter = new CustomerFilter {Email = "test"};
+                var result = await repository.GetListByFilterAsync(filter);
+                Assert.Equal(2, result.Count);
             }
             finally
             {
@@ -75,17 +66,15 @@ namespace CF.Test.Customer.Repository
         [Fact]
         public async Task GetTest()
         {
-            var connection = CreateSqliteConnection();
+            var connection = CreateSqLiteConnection();
             connection.Open();
 
             try
             {
                 var options = SetDbContextOptionsBuilder(connection);
 
-                await using (var context = new CustomerMngtContext(options))
-                {
-                    context.Database.EnsureCreated();
-                }
+                await using var context = new CustomerMngtContext(options);
+                Assert.True(await context.Database.EnsureCreatedAsync());
 
                 //Arrange
                 var customerOne = new CustomerMngt.Domain.Entities.Customer
@@ -99,21 +88,14 @@ namespace CF.Test.Customer.Repository
                 };
 
                 //Act
-                await using (var context = new CustomerMngtContext(options))
-                { 
-                    var repository = new CustomerRepository(context);
-                    await repository.AddAsync(customerOne);
-                    await repository.SaveChangesAsync();
-                }
+                var repository = new CustomerRepository(context);
+                repository.Add(customerOne);
+                await repository.SaveChangesAsync();
 
                 //Assert
-                await using (var context = new CustomerMngtContext(options))
-                {
-                    var repository = new CustomerRepository(context);
-                    var filter = new CustomerFilter {Email = "test1@test.com"};
-                    var result = await repository.GetByFilterAsync(filter);
-                    Assert.Equal("test1@test.com", result.Email);
-                }
+                var filter = new CustomerFilter {Email = "test1@test.com"};
+                var result = await repository.GetByFilterAsync(filter);
+                Assert.Equal("test1@test.com", result.Email);
             }
             finally
             {
@@ -124,17 +106,15 @@ namespace CF.Test.Customer.Repository
         [Fact]
         public async Task CreateOkTest()
         {
-            var connection = CreateSqliteConnection();
+            var connection = CreateSqLiteConnection();
             connection.Open();
 
             try
             {
                 var options = SetDbContextOptionsBuilder(connection);
 
-                await using (var context = new CustomerMngtContext(options))
-                {
-                    context.Database.EnsureCreated();
-                }
+                await using var context = new CustomerMngtContext(options);
+                Assert.True(await context.Database.EnsureCreatedAsync());
 
                 //Arrange
                 var customer = new CustomerMngt.Domain.Entities.Customer
@@ -146,16 +126,14 @@ namespace CF.Test.Customer.Repository
                     Updated = DateTime.Now,
                     Created = DateTime.Now
                 };
-               
+
                 //Act
-                await using (var context = new CustomerMngtContext(options))
-                {
-                    var repository = new CustomerRepository(context);
-                    await repository.AddAsync(customer);
-                    var result = await repository.SaveChangesAsync();
-                    //Assert
-                    Assert.Equal(1, result);
-                }
+                var repository = new CustomerRepository(context);
+                repository.Add(customer);
+                var result = await repository.SaveChangesAsync();
+
+                //Assert
+                Assert.Equal(1, result);
             }
             finally
             {
@@ -166,17 +144,15 @@ namespace CF.Test.Customer.Repository
         [Fact]
         public async Task DeleteTest()
         {
-            var connection = CreateSqliteConnection();
+            var connection = CreateSqLiteConnection();
             connection.Open();
 
             try
             {
                 var options = SetDbContextOptionsBuilder(connection);
 
-                await using (var context = new CustomerMngtContext(options))
-                {
-                    context.Database.EnsureCreated();
-                }
+                await using var context = new CustomerMngtContext(options);
+                Assert.True(await context.Database.EnsureCreatedAsync());
 
                 //Arrange
                 var newCustomer = new CustomerMngt.Domain.Entities.Customer
@@ -190,30 +166,19 @@ namespace CF.Test.Customer.Repository
                 };
 
                 //Act
-                await using (var context = new CustomerMngtContext(options))
-                { 
-                    var repository = new CustomerRepository(context);
-                    await repository.AddAsync(newCustomer);
-                    await repository.SaveChangesAsync();
-                }
+                var repository = new CustomerRepository(context);
+                repository.Add(newCustomer);
+                await repository.SaveChangesAsync();
 
-                await using (var context = new CustomerMngtContext(options))
-                { 
-                    var repository = new CustomerRepository(context);
-                    var filterStored = new CustomerFilter {Id = newCustomer.Id};
-                    var storedCustomer = await repository.GetByFilterAsync(filterStored);
-                    repository.Remove(storedCustomer);
-                    await repository.SaveChangesAsync();
-                }
+                var filterStored = new CustomerFilter {Id = newCustomer.Id};
+                var storedCustomer = await repository.GetByFilterAsync(filterStored);
+                repository.Remove(storedCustomer);
+                await repository.SaveChangesAsync();
 
                 //Assert
-                await using (var context = new CustomerMngtContext(options))
-                {
-                    var filterNonExistentUser = new CustomerFilter {Id = newCustomer.Id};
-                    var repository = new CustomerRepository(context);
-                    var nonExistentUser = await repository.GetByFilterAsync(filterNonExistentUser);
-                    Assert.Null(nonExistentUser);
-                }
+                var filterNonExistentUser = new CustomerFilter {Id = newCustomer.Id};
+                var nonExistentUser = await repository.GetByFilterAsync(filterNonExistentUser);
+                Assert.Null(nonExistentUser);
             }
             finally
             {
@@ -224,17 +189,15 @@ namespace CF.Test.Customer.Repository
         [Fact]
         public async Task DuplicatedEmailTest()
         {
-            var connection = CreateSqliteConnection();
+            var connection = CreateSqLiteConnection();
             connection.Open();
 
             try
             {
                 var options = SetDbContextOptionsBuilder(connection);
 
-                await using (var context = new CustomerMngtContext(options))
-                {
-                    context.Database.EnsureCreated();
-                }
+                await using var context = new CustomerMngtContext(options);
+                Assert.True(await context.Database.EnsureCreatedAsync());
 
                 //Arrange
                 var customerOne = new CustomerMngt.Domain.Entities.Customer
@@ -256,21 +219,15 @@ namespace CF.Test.Customer.Repository
                 };
 
                 //Act
-                await using (var context = new CustomerMngtContext(options))
-                { 
-                    var repository = new CustomerRepository(context);
-                    await repository.AddAsync(customerOne);
-                    await repository.SaveChangesAsync();
-                }
+                var repository = new CustomerRepository(context);
+                repository.Add(customerOne);
+                await repository.SaveChangesAsync();
 
                 //Assert
-                await using (var context = new CustomerMngtContext(options))
-                { 
-                    var repository = new CustomerRepository(context);
-                    await repository.AddAsync(customerTwo);
-                    var exception = await Assert.ThrowsAsync<DbUpdateException>(() => repository.SaveChangesAsync());
-                    Assert.NotNull(exception);
-                }
+                repository.Add(customerTwo);
+                var exception =
+                    await Assert.ThrowsAsync<DbUpdateException>(() => repository.SaveChangesAsync());
+                Assert.NotNull(exception);
             }
             finally
             {
@@ -281,17 +238,15 @@ namespace CF.Test.Customer.Repository
         [Fact]
         public async Task CreateInvalidEmailTest()
         {
-            var connection = CreateSqliteConnection();
+            var connection = CreateSqLiteConnection();
             connection.Open();
 
             try
             {
                 var options = SetDbContextOptionsBuilder(connection);
 
-                await using (var context = new CustomerMngtContext(options))
-                {
-                    context.Database.EnsureCreated();
-                }
+                await using var context = new CustomerMngtContext(options);
+                Assert.True(await context.Database.EnsureCreatedAsync());
 
                 //Arrange
                 var customer = new CustomerMngt.Domain.Entities.Customer
@@ -302,17 +257,15 @@ namespace CF.Test.Customer.Repository
                     FirstName = "FirstName1",
                     Created = DateTime.Now
                 };
-               
+
                 //Act
-                await using (var context = new CustomerMngtContext(options))
-                {
-                    var repository = new CustomerRepository(context);
-                    await repository.AddAsync(customer);
-                    
-                    //Assert
-                    var exception = await Assert.ThrowsAsync<DbUpdateException>(() => repository.SaveChangesAsync());
-                    Assert.NotNull(exception);
-                }
+                var repository = new CustomerRepository(context);
+                repository.Add(customer);
+
+                //Assert
+                var exception =
+                    await Assert.ThrowsAsync<DbUpdateException>(() => repository.SaveChangesAsync());
+                Assert.NotNull(exception);
             }
             finally
             {
@@ -323,17 +276,15 @@ namespace CF.Test.Customer.Repository
         [Fact]
         public async Task CreateInvalidPasswordTest()
         {
-            var connection = CreateSqliteConnection();
+            var connection = CreateSqLiteConnection();
             connection.Open();
 
             try
             {
                 var options = SetDbContextOptionsBuilder(connection);
 
-                await using (var context = new CustomerMngtContext(options))
-                {
-                    context.Database.EnsureCreated();
-                }
+                await using var context = new CustomerMngtContext(options);
+                Assert.True(await context.Database.EnsureCreatedAsync());
 
                 //Arrange
                 var customer = new CustomerMngt.Domain.Entities.Customer
@@ -344,17 +295,15 @@ namespace CF.Test.Customer.Repository
                     FirstName = "FirstName1",
                     Created = DateTime.Now
                 };
-               
+
                 //Act
-                await using (var context = new CustomerMngtContext(options))
-                {
-                    var repository = new CustomerRepository(context);
-                    await repository.AddAsync(customer);
-                    
-                    //Assert
-                    var exception = await Assert.ThrowsAsync<DbUpdateException>(() => repository.SaveChangesAsync());
-                    Assert.NotNull(exception);
-                }
+                var repository = new CustomerRepository(context);
+                repository.Add(customer);
+
+                //Assert
+                var exception =
+                    await Assert.ThrowsAsync<DbUpdateException>(() => repository.SaveChangesAsync());
+                Assert.NotNull(exception);
             }
             finally
             {
@@ -365,17 +314,15 @@ namespace CF.Test.Customer.Repository
         [Fact]
         public async Task CreateInvalidFirstNameTest()
         {
-            var connection = CreateSqliteConnection();
+            var connection = CreateSqLiteConnection();
             connection.Open();
 
             try
             {
                 var options = SetDbContextOptionsBuilder(connection);
 
-                await using (var context = new CustomerMngtContext(options))
-                {
-                    context.Database.EnsureCreated();
-                }
+                await using var context = new CustomerMngtContext(options);
+                Assert.True(await context.Database.EnsureCreatedAsync());
 
                 //Arrange
                 var customer = new CustomerMngt.Domain.Entities.Customer
@@ -386,17 +333,15 @@ namespace CF.Test.Customer.Repository
                     FirstName = null,
                     Created = DateTime.Now
                 };
-               
+
                 //Act
-                await using (var context = new CustomerMngtContext(options))
-                {
-                    var repository = new CustomerRepository(context);
-                    await repository.AddAsync(customer);
-                    
-                    //Assert
-                    var exception = await Assert.ThrowsAsync<DbUpdateException>(() => repository.SaveChangesAsync());
-                    Assert.NotNull(exception);
-                }
+                var repository = new CustomerRepository(context);
+                repository.Add(customer);
+
+                //Assert
+                var exception =
+                    await Assert.ThrowsAsync<DbUpdateException>(() => repository.SaveChangesAsync());
+                Assert.NotNull(exception);
             }
             finally
             {
@@ -407,17 +352,15 @@ namespace CF.Test.Customer.Repository
         [Fact]
         public async Task CreateInvalidSurnameTest()
         {
-            var connection = CreateSqliteConnection();
+            var connection = CreateSqLiteConnection();
             connection.Open();
 
             try
             {
                 var options = SetDbContextOptionsBuilder(connection);
 
-                await using (var context = new CustomerMngtContext(options))
-                {
-                    context.Database.EnsureCreated();
-                }
+                await using var context = new CustomerMngtContext(options);
+                Assert.True(await context.Database.EnsureCreatedAsync());
 
                 //Arrange
                 var customer = new CustomerMngt.Domain.Entities.Customer
@@ -428,17 +371,15 @@ namespace CF.Test.Customer.Repository
                     FirstName = "FirstName",
                     Created = DateTime.Now
                 };
-               
+
                 //Act
-                await using (var context = new CustomerMngtContext(options))
-                {
-                    var repository = new CustomerRepository(context);
-                    await repository.AddAsync(customer);
-                
-                    //Assert
-                    var exception = await Assert.ThrowsAsync<DbUpdateException>(() => repository.SaveChangesAsync());
-                    Assert.NotNull(exception);
-                }
+
+                var repository = new CustomerRepository(context);
+                repository.Add(customer);
+
+                //Assert
+                var exception = await Assert.ThrowsAsync<DbUpdateException>(() => repository.SaveChangesAsync());
+                Assert.NotNull(exception);
             }
             finally
             {
@@ -453,7 +394,7 @@ namespace CF.Test.Customer.Repository
                 .Options;
         }
 
-        private static SqliteConnection CreateSqliteConnection()
+        private static SqliteConnection CreateSqLiteConnection()
         {
             return new SqliteConnection("DataSource=:memory:");
         }
