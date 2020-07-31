@@ -13,7 +13,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CF.CustomerMngt.Infrastruct
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CF.Test", "src\CF.Test\CF.Test.csproj", "{350D1AD3-B934-46DD-8E23-F95DF546E97E}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NewFolder1", "NewFolder1", "{FAD9F9C1-F3EE-4881-8A71-67F4EB69B1AA}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CustomerContext", "CustomerContext", "{FAD9F9C1-F3EE-4881-8A71-67F4EB69B1AA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -44,6 +44,11 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{40931CEC-045A-4E2F-8745-A76AD15FA53B} = {FAD9F9C1-F3EE-4881-8A71-67F4EB69B1AA}
+		{9F7F03FA-CD8C-436E-976F-AC624064E858} = {FAD9F9C1-F3EE-4881-8A71-67F4EB69B1AA}
+		{A981F9D2-ABEE-46C9-953D-1892E1E76BD5} = {FAD9F9C1-F3EE-4881-8A71-67F4EB69B1AA}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B8AAA169-2335-4252-AEC5-E5EE6A78E940}
