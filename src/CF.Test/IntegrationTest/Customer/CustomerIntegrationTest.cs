@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.WebUtilities;
 using Newtonsoft.Json;
 using Xunit;
 
-namespace CF.Test.Integration.Customer
+namespace CF.Test.IntegrationTest.Customer
 {
     public class CustomerIntegrationTest : IClassFixture<CustomWebApplicationFactory<Startup>>
     {

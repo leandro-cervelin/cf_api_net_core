@@ -3,14 +3,14 @@ using System.Linq;
 using System.Threading.Tasks;
 using CF.Api;
 using CF.CustomerMngt.Infrastructure.DbContext;
-using CF.Test.Integration.Seed;
+using CF.Test.IntegrationTest.Seed;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-namespace CF.Test.Integration
+namespace CF.Test.IntegrationTest
 {
     //for more about WebApplicationFactory: https://fullstackmark.com/post/20/painless-integration-testing-with-aspnet-core-web-api
     public class CustomWebApplicationFactory<TStartup> : WebApplicationFactory<Startup>

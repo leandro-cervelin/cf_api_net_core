@@ -9,7 +9,7 @@ using CF.CustomerMngt.Domain.Services;
 using Moq;
 using Xunit;
 
-namespace CF.Test.Customer.Domain
+namespace CF.Test.UnitTest.Domain
 {
     public class CustomerServiceTest
     {

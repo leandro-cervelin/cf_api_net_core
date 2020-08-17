@@ -10,7 +10,7 @@ using Moq;
 using Xunit;
 using Xunit.Sdk;
 
-namespace CF.Test.Customer.Facade
+namespace CF.Test.UnitTest.Facade
 {
     public class CustomerFacadeTest
     {
