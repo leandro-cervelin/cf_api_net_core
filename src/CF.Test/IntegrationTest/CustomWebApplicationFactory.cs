@@ -54,7 +54,7 @@ namespace CF.Test.IntegrationTest
                 try
                 {
                     // Seed the database with some specific test data.
-                    Task.Run(() => CustomerSeed.Populate(dbContext));
+                    Task.FromResult(CustomerSeed.Populate(dbContext));
                 }
                 catch (Exception ex)
                 {
