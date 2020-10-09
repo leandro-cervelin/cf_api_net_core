@@ -2,7 +2,7 @@
 
 namespace CF.CustomerMngt.Application.Dtos
 {
-    public class PaginationDto<TDto> where TDto: class 
+    public class PaginationDto<TDto> where TDto : class
     {
         public int CurrentPage { get; set; }
         public int Count { get; set; }

@@ -8,9 +8,9 @@ namespace CF.Api.Middlewares
 {
     public class ExceptionMiddleware
     {
-        private readonly RequestDelegate _next;
-        private readonly ILogger _logger;
         private readonly ICorrelationContextAccessor _correlationContext;
+        private readonly ILogger _logger;
+        private readonly RequestDelegate _next;
 
         public ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddleware> logger,
             ICorrelationContextAccessor correlationContext)
@@ -37,4 +37,3 @@ namespace CF.Api.Middlewares
         }
     }
 }
-

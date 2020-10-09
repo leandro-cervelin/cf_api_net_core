@@ -22,8 +22,7 @@ namespace CF.CustomerMngt.Infrastructure.Mappers
 
             CreateMap<Customer, CustomerResponseDto>()
                 .ForMember(dest => dest.FullName, opt => opt.Ignore())
-                .AfterMap((source, destination) => 
-                    { destination.FullName = source.GetFullName(); });
+                .AfterMap((source, destination) => { destination.FullName = source.GetFullName(); });
 
             CreateMap<CustomerFilterDto, CustomerFilter>();
 

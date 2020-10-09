@@ -24,7 +24,8 @@ namespace CF.CustomerMngt.Domain.Helpers.PasswordHasher
         public string Hash(string password)
         {
             if (!ValidatePassword(password))
-                throw new ValidationException("Password must be at least 8 characters and contain at 3 of 4 of the following: upper case (A-Z), lower case (a-z), number (0-9) and special character (e.g. !@#$%^&*).");
+                throw new ValidationException(
+                    "Password must be at least 8 characters and contain at 3 of 4 of the following: upper case (A-Z), lower case (a-z), number (0-9) and special character (e.g. !@#$%^&*).");
 
             using var algorithm = new Rfc2898DeriveBytes(
                 password,
@@ -42,10 +43,8 @@ namespace CF.CustomerMngt.Domain.Helpers.PasswordHasher
             var parts = hash.Split('.', 3);
 
             if (parts.Length != 3)
-            {
                 throw new FormatException(
                     "Unexpected hash format. Should be formatted as `{iterations}.{salt}.{hash}`");
-            }
 
             var iterations = Convert.ToInt32(parts[0]);
             var salt = Convert.FromBase64String(parts[1]);
@@ -67,7 +66,8 @@ namespace CF.CustomerMngt.Domain.Helpers.PasswordHasher
 
         public static bool ValidatePassword(string password)
         {
-            const string regex = @"^((?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])|(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[^a-zA-Z0-9])|(?=.*?[A-Z])(?=.*?[0-9])(?=.*?[^a-zA-Z0-9])|(?=.*?[a-z])(?=.*?[0-9])(?=.*?[^a-zA-Z0-9])).{8,}$";
+            const string regex =
+                @"^((?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])|(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[^a-zA-Z0-9])|(?=.*?[A-Z])(?=.*?[0-9])(?=.*?[^a-zA-Z0-9])|(?=.*?[a-z])(?=.*?[0-9])(?=.*?[^a-zA-Z0-9])).{8,}$";
             return Regex.IsMatch(password, regex, RegexOptions.IgnoreCase);
         }
     }

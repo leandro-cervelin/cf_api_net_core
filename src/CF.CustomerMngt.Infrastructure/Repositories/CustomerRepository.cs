@@ -36,39 +36,33 @@ namespace CF.CustomerMngt.Infrastructure.Repositories
         public async Task<List<Customer>> GetListByFilterAsync(CustomerFilter filter)
         {
             var query = DbContext.Customers.AsQueryable();
-            
+
             query = ApplyFilter(filter, query);
 
             query = ApplySorting(filter, query);
 
             if (filter.CurrentPage > 0)
                 query = query.Skip((filter.CurrentPage - 1) * filter.PageSize).Take(filter.PageSize);
-            
+
             return await query.ToListAsync();
         }
 
         private static IQueryable<Customer> ApplySorting(CustomerFilter filter, IQueryable<Customer> query)
         {
             if (filter?.OrderBy.ToLower() == "firstname")
-            {
                 query = filter.SortBy.ToLower() == "asc"
                     ? query.OrderBy(x => x.FirstName)
                     : query.OrderByDescending(x => x.FirstName);
-            }
 
             if (filter?.OrderBy.ToLower() == "surname")
-            {
                 query = filter.SortBy.ToLower() == "asc"
                     ? query.OrderBy(x => x.Surname)
                     : query.OrderByDescending(x => x.Surname);
-            }
 
             if (filter?.OrderBy.ToLower() == "email")
-            {
                 query = filter.SortBy.ToLower() == "asc"
                     ? query.OrderBy(x => x.Email)
                     : query.OrderByDescending(x => x.Email);
-            }
 
             return query;
         }

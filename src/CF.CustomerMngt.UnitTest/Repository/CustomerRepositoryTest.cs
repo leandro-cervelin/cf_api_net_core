@@ -8,7 +8,7 @@ using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
 
-namespace CF.Test.UnitTest.Repository
+namespace CF.CustomerMngt.UnitTest.Repository
 {
     public class CustomerRepositoryTest
     {

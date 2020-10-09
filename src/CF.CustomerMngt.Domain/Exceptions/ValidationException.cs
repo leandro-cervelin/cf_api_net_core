@@ -3,7 +3,7 @@
 namespace CF.CustomerMngt.Domain.Exceptions
 {
     /// <summary>
-    /// Thrown when an entity cannot be found with a given id from the data layer
+    ///     Thrown when an entity cannot be found with a given id from the data layer
     /// </summary>
     public class ValidationException : Exception
     {
@@ -14,7 +14,7 @@ namespace CF.CustomerMngt.Domain.Exceptions
         public ValidationException(string message) : base(message)
         {
         }
-        
+
         public ValidationException(string message, Exception innerException) : base(message, innerException)
         {
         }

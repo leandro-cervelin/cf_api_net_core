@@ -3,7 +3,7 @@
 namespace CF.CustomerMngt.Domain.Exceptions
 {
     /// <summary>
-    /// Thrown when an entity cannot be found with a given id from the data layer
+    ///     Thrown when an entity cannot be found with a given id from the data layer
     /// </summary>
     public class EntityNotFoundException : Exception
     {

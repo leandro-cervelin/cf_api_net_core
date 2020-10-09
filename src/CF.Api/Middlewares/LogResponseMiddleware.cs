@@ -7,11 +7,12 @@ namespace CF.Api.Middlewares
 {
     public class LogResponseMiddleware
     {
-        private readonly RequestDelegate _next;
-        private readonly ILogger _logger;
         private readonly ICorrelationContextAccessor _correlationContext;
+        private readonly ILogger _logger;
+        private readonly RequestDelegate _next;
 
-        public LogResponseMiddleware(RequestDelegate next, ILogger<LogResponseMiddleware> logger, ICorrelationContextAccessor correlationContext)
+        public LogResponseMiddleware(RequestDelegate next, ILogger<LogResponseMiddleware> logger,
+            ICorrelationContextAccessor correlationContext)
         {
             _next = next;
             _logger = logger;
@@ -23,7 +24,7 @@ namespace CF.Api.Middlewares
             var correlationId = _correlationContext.CorrelationContext.CorrelationId;
 
             _logger.LogInformation($"StatusCode: {context.Response.StatusCode}. (CorrelationId: {correlationId})");
-            
+
             await _next(context);
         }
     }

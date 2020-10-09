@@ -8,7 +8,7 @@ using CF.CustomerMngt.Domain.Services.Interfaces;
 
 namespace CF.CustomerMngt.Application.Facades
 {
-    public class CustomerFacade : ICustomerFacade 
+    public class CustomerFacade : ICustomerFacade
     {
         private readonly ICustomerService _customerService;
         private readonly IMapper _mapper;
@@ -63,4 +63,3 @@ namespace CF.CustomerMngt.Application.Facades
         }
     }
 }
-

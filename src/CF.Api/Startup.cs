@@ -44,7 +44,7 @@ namespace CF.Api
             services.AddDefaultCorrelationId();
             services.AddControllers();
             services.AddAutoMapper(typeof(CustomerMngtProfile));
-            
+
             services.Configure<GzipCompressionProviderOptions>(options => options.Level = CompressionLevel.Optimal);
             services.AddResponseCompression(options => { options.Providers.Add<GzipCompressionProvider>(); });
 
@@ -77,10 +77,7 @@ namespace CF.Api
             app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", "CF API V1"); });
             app.UseHttpsRedirection();
             app.UseRouting();
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllers();
-            });
+            app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
 
             RunMigration(app);
         }

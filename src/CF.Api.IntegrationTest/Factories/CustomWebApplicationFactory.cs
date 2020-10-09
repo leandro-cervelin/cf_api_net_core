@@ -1,16 +1,16 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using CF.Api;
+using CF.Api.IntegrationTest.Seeds;
 using CF.CustomerMngt.Infrastructure.DbContext;
-using CF.Test.IntegrationTest.Seed;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-namespace CF.Test.IntegrationTest
+namespace CF.Api.IntegrationTest.Factories
 {
     //for more about WebApplicationFactory: https://fullstackmark.com/post/20/painless-integration-testing-with-aspnet-core-web-api
     public class CustomWebApplicationFactory<TStartup> : WebApplicationFactory<Startup>
@@ -21,10 +21,13 @@ namespace CF.Test.IntegrationTest
         {
             builder.ConfigureServices(services =>
             {
-                // Removing Existing Db Context
-                var descriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<CustomerMngtContext>));
-                if (descriptor != null)
-                    services.Remove(descriptor);
+                // Removing Existing Registrations
+                var registrationsTypeToRemove = new List<Type>
+                {
+                    typeof(DbContextOptions<CustomerMngtContext>)
+                };
+
+                RemoveRegistrations(services, registrationsTypeToRemove);
 
                 // CreateAsync a new service provider.
                 var serviceProvider = new ServiceCollection()
@@ -58,9 +61,22 @@ namespace CF.Test.IntegrationTest
                 }
                 catch (Exception ex)
                 {
-                    logger.LogError(ex, $"An error occurred seeding the database with test messages. Error: {ex.Message}");
+                    logger.LogError(
+                        "An error occurred seeding the database with test messages. Error: {ex.Message}, {ex}",
+                        ex.Message, ex);
                 }
             });
+        }
+
+        protected static void RemoveRegistration(IServiceCollection services, Type type)
+        {
+            var currentRegistration = services.FirstOrDefault(c => c.ServiceType == type);
+            if (currentRegistration != null) services.Remove(currentRegistration);
+        }
+
+        protected static void RemoveRegistrations(IServiceCollection services, IEnumerable<Type> types)
+        {
+            foreach (var type in types) RemoveRegistration(services, type);
         }
     }
 }

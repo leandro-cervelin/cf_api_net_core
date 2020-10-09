@@ -8,9 +8,9 @@ namespace CF.Api.Middlewares
 {
     public class LogRequestMiddleware
     {
-        private readonly RequestDelegate _next;
-        private readonly ILogger _logger;
         private readonly ICorrelationContextAccessor _correlationContext;
+        private readonly ILogger _logger;
+        private readonly RequestDelegate _next;
 
         public LogRequestMiddleware(RequestDelegate next, ILogger<LogRequestMiddleware> logger,
             ICorrelationContextAccessor correlationContext)
@@ -23,7 +23,7 @@ namespace CF.Api.Middlewares
         public async Task Invoke(HttpContext context)
         {
             var url = context.Request.GetDisplayUrl();
-           
+
             var correlationId = _correlationContext.CorrelationContext.CorrelationId;
 
             _logger.LogInformation(
@@ -33,9 +33,8 @@ namespace CF.Api.Middlewares
                 $"Method: {context.Request.Method}, " +
                 $"Url: {url}, " +
                 $"CorrelationId: {correlationId}");
-            
+
             await _next(context);
         }
     }
 }
-

@@ -4,24 +4,23 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using CF.Api;
+using CF.Api.IntegrationTest.Factories;
 using CF.CustomerMngt.Application.Dtos;
 using Microsoft.AspNetCore.WebUtilities;
 using Newtonsoft.Json;
 using Xunit;
 
-namespace CF.Test.IntegrationTest.Customer
+namespace CF.Api.IntegrationTest
 {
     public class CustomerIntegrationTest : IClassFixture<CustomWebApplicationFactory<Startup>>
     {
+        private const string CustomerUrl = "api/v1/customer";
         private readonly CustomWebApplicationFactory<Startup> _factory;
 
         public CustomerIntegrationTest(CustomWebApplicationFactory<Startup> factory)
         {
             _factory = factory;
         }
-
-        private const string CustomerUrl = "api/v1/customer";
 
         [Fact]
         public async Task CreateCustomerOkTest()
@@ -336,7 +335,8 @@ namespace CF.Test.IntegrationTest.Customer
             client = _factory.CreateClient();
             var getResponse = await client.GetAsync(createResponse.Headers.Location.ToString());
             Assert.True(getResponse.StatusCode == HttpStatusCode.OK);
-            var customer = JsonConvert.DeserializeObject<CustomerResponseDto>(await getResponse.Content.ReadAsStringAsync());
+            var customer =
+                JsonConvert.DeserializeObject<CustomerResponseDto>(await getResponse.Content.ReadAsStringAsync());
 
             dto.FirstName = "New Name";
             var contentUpdate = await CreateStringContent(dto);
@@ -371,12 +371,13 @@ namespace CF.Test.IntegrationTest.Customer
             var createCustomerTwoResponse = await client.PostAsync(CustomerUrl, contentCustomerTwo);
             Assert.True(createCustomerTwoResponse.StatusCode == HttpStatusCode.Created);
 
-            var parameters = new Dictionary<string, string> { { "email", dto.Email } };
+            var parameters = new Dictionary<string, string> {{"email", dto.Email}};
             var requestUri = QueryHelpers.AddQueryString(CustomerUrl, parameters);
             client = _factory.CreateClient();
             var getResponse = await client.GetAsync(requestUri);
             Assert.True(getResponse.StatusCode == HttpStatusCode.OK);
-            var customer = JsonConvert.DeserializeObject<CustomerResponseDto>(await getResponse.Content.ReadAsStringAsync());
+            var customer =
+                JsonConvert.DeserializeObject<CustomerResponseDto>(await getResponse.Content.ReadAsStringAsync());
 
             dto.Email = customerOneEmail;
             var content = await CreateStringContent(dto);
@@ -398,7 +399,7 @@ namespace CF.Test.IntegrationTest.Customer
                 Password = "Password1@",
                 ConfirmPassword = "Password1@"
             };
-            
+
             var content = await CreateStringContent(dto);
             var client = _factory.CreateClient();
             var response = await client.PostAsync(CustomerUrl, content);
@@ -446,7 +447,9 @@ namespace CF.Test.IntegrationTest.Customer
             client = _factory.CreateClient();
             var getResponse = await client.GetAsync(requestUri);
             Assert.True(getResponse.StatusCode == HttpStatusCode.OK);
-            var customers = JsonConvert.DeserializeObject<PaginationDto<CustomerResponseDto>>(await getResponse.Content.ReadAsStringAsync());
+            var customers =
+                JsonConvert.DeserializeObject<PaginationDto<CustomerResponseDto>>(
+                    await getResponse.Content.ReadAsStringAsync());
             Assert.True(customers.Count > 1);
         }
 
@@ -465,7 +468,7 @@ namespace CF.Test.IntegrationTest.Customer
             };
 
             var content = await CreateStringContent(dto);
-            
+
             var client = _factory.CreateClient();
             var response = await client.PostAsync(CustomerUrl, content);
             Assert.True(response.StatusCode == HttpStatusCode.Created);
@@ -473,7 +476,8 @@ namespace CF.Test.IntegrationTest.Customer
             client = _factory.CreateClient();
             var getResponse = await client.GetAsync(response.Headers.Location.ToString());
             Assert.True(getResponse.StatusCode == HttpStatusCode.OK);
-            var customer = JsonConvert.DeserializeObject<CustomerResponseDto>(await getResponse.Content.ReadAsStringAsync());
+            var customer =
+                JsonConvert.DeserializeObject<CustomerResponseDto>(await getResponse.Content.ReadAsStringAsync());
 
             client = _factory.CreateClient();
             var deleteResponse = await client.DeleteAsync($"{CustomerUrl}/{customer.Id}");

@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Text.RegularExpressions;
-using CF.CustomerMngt.Domain.Exceptions;
 
 namespace CF.CustomerMngt.Domain.Entities
 {

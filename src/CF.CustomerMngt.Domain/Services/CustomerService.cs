@@ -26,7 +26,7 @@ namespace CF.CustomerMngt.Domain.Services
                 throw new ValidationException("Filter is null.");
 
             if (filter.PageSize > 100)
-                throw new ValidationException( "Maximum allowed page size is 100.");
+                throw new ValidationException("Maximum allowed page size is 100.");
 
             if (filter.CurrentPage <= 0) filter.PageSize = 1;
 
@@ -61,10 +61,10 @@ namespace CF.CustomerMngt.Domain.Services
 
             if (customer == null)
                 throw new ValidationException("Customer is null.");
-            
+
             var entity = await _customerRepository.GetByIdAsync(id);
 
-            if (entity == null) 
+            if (entity == null)
                 throw new EntityNotFoundException(id);
 
             Validate(customer);
@@ -92,7 +92,7 @@ namespace CF.CustomerMngt.Domain.Services
 
             var isAvailableEmail = await IsAvailableEmailAsync(customer.Email);
             if (!isAvailableEmail) throw new ValidationException("Email is not available.");
-            
+
             customer.Password = _passwordHasher.Hash(customer.Password);
             customer.SetCreatedDate();
             _customerRepository.Add(customer);
