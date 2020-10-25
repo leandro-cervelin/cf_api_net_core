@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using CF.Api.IntegrationTest.Seeds;
-using CF.CustomerMngt.Infrastructure.DbContext;
+using CF.Customer.Infrastructure.DbContext;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
@@ -24,7 +24,7 @@ namespace CF.Api.IntegrationTest.Factories
                 // Removing Existing Registrations
                 var registrationsTypeToRemove = new List<Type>
                 {
-                    typeof(DbContextOptions<CustomerMngtContext>)
+                    typeof(DbContextOptions<CustomerContext>)
                 };
 
                 RemoveRegistrations(services, registrationsTypeToRemove);
@@ -35,7 +35,7 @@ namespace CF.Api.IntegrationTest.Factories
                     .BuildServiceProvider();
 
                 // Add a database context (AppDbContext) using an in-memory database for testing.
-                services.AddDbContext<CustomerMngtContext>(options =>
+                services.AddDbContext<CustomerContext>(options =>
                 {
                     options.UseSqlite(_connectionString);
                     options.UseInternalServiceProvider(serviceProvider);
@@ -47,7 +47,7 @@ namespace CF.Api.IntegrationTest.Factories
                 // CreateAsync a scope to obtain a reference to the database contexts
                 using var scope = buildServiceProvider.CreateScope();
                 var scopedServices = scope.ServiceProvider;
-                var dbContext = scopedServices.GetRequiredService<CustomerMngtContext>();
+                var dbContext = scopedServices.GetRequiredService<CustomerContext>();
 
                 var logger = scopedServices.GetRequiredService<ILogger<CustomWebApplicationFactory<TStartup>>>();
 

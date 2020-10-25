@@ -1,8 +1,8 @@
 ﻿using System.Net;
 using System.Threading.Tasks;
-using CF.CustomerMngt.Application.Dtos;
-using CF.CustomerMngt.Application.Facades.Interfaces;
-using CF.CustomerMngt.Domain.Exceptions;
+using CF.Customer.Application.Dtos;
+using CF.Customer.Application.Facades.Interfaces;
+using CF.Customer.Domain.Exceptions;
 using CorrelationId.Abstractions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;

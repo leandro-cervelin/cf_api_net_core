@@ -1,16 +1,16 @@
 ﻿using System.IO.Compression;
 using System.Linq;
 using AutoMapper;
-using CF.Api.Middlewares;
-using CF.CustomerMngt.Application.Facades;
-using CF.CustomerMngt.Application.Facades.Interfaces;
-using CF.CustomerMngt.Domain.Helpers.PasswordHasher;
-using CF.CustomerMngt.Domain.Repositories;
-using CF.CustomerMngt.Domain.Services;
-using CF.CustomerMngt.Domain.Services.Interfaces;
-using CF.CustomerMngt.Infrastructure.DbContext;
-using CF.CustomerMngt.Infrastructure.Mappers;
-using CF.CustomerMngt.Infrastructure.Repositories;
+using CF.Api.Middleware;
+using CF.Customer.Application.Facades;
+using CF.Customer.Application.Facades.Interfaces;
+using CF.Customer.Domain.Helpers.PasswordHasher;
+using CF.Customer.Domain.Repositories;
+using CF.Customer.Domain.Services;
+using CF.Customer.Domain.Services.Interfaces;
+using CF.Customer.Infrastructure.DbContext;
+using CF.Customer.Infrastructure.Mappers;
+using CF.Customer.Infrastructure.Repositories;
 using CorrelationId;
 using CorrelationId.DependencyInjection;
 using Microsoft.AspNetCore.Builder;
@@ -43,12 +43,12 @@ namespace CF.Api
             services.AddSwaggerGen(c => { c.SwaggerDoc("v1", new OpenApiInfo {Title = "CF API", Version = "v1"}); });
             services.AddDefaultCorrelationId();
             services.AddControllers();
-            services.AddAutoMapper(typeof(CustomerMngtProfile));
+            services.AddAutoMapper(typeof(CustomerProfile));
 
             services.Configure<GzipCompressionProviderOptions>(options => options.Level = CompressionLevel.Optimal);
             services.AddResponseCompression(options => { options.Providers.Add<GzipCompressionProvider>(); });
 
-            services.AddDbContext<CustomerMngtContext>(options =>
+            services.AddDbContext<CustomerContext>(options =>
             {
                 options.UseSqlServer(Configuration.GetConnectionString("DbConnection"),
                     a => { a.MigrationsAssembly("CF.Api"); });
@@ -85,8 +85,8 @@ namespace CF.Api
         private static void RunMigration(IApplicationBuilder app)
         {
             using var serviceScope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope();
-            if (serviceScope.ServiceProvider.GetService<CustomerMngtContext>().Database.GetPendingMigrations().Any())
-                serviceScope.ServiceProvider.GetService<CustomerMngtContext>().Database.Migrate();
+            if (serviceScope.ServiceProvider.GetService<CustomerContext>().Database.GetPendingMigrations().Any())
+                serviceScope.ServiceProvider.GetService<CustomerContext>().Database.Migrate();
         }
     }
 }

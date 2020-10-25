@@ -5,17 +5,17 @@ VisualStudioVersion = 16.0.28922.388
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CF.Api", "src\CF.Api\CF.Api.csproj", "{AE02CD1D-9F37-495A-B32F-1317B2F42022}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CF.CustomerMngt.Application", "src\CF.CustomerMngt.Application\CF.CustomerMngt.Application.csproj", "{40931CEC-045A-4E2F-8745-A76AD15FA53B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CF.Customer.Application", "src\CF.Customer.Application\CF.Customer.Application.csproj", "{40931CEC-045A-4E2F-8745-A76AD15FA53B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CF.CustomerMngt.Domain", "src\CF.CustomerMngt.Domain\CF.CustomerMngt.Domain.csproj", "{9F7F03FA-CD8C-436E-976F-AC624064E858}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CF.Customer.Domain", "src\CF.Customer.Domain\CF.Customer.Domain.csproj", "{9F7F03FA-CD8C-436E-976F-AC624064E858}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CF.CustomerMngt.Infrastructure", "src\CF.CustomerMngt.Infrastructure\CF.CustomerMngt.Infrastructure.csproj", "{A981F9D2-ABEE-46C9-953D-1892E1E76BD5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CF.Customer.Infrastructure", "src\CF.Customer.Infrastructure\CF.Customer.Infrastructure.csproj", "{A981F9D2-ABEE-46C9-953D-1892E1E76BD5}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CustomerContext", "CustomerContext", "{FAD9F9C1-F3EE-4881-8A71-67F4EB69B1AA}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Customer", "Customer", "{FAD9F9C1-F3EE-4881-8A71-67F4EB69B1AA}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CF.Api.IntegrationTest", "src\CF.Api.IntegrationTest\CF.Api.IntegrationTest.csproj", "{5E1B70C7-7B83-45B0-97B9-9217AA1E361C}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CF.CustomerMngt.UnitTest", "src\CF.CustomerMngt.UnitTest\CF.CustomerMngt.UnitTest.csproj", "{6C787844-6222-4D34-B8ED-813A39E468EA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CF.Customer.UnitTest", "src\CF.Customer.UnitTest\CF.Customer.UnitTest.csproj", "{6C787844-6222-4D34-B8ED-813A39E468EA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
