@@ -28,7 +28,7 @@ namespace CF.Api.Middleware
 
             _logger.LogInformation(
                 "Scheme: {scheme}, Host: {host}, Path: {path}, Method: {method}, url: {url}, correlationId: {correlationId}",
-                context.Request?.Scheme, context.Request?.Host, context.Request?.Path, context.Request?.Method, url,
+                context.Request.Scheme, context.Request.Host, context.Request.Path, context.Request.Method, url,
                 correlationId);
 
             await _next(context);

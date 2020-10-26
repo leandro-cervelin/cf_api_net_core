@@ -24,7 +24,7 @@ namespace CF.Api.Middleware
             var correlationId = _correlationContext.CorrelationContext.CorrelationId;
 
             _logger.LogInformation("StatusCode: {statusCode}. (CorrelationId: {correlationId})",
-                context?.Response?.StatusCode, correlationId);
+                context.Response.StatusCode, correlationId);
 
             await _next(context);
         }

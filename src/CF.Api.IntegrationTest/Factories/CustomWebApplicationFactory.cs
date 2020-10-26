@@ -12,7 +12,6 @@ using Microsoft.Extensions.Logging;
 
 namespace CF.Api.IntegrationTest.Factories
 {
-    //for more about WebApplicationFactory: https://fullstackmark.com/post/20/painless-integration-testing-with-aspnet-core-web-api
     public class CustomWebApplicationFactory<TStartup> : WebApplicationFactory<Startup>
     {
         private readonly string _connectionString = $"DataSource={Guid.NewGuid()}.db";

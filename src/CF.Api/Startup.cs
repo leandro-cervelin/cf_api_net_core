@@ -85,8 +85,10 @@ namespace CF.Api
         private static void RunMigration(IApplicationBuilder app)
         {
             using var serviceScope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope();
-            if (serviceScope.ServiceProvider.GetService<CustomerContext>().Database.GetPendingMigrations().Any())
-                serviceScope.ServiceProvider.GetService<CustomerContext>().Database.Migrate();
+            var context = serviceScope.ServiceProvider.GetService<CustomerContext>();
+            if (context == null) return;
+            if (context.Database.GetPendingMigrations().Any())
+                context.Database.Migrate();
         }
     }
 }
