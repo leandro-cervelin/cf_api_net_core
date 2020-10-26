@@ -17,29 +17,26 @@ namespace CF.Customer.Infrastructure.DbContext
 
         private static void CustomerModelBuilder(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Domain.Entities.Customer>().ToTable("Customer");
+            var model = modelBuilder.Entity<Domain.Entities.Customer>();
 
-            modelBuilder.Entity<Domain.Entities.Customer>()
-                .Property(x => x.Email)
+            model.ToTable("Customer");
+
+            model.Property(x => x.Email)
                 .HasMaxLength(100)
                 .IsRequired();
 
-            modelBuilder.Entity<Domain.Entities.Customer>()
-                .HasIndex(x => x.Email)
+            model.HasIndex(x => x.Email)
                 .IsUnique();
 
-            modelBuilder.Entity<Domain.Entities.Customer>()
-                .Property(x => x.FirstName)
+            model.Property(x => x.FirstName)
                 .HasMaxLength(100)
                 .IsRequired();
 
-            modelBuilder.Entity<Domain.Entities.Customer>()
-                .Property(x => x.Password)
+            model.Property(x => x.Password)
                 .HasMaxLength(2000)
                 .IsRequired();
 
-            modelBuilder.Entity<Domain.Entities.Customer>()
-                .Property(x => x.Surname)
+            model.Property(x => x.Surname)
                 .HasMaxLength(100)
                 .IsRequired();
         }

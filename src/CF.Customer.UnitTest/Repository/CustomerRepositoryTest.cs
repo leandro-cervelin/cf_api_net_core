@@ -53,7 +53,7 @@ namespace CF.Customer.UnitTest.Repository
                 await repository.SaveChangesAsync();
 
                 //Assert
-                var filter = new CustomerFilter {FirstName = "FirstName" };
+                var filter = new CustomerFilter {FirstName = "FirstName"};
                 var result = await repository.GetListByFilterAsync(filter);
                 Assert.Equal(2, result.Count);
             }

@@ -32,7 +32,7 @@ namespace CF.Api.Middleware
 
                 _logger.LogError(
                     "Exception Details: {message}, {innerException}, {stackTrace}, {fullException}. CorrelationId: {correlationId}",
-                e.Message, e.InnerException, e.StackTrace, e.ToString(), correlationId);
+                    e.Message, e.InnerException, e.StackTrace, e.ToString(), correlationId);
                 throw;
             }
         }

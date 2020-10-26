@@ -1,4 +1,5 @@
-﻿using System.IO.Compression;
+﻿using System;
+using System.IO.Compression;
 using System.Linq;
 using AutoMapper;
 using CF.Api.Middleware;
@@ -86,7 +87,7 @@ namespace CF.Api
         {
             using var serviceScope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope();
             var context = serviceScope.ServiceProvider.GetService<CustomerContext>();
-            if (context == null) return;
+            if (context == null) throw new ApplicationException("Invalid Context");
             if (context.Database.GetPendingMigrations().Any())
                 context.Database.Migrate();
         }

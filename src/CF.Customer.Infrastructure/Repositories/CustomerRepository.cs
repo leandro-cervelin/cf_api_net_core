@@ -73,7 +73,7 @@ namespace CF.Customer.Infrastructure.Repositories
                 query = query.Where(x => x.Id == filter.Id);
 
             if (!string.IsNullOrWhiteSpace(filter.FirstName))
-                query = query.Where(x => EF.Functions.Like(x.FirstName,$"%{filter.FirstName}%"));
+                query = query.Where(x => EF.Functions.Like(x.FirstName, $"%{filter.FirstName}%"));
 
             if (!string.IsNullOrWhiteSpace(filter.Surname))
                 query = query.Where(x => EF.Functions.Like(x.Surname, $"%{filter.Surname}%"));
