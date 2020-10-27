@@ -276,25 +276,6 @@ namespace CF.Api.IntegrationTest
         }
 
         [Fact]
-        public async Task CreateMaxLengthPasswordTest()
-        {
-            var dto = new CustomerRequestDto
-            {
-                FirstName = "Test First",
-                Surname = "Test Surname",
-                Email = CreateValidEmail(),
-                Password = "01234567901234567901234@Df",
-                ConfirmPassword = "01234567901234567901234@Df"
-            };
-
-            var content = await CreateStringContent(dto);
-            var client = _factory.CreateClient();
-            var response = await client.PostAsync(CustomerUrl, content);
-
-            Assert.True(response.StatusCode == HttpStatusCode.BadRequest);
-        }
-
-        [Fact]
         public async Task CreateInvalidPasswordTest()
         {
             var dto = new CustomerRequestDto

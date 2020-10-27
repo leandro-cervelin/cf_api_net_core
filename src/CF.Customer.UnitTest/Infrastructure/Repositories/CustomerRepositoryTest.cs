@@ -8,7 +8,7 @@ using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
 
-namespace CF.Customer.UnitTest.Repository
+namespace CF.Customer.UnitTest.Infrastructure.Repositories
 {
     public class CustomerRepositoryTest
     {
@@ -373,7 +373,6 @@ namespace CF.Customer.UnitTest.Repository
                 };
 
                 //Act
-
                 var repository = new CustomerRepository(context);
                 repository.Add(customer);
 

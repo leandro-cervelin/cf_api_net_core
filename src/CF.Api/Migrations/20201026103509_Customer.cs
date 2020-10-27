@@ -8,34 +8,31 @@ namespace CF.Api.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Customer",
-                columns: table => new
+                "Customer",
+                table => new
                 {
-                    Id = table.Column<long>(type: "bigint", nullable: false)
+                    Id = table.Column<long>("bigint", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Created = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Email = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    FirstName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    Password = table.Column<string>(type: "nvarchar(2000)", maxLength: 2000, nullable: false),
-                    Surname = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    Updated = table.Column<DateTime>(type: "datetime2", nullable: true)
+                    Created = table.Column<DateTime>("datetime2", nullable: false),
+                    Email = table.Column<string>("nvarchar(100)", maxLength: 100, nullable: false),
+                    FirstName = table.Column<string>("nvarchar(100)", maxLength: 100, nullable: false),
+                    Password = table.Column<string>("nvarchar(2000)", maxLength: 2000, nullable: false),
+                    Surname = table.Column<string>("nvarchar(100)", maxLength: 100, nullable: false),
+                    Updated = table.Column<DateTime>("datetime2", nullable: true)
                 },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Customer", x => x.Id);
-                });
+                constraints: table => { table.PrimaryKey("PK_Customer", x => x.Id); });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Customer_Email",
-                table: "Customer",
-                column: "Email",
+                "IX_Customer_Email",
+                "Customer",
+                "Email",
                 unique: true);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Customer");
+                "Customer");
         }
     }
 }

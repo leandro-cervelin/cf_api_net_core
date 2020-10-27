@@ -2,7 +2,6 @@
 using System.Threading.Tasks;
 using CF.Customer.Domain.Entities;
 using CF.Customer.Domain.Exceptions;
-using CF.Customer.Domain.Helpers.PasswordHasher;
 using CF.Customer.Domain.Models;
 using CF.Customer.Domain.Repositories;
 using CF.Customer.Domain.Services.Interfaces;
@@ -12,12 +11,12 @@ namespace CF.Customer.Domain.Services
     public class CustomerService : ICustomerService
     {
         private readonly ICustomerRepository _customerRepository;
-        private readonly IPasswordHasher _passwordHasher;
+        private readonly IPasswordHasherService _passwordHasherService;
 
-        public CustomerService(ICustomerRepository customerRepository, IPasswordHasher passwordHasher)
+        public CustomerService(ICustomerRepository customerRepository, IPasswordHasherService passwordHasherService)
         {
             _customerRepository = customerRepository;
-            _passwordHasher = passwordHasher;
+            _passwordHasherService = passwordHasherService;
         }
 
         public async Task<Pagination<Entities.Customer>> GetListByFilterAsync(CustomerFilter filter)
@@ -76,8 +75,8 @@ namespace CF.Customer.Domain.Services
             entity.FirstName = customer.FirstName;
             entity.Surname = customer.Surname;
 
-            var (verified, _) = _passwordHasher.Check(entity.Password, customer.Password);
-            if (!verified) entity.Password = _passwordHasher.Hash(customer.Password);
+            var (verified, _) = _passwordHasherService.Check(entity.Password, customer.Password);
+            if (!verified) entity.Password = _passwordHasherService.Hash(customer.Password);
 
             entity.SetUpdatedDate();
             await _customerRepository.SaveChangesAsync();
@@ -93,7 +92,7 @@ namespace CF.Customer.Domain.Services
             var isAvailableEmail = await IsAvailableEmailAsync(customer.Email);
             if (!isAvailableEmail) throw new ValidationException("Email is not available.");
 
-            customer.Password = _passwordHasher.Hash(customer.Password);
+            customer.Password = _passwordHasherService.Hash(customer.Password);
             customer.SetCreatedDate();
             _customerRepository.Add(customer);
             await _customerRepository.SaveChangesAsync();
@@ -122,7 +121,7 @@ namespace CF.Customer.Domain.Services
 
         private static void Validate(Entities.Customer customer)
         {
-            customer.ValidateFistName();
+            customer.ValidateFirstName();
 
             customer.ValidateSurname();
 

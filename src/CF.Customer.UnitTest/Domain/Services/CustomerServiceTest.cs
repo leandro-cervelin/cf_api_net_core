@@ -2,14 +2,14 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using CF.Customer.Domain.Exceptions;
-using CF.Customer.Domain.Helpers.PasswordHasher;
 using CF.Customer.Domain.Models;
 using CF.Customer.Domain.Repositories;
 using CF.Customer.Domain.Services;
+using CF.Customer.Domain.Services.Interfaces;
 using Moq;
 using Xunit;
 
-namespace CF.Customer.UnitTest.Domain
+namespace CF.Customer.UnitTest.Domain.Services
 {
     public class CustomerServiceTest
     {
@@ -30,7 +30,7 @@ namespace CF.Customer.UnitTest.Domain
 
             //Act
             var mockRepository = new Mock<ICustomerRepository>();
-            var mockPassword = new Mock<IPasswordHasher>();
+            var mockPassword = new Mock<IPasswordHasherService>();
             var filter = new CustomerFilter {Id = 1};
             mockRepository.Setup(x => x.GetByFilterAsync(filter)).ReturnsAsync(customer);
             var mockService = new CustomerService(mockRepository.Object, mockPassword.Object);
@@ -74,7 +74,7 @@ namespace CF.Customer.UnitTest.Domain
 
             //Act
             var mockRepository = new Mock<ICustomerRepository>();
-            var mockPassword = new Mock<IPasswordHasher>();
+            var mockPassword = new Mock<IPasswordHasherService>();
             var filter = new CustomerFilter {PageSize = 10, CurrentPage = 1};
             mockRepository.Setup(x => x.CountByFilterAsync(filter))
                 .ReturnsAsync(customers.Count);
@@ -101,7 +101,7 @@ namespace CF.Customer.UnitTest.Domain
 
             //Act
             var mockRepository = new Mock<ICustomerRepository>();
-            var mockPassword = new Mock<IPasswordHasher>();
+            var mockPassword = new Mock<IPasswordHasherService>();
             var mockService = new CustomerService(mockRepository.Object, mockPassword.Object);
             var exception = await Assert.ThrowsAsync<ValidationException>(() => mockService.CreateAsync(customer));
 
@@ -123,7 +123,7 @@ namespace CF.Customer.UnitTest.Domain
 
             //Act
             var mockRepository = new Mock<ICustomerRepository>();
-            var mockPassword = new Mock<IPasswordHasher>();
+            var mockPassword = new Mock<IPasswordHasherService>();
             var mockService = new CustomerService(mockRepository.Object, mockPassword.Object);
             var exception = await Assert.ThrowsAsync<ValidationException>(() => mockService.CreateAsync(customer));
 
@@ -146,7 +146,7 @@ namespace CF.Customer.UnitTest.Domain
 
             //Act
             var mockRepository = new Mock<ICustomerRepository>();
-            var mockPassword = new Mock<IPasswordHasher>();
+            var mockPassword = new Mock<IPasswordHasherService>();
             var mockService = new CustomerService(mockRepository.Object, mockPassword.Object);
             var exception = await Assert.ThrowsAsync<ValidationException>(() => mockService.CreateAsync(customer));
 
@@ -169,7 +169,7 @@ namespace CF.Customer.UnitTest.Domain
 
             //Act
             var mockRepository = new Mock<ICustomerRepository>();
-            var mockPassword = new Mock<IPasswordHasher>();
+            var mockPassword = new Mock<IPasswordHasherService>();
             var mockService = new CustomerService(mockRepository.Object, mockPassword.Object);
             var exception = await Assert.ThrowsAsync<ValidationException>(() => mockService.CreateAsync(customer));
 
@@ -192,7 +192,7 @@ namespace CF.Customer.UnitTest.Domain
 
             //Act
             var mockRepository = new Mock<ICustomerRepository>();
-            var mockPassword = new Mock<IPasswordHasher>();
+            var mockPassword = new Mock<IPasswordHasherService>();
             var mockService = new CustomerService(mockRepository.Object, mockPassword.Object);
             var exception = await Assert.ThrowsAsync<ValidationException>(() => mockService.CreateAsync(customer));
 
@@ -214,7 +214,7 @@ namespace CF.Customer.UnitTest.Domain
 
             //Act
             var mockRepository = new Mock<ICustomerRepository>();
-            var mockPassword = new Mock<IPasswordHasher>();
+            var mockPassword = new Mock<IPasswordHasherService>();
             var mockService = new CustomerService(mockRepository.Object, mockPassword.Object);
             var exception = await Assert.ThrowsAsync<ValidationException>(() => mockService.CreateAsync(customer));
 
@@ -236,7 +236,7 @@ namespace CF.Customer.UnitTest.Domain
 
             //Act
             var mockRepository = new Mock<ICustomerRepository>();
-            var mockPassword = new Mock<IPasswordHasher>();
+            var mockPassword = new Mock<IPasswordHasherService>();
             var mockService = new CustomerService(mockRepository.Object, mockPassword.Object);
             var exception = await Assert.ThrowsAsync<ValidationException>(() => mockService.CreateAsync(customer));
 
@@ -258,7 +258,7 @@ namespace CF.Customer.UnitTest.Domain
 
             //Act
             var mockRepository = new Mock<ICustomerRepository>();
-            var mockPassword = new Mock<IPasswordHasher>();
+            var mockPassword = new Mock<IPasswordHasherService>();
             var mockService = new CustomerService(mockRepository.Object, mockPassword.Object);
             var exception = await Assert.ThrowsAsync<ValidationException>(() => mockService.CreateAsync(customer));
 
@@ -281,29 +281,7 @@ namespace CF.Customer.UnitTest.Domain
 
             //Act
             var mockRepository = new Mock<ICustomerRepository>();
-            var mockPassword = new Mock<IPasswordHasher>();
-            var mockService = new CustomerService(mockRepository.Object, mockPassword.Object);
-            var exception = await Assert.ThrowsAsync<ValidationException>(() => mockService.CreateAsync(customer));
-
-            //Assert
-            Assert.NotNull(exception);
-        }
-
-        [Fact]
-        public async Task CreateInvalidPasswordMaxLengthTest()
-        {
-            //Arrange
-            var customer = new Customer.Domain.Entities.Customer
-            {
-                Password = "Password@0122222222222222222",
-                Email = "test1@test.com",
-                Surname = "Surname",
-                FirstName = "First Name"
-            };
-
-            //Act
-            var mockRepository = new Mock<ICustomerRepository>();
-            var mockPassword = new Mock<IPasswordHasher>();
+            var mockPassword = new Mock<IPasswordHasherService>();
             var mockService = new CustomerService(mockRepository.Object, mockPassword.Object);
             var exception = await Assert.ThrowsAsync<ValidationException>(() => mockService.CreateAsync(customer));
 
@@ -325,7 +303,7 @@ namespace CF.Customer.UnitTest.Domain
 
             //Act
             var mockRepository = new Mock<ICustomerRepository>();
-            var mockPassword = new Mock<IPasswordHasher>();
+            var mockPassword = new Mock<IPasswordHasherService>();
             var mockService = new CustomerService(mockRepository.Object, mockPassword.Object);
             var exception = await Assert.ThrowsAsync<ValidationException>(() => mockService.CreateAsync(customer));
 
@@ -348,7 +326,7 @@ namespace CF.Customer.UnitTest.Domain
 
             //Act
             var mockRepository = new Mock<ICustomerRepository>();
-            var mockPassword = new Mock<IPasswordHasher>();
+            var mockPassword = new Mock<IPasswordHasherService>();
             var mockService = new CustomerService(mockRepository.Object, mockPassword.Object);
             var exception = await Assert.ThrowsAsync<ValidationException>(() => mockService.UpdateAsync(id, customer));
 
@@ -364,7 +342,7 @@ namespace CF.Customer.UnitTest.Domain
 
             //Act
             var mockRepository = new Mock<ICustomerRepository>();
-            var mockPassword = new Mock<IPasswordHasher>();
+            var mockPassword = new Mock<IPasswordHasherService>();
             var mockService = new CustomerService(mockRepository.Object, mockPassword.Object);
             var exception = await Assert.ThrowsAsync<ValidationException>(() => mockService.UpdateAsync(id, null));
 
@@ -389,7 +367,7 @@ namespace CF.Customer.UnitTest.Domain
 
             //Act
             var mockRepository = new Mock<ICustomerRepository>();
-            var mockPassword = new Mock<IPasswordHasher>();
+            var mockPassword = new Mock<IPasswordHasherService>();
             var mockService = new CustomerService(mockRepository.Object, mockPassword.Object);
             var exception =
                 await Assert.ThrowsAsync<EntityNotFoundException>(() => mockService.UpdateAsync(id, customer));
@@ -406,7 +384,7 @@ namespace CF.Customer.UnitTest.Domain
 
             //Act
             var mockRepository = new Mock<ICustomerRepository>();
-            var mockPassword = new Mock<IPasswordHasher>();
+            var mockPassword = new Mock<IPasswordHasherService>();
             var mockService = new CustomerService(mockRepository.Object, mockPassword.Object);
             var exception = await Assert.ThrowsAsync<ValidationException>(() => mockService.DeleteAsync(id));
 
@@ -422,7 +400,7 @@ namespace CF.Customer.UnitTest.Domain
 
             //Act
             var mockRepository = new Mock<ICustomerRepository>();
-            var mockPassword = new Mock<IPasswordHasher>();
+            var mockPassword = new Mock<IPasswordHasherService>();
             var mockService = new CustomerService(mockRepository.Object, mockPassword.Object);
             var exception = await Assert.ThrowsAsync<EntityNotFoundException>(() => mockService.DeleteAsync(id));
 
@@ -445,7 +423,7 @@ namespace CF.Customer.UnitTest.Domain
 
             //Act
             var mockRepository = new Mock<ICustomerRepository>();
-            var mockPassword = new Mock<IPasswordHasher>();
+            var mockPassword = new Mock<IPasswordHasherService>();
             var filter = new CustomerFilter {Email = customer.Email};
             mockRepository.Setup(x => x.GetByFilterAsync(filter)).ReturnsAsync(customer);
 

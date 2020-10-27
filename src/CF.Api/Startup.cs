@@ -5,7 +5,6 @@ using AutoMapper;
 using CF.Api.Middleware;
 using CF.Customer.Application.Facades;
 using CF.Customer.Application.Facades.Interfaces;
-using CF.Customer.Domain.Helpers.PasswordHasher;
 using CF.Customer.Domain.Repositories;
 using CF.Customer.Domain.Services;
 using CF.Customer.Domain.Services.Interfaces;
@@ -40,7 +39,7 @@ namespace CF.Api
             services.AddTransient<ICustomerFacade, CustomerFacade>();
             services.AddTransient<ICustomerService, CustomerService>();
             services.AddTransient<ICustomerRepository, CustomerRepository>();
-            services.AddSingleton<IPasswordHasher, PasswordHasher>();
+            services.AddSingleton<IPasswordHasherService, PasswordHasherServiceService>();
             services.AddSwaggerGen(c => { c.SwaggerDoc("v1", new OpenApiInfo {Title = "CF API", Version = "v1"}); });
             services.AddDefaultCorrelationId();
             services.AddControllers();

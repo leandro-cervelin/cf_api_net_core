@@ -26,9 +26,12 @@ namespace CF.Customer.Domain.Entities
             if (string.IsNullOrEmpty(customer.Password))
                 throw new ValidationException("The Password is required.");
 
-            if (customer.Password.Length < 8 || customer.Password.Length > 20)
+            const string regex =
+                @"^((?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])|(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[^a-zA-Z0-9])|(?=.*?[A-Z])(?=.*?[0-9])(?=.*?[^a-zA-Z0-9])|(?=.*?[a-z])(?=.*?[0-9])(?=.*?[^a-zA-Z0-9])).{8,}$";
+
+            if (!Regex.IsMatch(customer.Password, regex))
                 throw new ValidationException(
-                    "The Surname must be a string with a minimum length of 8 and a maximum length of 20.");
+                    "Password must be at least 8 characters and contain at 3 of the following: upper case (A-Z), lower case (a-z), number (0-9) and special character (e.g. !@#$%^&*).");
         }
 
         public static void ValidateEmail(this Customer customer)
@@ -52,7 +55,7 @@ namespace CF.Customer.Domain.Entities
                     "The Surname must be a string with a minimum length of 2 and a maximum length of 100.");
         }
 
-        public static void ValidateFistName(this Customer customer)
+        public static void ValidateFirstName(this Customer customer)
         {
             if (string.IsNullOrEmpty(customer.FirstName))
                 throw new ValidationException("The First Name is required.");

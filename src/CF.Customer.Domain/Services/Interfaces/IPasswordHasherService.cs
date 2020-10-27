@@ -1,6 +1,6 @@
-﻿namespace CF.Customer.Domain.Helpers.PasswordHasher
+﻿namespace CF.Customer.Domain.Services.Interfaces
 {
-    public interface IPasswordHasher
+    public interface IPasswordHasherService
     {
         string Hash(string password);
 
