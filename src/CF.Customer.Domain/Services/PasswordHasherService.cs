@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using System.Security.Cryptography;
-using System.Text.RegularExpressions;
 using CF.Customer.Domain.Services.Interfaces;
 
 namespace CF.Customer.Domain.Services
@@ -44,13 +43,6 @@ namespace CF.Customer.Domain.Services
             var verified = keyToCheck.SequenceEqual(key);
 
             return (verified, needsUpgrade);
-        }
-
-        public static bool ValidatePasswordRequirements(string password)
-        {
-            const string regex =
-                @"^((?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])|(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[^a-zA-Z0-9])|(?=.*?[A-Z])(?=.*?[0-9])(?=.*?[^a-zA-Z0-9])|(?=.*?[a-z])(?=.*?[0-9])(?=.*?[^a-zA-Z0-9])).{8,}$";
-            return Regex.IsMatch(password, regex);
         }
     }
 }
