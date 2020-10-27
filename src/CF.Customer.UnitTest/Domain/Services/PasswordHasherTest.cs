@@ -1,4 +1,5 @@
 ﻿using System;
+using CF.Customer.Domain.Exceptions;
 using CF.Customer.Domain.Services;
 using Xunit;
 
@@ -55,6 +56,23 @@ namespace CF.Customer.UnitTest.Domain.Services
             var hash = service.Hash(password).Replace("1000", "900");
             var (_, needsUpgrade) = service.Check(hash, password);
             Assert.True(needsUpgrade);
+        }
+
+        [Fact]
+        public void CheckUnexpectedHashFormatTest()
+        {
+            const string password = "Blah@!1894";
+            var service = new PasswordHasherServiceService();
+            var hash = service.Hash(password);
+            var hashSplit = hash.Split(".");
+
+            const string invalidUnexpectedHashFormatErrorMessage =
+                "Unexpected hash format. Should be formatted as '{iterations}.{salt}.{hash}'";
+
+            var invalidHash = $"{hashSplit[0]}.{hashSplit[1]}";
+
+            var exception = Assert.Throws<FormatException>(() => service.Check(invalidHash, password));
+            Assert.Equal(invalidUnexpectedHashFormatErrorMessage, exception.Message);
         }
     }
 }
