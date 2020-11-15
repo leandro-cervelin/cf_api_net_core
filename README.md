@@ -1,4 +1,4 @@
-![.NET Core](https://github.com/leandro-cervelin/cf_api_net_core/workflows/.NET%20Core/badge.svg)
+![.NET 5.0](https://github.com/leandro-cervelin/cf_api_net_core/workflows/.NET%205.0/badge.svg)
 # .NET 5.0 Example App / API
 ## .Net 5.0 API using SQL Server with Entity Framework Core
 ## Unit Tests and Integration Tests
