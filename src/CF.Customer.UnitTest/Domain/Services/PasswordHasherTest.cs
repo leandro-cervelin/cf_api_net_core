@@ -12,7 +12,7 @@ namespace CF.Customer.UnitTest.Domain.Services
         {
             //Arrange
             const string password = "Blah@!1894";
-            var service = new PasswordHasherServiceService();
+            var service = new PasswordHasherService();
 
             //Act
             var result = service.Hash(password);
@@ -30,7 +30,7 @@ namespace CF.Customer.UnitTest.Domain.Services
         public void CheckOkTest()
         {
             const string password = "Blah@!1894";
-            var service = new PasswordHasherServiceService();
+            var service = new PasswordHasherService();
             var hash = service.Hash(password);
             var (verified, needsUpgrade) = service.Check(hash, password);
             Assert.True(verified);
@@ -42,7 +42,7 @@ namespace CF.Customer.UnitTest.Domain.Services
         {
             const string password = "Blah@!1894";
             const string fakePassword = "Blah@!4981";
-            var service = new PasswordHasherServiceService();
+            var service = new PasswordHasherService();
             var hash = service.Hash(password);
             var (verified, _) = service.Check(hash, fakePassword);
             Assert.False(verified);
@@ -52,7 +52,7 @@ namespace CF.Customer.UnitTest.Domain.Services
         public void CheckNeedsUpgradeTest()
         {
             const string password = "Blah@!1894";
-            var service = new PasswordHasherServiceService();
+            var service = new PasswordHasherService();
             var hash = service.Hash(password).Replace("1000", "900");
             var (_, needsUpgrade) = service.Check(hash, password);
             Assert.True(needsUpgrade);
@@ -62,7 +62,7 @@ namespace CF.Customer.UnitTest.Domain.Services
         public void CheckUnexpectedHashFormatTest()
         {
             const string password = "Blah@!1894";
-            var service = new PasswordHasherServiceService();
+            var service = new PasswordHasherService();
             var hash = service.Hash(password);
             var hashSplit = hash.Split(".");
 

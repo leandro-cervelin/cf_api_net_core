@@ -2,15 +2,16 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using CF.Api.IntegrationTest.Seeds;
+using CF.Api;
 using CF.Customer.Infrastructure.DbContext;
+using CF.IntegrationTest.Seeds;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-namespace CF.Api.IntegrationTest.Factories
+namespace CF.IntegrationTest.Factories
 {
     public class CustomWebApplicationFactory<TStartup> : WebApplicationFactory<Startup>
     {

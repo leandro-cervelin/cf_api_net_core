@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using CF.Customer.Infrastructure.DbContext;
 
-namespace CF.Api.IntegrationTest.Seeds
+namespace CF.IntegrationTest.Seeds
 {
     public class CustomerSeed
     {

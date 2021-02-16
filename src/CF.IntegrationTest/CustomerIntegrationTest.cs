@@ -4,13 +4,14 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using CF.Api.IntegrationTest.Factories;
+using CF.Api;
 using CF.Customer.Application.Dtos;
+using CF.IntegrationTest.Factories;
 using Microsoft.AspNetCore.WebUtilities;
 using Newtonsoft.Json;
 using Xunit;
 
-namespace CF.Api.IntegrationTest
+namespace CF.IntegrationTest
 {
     public class CustomerIntegrationTest : IClassFixture<CustomWebApplicationFactory<Startup>>
     {

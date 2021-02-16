@@ -39,7 +39,7 @@ namespace CF.Api
             services.AddTransient<ICustomerFacade, CustomerFacade>();
             services.AddTransient<ICustomerService, CustomerService>();
             services.AddTransient<ICustomerRepository, CustomerRepository>();
-            services.AddSingleton<IPasswordHasherService, PasswordHasherServiceService>();
+            services.AddSingleton<IPasswordHasherService, PasswordHasherService>();
             services.AddSwaggerGen(c => { c.SwaggerDoc("v1", new OpenApiInfo {Title = "CF API", Version = "v1"}); });
             services.AddDefaultCorrelationId();
             services.AddControllers();
