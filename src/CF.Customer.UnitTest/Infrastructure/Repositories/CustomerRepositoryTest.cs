@@ -395,7 +395,7 @@ namespace CF.Customer.UnitTest.Infrastructure.Repositories
 
         private static SqliteConnection CreateSqLiteConnection()
         {
-            return new SqliteConnection("DataSource=:memory:");
+            return new("DataSource=:memory:");
         }
     }
 }

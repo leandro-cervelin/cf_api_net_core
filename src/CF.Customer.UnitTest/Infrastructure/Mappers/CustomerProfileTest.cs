@@ -13,7 +13,7 @@ namespace CF.Customer.UnitTest.Infrastructure.Mappers
     public class CustomerProfileTest
     {
         public MapperConfiguration MapperConfiguration =
-            new MapperConfiguration(cfg => cfg.AddProfile<CustomerProfile>());
+            new(cfg => cfg.AddProfile<CustomerProfile>());
 
         [Fact]
         public void CustomerRequestDtoToCustomer()
@@ -63,7 +63,7 @@ namespace CF.Customer.UnitTest.Infrastructure.Mappers
         {
             var customerList = new List<Customer.Domain.Entities.Customer>
             {
-                new Customer.Domain.Entities.Customer
+                new()
                 {
                     Surname = "Dickinson",
                     FirstName = "Bruce",

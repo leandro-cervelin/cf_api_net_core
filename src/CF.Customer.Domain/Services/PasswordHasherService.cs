@@ -8,7 +8,7 @@ namespace CF.Customer.Domain.Services
     /// <summary>
     ///     https://gist.github.com/edamtoft
     /// </summary>
-    public sealed class PasswordHasherService : IPasswordHasherService
+    public class PasswordHasherService : IPasswordHasherService
     {
         private const int SaltSize = 16; // 128 bit 
         private const int KeySize = 32; // 256 bit

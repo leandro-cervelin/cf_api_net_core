@@ -9,6 +9,6 @@ namespace CF.Customer.Domain.Models
         public int Count { get; set; }
         public int PageSize { get; set; } = 10;
         public int TotalPages => PageSize > 0 ? (int) Math.Ceiling(decimal.Divide(Count, PageSize)) : 1;
-        public List<T> Result { get; set; } = new List<T>();
+        public List<T> Result { get; set; } = new();
     }
 }

@@ -1,5 +1,4 @@
 ﻿using System;
-using CF.Customer.Domain.Exceptions;
 using CF.Customer.Domain.Services;
 using Xunit;
 
