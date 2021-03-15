@@ -120,7 +120,7 @@ namespace CF.IntegrationTest
             var client = _factory.CreateClient();
             var response = await client.PostAsync(CustomerUrl, content);
 
-            Assert.True(response.StatusCode == HttpStatusCode.BadRequest);
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         }
 
         [Fact]
@@ -139,7 +139,7 @@ namespace CF.IntegrationTest
             var client = _factory.CreateClient();
             var response = await client.PostAsync(CustomerUrl, content);
 
-            Assert.True(response.StatusCode == HttpStatusCode.BadRequest);
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         }
 
         [Fact]
@@ -159,7 +159,7 @@ namespace CF.IntegrationTest
             var client = _factory.CreateClient();
             var response = await client.PostAsync(CustomerUrl, content);
 
-            Assert.True(response.StatusCode == HttpStatusCode.BadRequest);
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         }
 
         [Fact]
@@ -178,7 +178,7 @@ namespace CF.IntegrationTest
             var client = _factory.CreateClient();
             var response = await client.PostAsync(CustomerUrl, content);
 
-            Assert.True(response.StatusCode == HttpStatusCode.BadRequest);
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         }
 
         [Fact]
@@ -198,7 +198,7 @@ namespace CF.IntegrationTest
             var client = _factory.CreateClient();
             var response = await client.PostAsync(CustomerUrl, content);
 
-            Assert.True(response.StatusCode == HttpStatusCode.BadRequest);
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         }
 
         [Fact]
@@ -217,7 +217,7 @@ namespace CF.IntegrationTest
             var client = _factory.CreateClient();
             var response = await client.PostAsync(CustomerUrl, content);
 
-            Assert.True(response.StatusCode == HttpStatusCode.BadRequest);
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         }
 
         [Fact]
@@ -235,7 +235,7 @@ namespace CF.IntegrationTest
             var client = _factory.CreateClient();
             var response = await client.PostAsync(CustomerUrl, content);
 
-            Assert.True(response.StatusCode == HttpStatusCode.BadRequest);
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         }
 
         [Fact]
@@ -254,7 +254,7 @@ namespace CF.IntegrationTest
             var client = _factory.CreateClient();
             var response = await client.PostAsync(CustomerUrl, content);
 
-            Assert.True(response.StatusCode == HttpStatusCode.BadRequest);
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         }
 
         [Fact]
@@ -273,7 +273,7 @@ namespace CF.IntegrationTest
             var client = _factory.CreateClient();
             var response = await client.PostAsync(CustomerUrl, content);
 
-            Assert.True(response.StatusCode == HttpStatusCode.BadRequest);
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         }
 
         [Fact]
@@ -292,7 +292,7 @@ namespace CF.IntegrationTest
             var client = _factory.CreateClient();
             var response = await client.PostAsync(CustomerUrl, content);
 
-            Assert.True(response.StatusCode == HttpStatusCode.BadRequest);
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         }
 
         [Fact]
@@ -312,11 +312,11 @@ namespace CF.IntegrationTest
             var content = await CreateStringContent(dto);
             var client = _factory.CreateClient();
             var createResponse = await client.PostAsync(CustomerUrl, content);
-            Assert.True(createResponse.StatusCode == HttpStatusCode.Created);
+            Assert.Equal(HttpStatusCode.Created, createResponse.StatusCode);
 
             client = _factory.CreateClient();
-            var getResponse = await client.GetAsync(createResponse.Headers.Location.ToString());
-            Assert.True(getResponse.StatusCode == HttpStatusCode.OK);
+            var getResponse = await client.GetAsync(createResponse.Headers.Location?.ToString());
+            Assert.Equal(HttpStatusCode.OK, getResponse.StatusCode);
             var customer =
                 JsonConvert.DeserializeObject<CustomerResponseDto>(await getResponse.Content.ReadAsStringAsync());
 
@@ -324,7 +324,7 @@ namespace CF.IntegrationTest
             var contentUpdate = await CreateStringContent(dto);
             var putResponse = await client.PutAsync($"{CustomerUrl}/{customer.Id}", contentUpdate);
             Assert.True(putResponse.IsSuccessStatusCode);
-            Assert.True(putResponse.StatusCode == HttpStatusCode.NoContent);
+            Assert.Equal(HttpStatusCode.NoContent, putResponse.StatusCode);
         }
 
         [Fact]
@@ -344,20 +344,20 @@ namespace CF.IntegrationTest
             var contentCustomerOne = await CreateStringContent(dto);
             var client = _factory.CreateClient();
             var createCustomerOneResponse = await client.PostAsync(CustomerUrl, contentCustomerOne);
-            Assert.True(createCustomerOneResponse.StatusCode == HttpStatusCode.Created);
+            Assert.Equal(HttpStatusCode.Created, createCustomerOneResponse.StatusCode);
 
             dto.Email = CreateValidEmail();
 
             var contentCustomerTwo = await CreateStringContent(dto);
             client = _factory.CreateClient();
             var createCustomerTwoResponse = await client.PostAsync(CustomerUrl, contentCustomerTwo);
-            Assert.True(createCustomerTwoResponse.StatusCode == HttpStatusCode.Created);
+            Assert.Equal(HttpStatusCode.Created, createCustomerTwoResponse.StatusCode);
 
             var parameters = new Dictionary<string, string> {{"email", dto.Email}};
             var requestUri = QueryHelpers.AddQueryString(CustomerUrl, parameters);
             client = _factory.CreateClient();
             var getResponse = await client.GetAsync(requestUri);
-            Assert.True(getResponse.StatusCode == HttpStatusCode.OK);
+            Assert.Equal(HttpStatusCode.OK, getResponse.StatusCode);
             var customer =
                 JsonConvert.DeserializeObject<CustomerResponseDto>(await getResponse.Content.ReadAsStringAsync());
 
@@ -365,7 +365,7 @@ namespace CF.IntegrationTest
             var content = await CreateStringContent(dto);
             client = _factory.CreateClient();
             var response = await client.PutAsync($"{CustomerUrl}/{customer.Id}", content);
-            Assert.True(response.StatusCode == HttpStatusCode.BadRequest);
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         }
 
         [Fact]
@@ -385,11 +385,11 @@ namespace CF.IntegrationTest
             var content = await CreateStringContent(dto);
             var client = _factory.CreateClient();
             var response = await client.PostAsync(CustomerUrl, content);
-            Assert.True(response.StatusCode == HttpStatusCode.Created);
+            Assert.Equal(HttpStatusCode.Created, response.StatusCode);
 
             client = _factory.CreateClient();
-            var getResponse = await client.GetAsync(response.Headers.Location.ToString());
-            Assert.True(getResponse.StatusCode == HttpStatusCode.OK);
+            var getResponse = await client.GetAsync(response.Headers.Location?.ToString());
+            Assert.Equal(HttpStatusCode.OK, getResponse.StatusCode);
         }
 
         [Fact]
@@ -407,13 +407,13 @@ namespace CF.IntegrationTest
             var content = await CreateStringContent(dto);
             var client = _factory.CreateClient();
             var response = await client.PostAsync(CustomerUrl, content);
-            Assert.True(response.StatusCode == HttpStatusCode.Created);
+            Assert.Equal(HttpStatusCode.Created, response.StatusCode);
 
             dto.Email = CreateValidEmail();
             var contentTwo = await CreateStringContent(dto);
             client = _factory.CreateClient();
             var responseTwo = await client.PostAsync(CustomerUrl, contentTwo);
-            Assert.True(responseTwo.StatusCode == HttpStatusCode.Created);
+            Assert.Equal(HttpStatusCode.Created, responseTwo.StatusCode);
 
 
             var parameters = new Dictionary<string, string>
@@ -428,7 +428,7 @@ namespace CF.IntegrationTest
 
             client = _factory.CreateClient();
             var getResponse = await client.GetAsync(requestUri);
-            Assert.True(getResponse.StatusCode == HttpStatusCode.OK);
+            Assert.Equal(HttpStatusCode.OK, getResponse.StatusCode);
             var customers =
                 JsonConvert.DeserializeObject<PaginationDto<CustomerResponseDto>>(
                     await getResponse.Content.ReadAsStringAsync());
@@ -453,17 +453,17 @@ namespace CF.IntegrationTest
 
             var client = _factory.CreateClient();
             var response = await client.PostAsync(CustomerUrl, content);
-            Assert.True(response.StatusCode == HttpStatusCode.Created);
+            Assert.Equal( HttpStatusCode.Created, response.StatusCode);
 
             client = _factory.CreateClient();
-            var getResponse = await client.GetAsync(response.Headers.Location.ToString());
-            Assert.True(getResponse.StatusCode == HttpStatusCode.OK);
+            var getResponse = await client.GetAsync(response.Headers.Location?.ToString());
+            Assert.Equal(HttpStatusCode.OK, getResponse.StatusCode);
             var customer =
                 JsonConvert.DeserializeObject<CustomerResponseDto>(await getResponse.Content.ReadAsStringAsync());
 
             client = _factory.CreateClient();
             var deleteResponse = await client.DeleteAsync($"{CustomerUrl}/{customer.Id}");
-            Assert.True(deleteResponse.StatusCode == HttpStatusCode.NoContent);
+            Assert.Equal(HttpStatusCode.NoContent, deleteResponse.StatusCode);
         }
 
         private static async Task<StringContent> CreateStringContent(CustomerRequestDto dto)
