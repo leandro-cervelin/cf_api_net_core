@@ -1,4 +1,4 @@
-![.NET 5.0](https://github.com/leandro-cervelin/cf_api_net_core/workflows/.NET%205.0/badge.svg)  ![CodeQL](https://github.com/leandro-cervelin/cf_api_net_core/workflows/CodeQL/badge.svg)
+[![.NET 6.0](https://github.com/leandro-cervelin/cf_api_net_core/actions/workflows/dotnet-core.yml/badge.svg)](https://github.com/leandro-cervelin/cf_api_net_core/actions/workflows/dotnet-core.yml)  [![CodeQL .NET 6.0](https://github.com/leandro-cervelin/cf_api_net_core/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/leandro-cervelin/cf_api_net_core/actions/workflows/codeql-analysis.yml)
 # .NET 6.0 Example App / API
 ## .Net 6.0 API using SQL Server with Entity Framework Core
 ## Unit Tests and Integration Tests
