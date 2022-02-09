@@ -37,9 +37,7 @@ public class CustomerController : ControllerBase
         }
         catch (ValidationException e)
         {
-            _logger.LogError(
-                "Exception Details: {message}, {innerException}, {stackTrace}. CorrelationId: {correlationId}",
-                e.Message, e.InnerException?.Message, e.StackTrace,
+            _logger.LogError(e, "Validation Exception Details. CorrelationId: {correlationId}",
                 _correlationContext.CorrelationContext.CorrelationId);
 
             return BadRequest(e.Message);
@@ -65,9 +63,7 @@ public class CustomerController : ControllerBase
         }
         catch (ValidationException e)
         {
-            _logger.LogError(
-                "Exception Details: {message}, {innerException}, {stackTrace}. CorrelationId: {correlationId}",
-                e.Message, e.InnerException?.Message, e.StackTrace,
+            _logger.LogError(e, "Validation Exception. CorrelationId: {correlationId}",
                 _correlationContext.CorrelationContext.CorrelationId);
 
             return BadRequest(e.Message);
@@ -89,9 +85,7 @@ public class CustomerController : ControllerBase
         }
         catch (ValidationException e)
         {
-            _logger.LogError(
-                "Exception Details: {message}, {innerException}, {stackTrace}. CorrelationId: {correlationId}",
-                e.Message, e.InnerException?.Message, e.StackTrace,
+            _logger.LogError(e, "Validation Exception. CorrelationId: {correlationId}",
                 _correlationContext.CorrelationContext.CorrelationId);
 
             return BadRequest(e.Message);
@@ -115,18 +109,14 @@ public class CustomerController : ControllerBase
         }
         catch (EntityNotFoundException e)
         {
-            _logger.LogError(
-                "Exception Details: {message}, {innerException}, {stackTrace}. CorrelationId: {correlationId}",
-                e.Message, e.InnerException?.Message, e.StackTrace,
+            _logger.LogError(e, "Entity Not Found Exception. CorrelationId: {correlationId}",
                 _correlationContext.CorrelationContext.CorrelationId);
 
             return NotFound();
         }
         catch (ValidationException e)
         {
-            _logger.LogError(
-                "Exception Details: {message}, {innerException}, {stackTrace}. CorrelationId: {correlationId}",
-                e.Message, e.InnerException?.Message, e.StackTrace,
+            _logger.LogError(e, "Validation Exception. CorrelationId: {correlationId}",
                 _correlationContext.CorrelationContext.CorrelationId);
 
             return BadRequest(e.Message);
@@ -149,18 +139,14 @@ public class CustomerController : ControllerBase
         }
         catch (EntityNotFoundException e)
         {
-            _logger.LogError(
-                "Exception Details: {message}, {innerException}, {stackTrace}. CorrelationId: {correlationId}",
-                e.Message, e.InnerException?.Message, e.StackTrace,
+            _logger.LogError(e, "Entity Not Found Exception. CorrelationId: {correlationId}",
                 _correlationContext.CorrelationContext.CorrelationId);
 
             return NotFound();
         }
         catch (ValidationException e)
         {
-            _logger.LogError(
-                "Exception Details: {message}, {innerException}, {stackTrace}. CorrelationId: {correlationId}",
-                e.Message, e.InnerException?.Message, e.StackTrace,
+            _logger.LogError(e, "Validation Exception. CorrelationId: {correlationId}",
                 _correlationContext.CorrelationContext.CorrelationId);
 
             return BadRequest(e.Message);

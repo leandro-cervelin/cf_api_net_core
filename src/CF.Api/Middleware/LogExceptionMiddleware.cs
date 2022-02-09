@@ -2,13 +2,13 @@
 
 namespace CF.Api.Middleware;
 
-public class ExceptionMiddleware
+public class LogExceptionMiddleware
 {
     private readonly ICorrelationContextAccessor _correlationContext;
     private readonly ILogger _logger;
     private readonly RequestDelegate _next;
 
-    public ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddleware> logger,
+    public LogExceptionMiddleware(RequestDelegate next, ILogger<LogExceptionMiddleware> logger,
         ICorrelationContextAccessor correlationContext)
     {
         _logger = logger;
@@ -25,10 +25,7 @@ public class ExceptionMiddleware
         catch (Exception e)
         {
             var correlationId = _correlationContext.CorrelationContext.CorrelationId;
-
-            _logger.LogError(
-                "Exception Details: {message}, {innerException}, {stackTrace}, {fullException}. CorrelationId: {correlationId}",
-                e.Message, e.InnerException, e.StackTrace, e.ToString(), correlationId);
+            _logger.LogError(e, "Unexpected exception. CorrelationId: {correlationId}", correlationId);
             throw;
         }
     }
