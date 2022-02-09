@@ -14,15 +14,17 @@ using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using NLog;
+using NLog.Extensions.Logging;
 using NLog.Web;
 using Swashbuckle.AspNetCore.SwaggerGen;
+using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Host.UseNLog();
 
 builder.Services.AddControllers();
-builder.Services.AddDefaultCorrelationId();
+builder.Services.AddDefaultCorrelationId(ConfigureCorrelationId());
 builder.Services.AddTransient<ICustomerFacade, CustomerFacade>();
 builder.Services.AddTransient<ICustomerService, CustomerService>();
 builder.Services.AddTransient<ICustomerRepository, CustomerRepository>();
@@ -43,22 +45,36 @@ AddNLog();
 await using var app = builder.Build();
 
 app.UseCorrelationId();
-
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "CF Api"));
-    app.UseMiddleware<LogRequestMiddleware>();
-    app.UseMiddleware<LogResponseMiddleware>();
-}
-
+AddExceptionHandler();
+AddSwagger();
+app.UseMiddleware<LogExceptionMiddleware>();
+app.UseMiddleware<LogRequestMiddleware>();
+app.UseMiddleware<LogResponseMiddleware>();
 app.UseHttpsRedirection();
-
 app.MapControllers();
 
 await app.RunAsync();
 
-static Action<SwaggerGenOptions> SetupSwagger()
+void AddExceptionHandler()
+{
+    if (app.Environment.IsDevelopment()) return;
+    app.UseExceptionHandler(ConfigureExceptionHandler());
+}
+
+void AddSwagger()
+{
+    if (!app.Environment.IsDevelopment()) return;
+    app.UseSwagger();
+    app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "CF Api"));
+}
+
+void AddNLog()
+{
+    if (builder.Environment.EnvironmentName.Contains("Test")) return;
+    LogManager.Setup().LoadConfigurationFromSection(builder.Configuration);
+}
+
+Action<SwaggerGenOptions> SetupSwagger()
 {
     return c =>
     {
@@ -91,10 +107,32 @@ static Action<SwaggerGenOptions> SetupSwagger()
     };
 }
 
-void AddNLog()
+Action<CorrelationIdOptions> ConfigureCorrelationId()
 {
-    if (builder.Environment.EnvironmentName.Contains("Test")) return;
-    LogManager.Setup().LoadConfigurationFromAppSettings().GetCurrentClassLogger();
+    return options =>
+    {
+        options.LogLevelOptions = new CorrelationIdLogLevelOptions
+        {
+            FoundCorrelationIdHeader = LogLevel.Debug,
+            MissingCorrelationIdHeader = LogLevel.Debug
+        };
+    };
+}
+
+Action<IApplicationBuilder> ConfigureExceptionHandler()
+{
+    return exceptionHandlerApp =>
+    {
+        exceptionHandlerApp.Run(async context =>
+        {
+            context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+
+            await context.Response.WriteAsJsonAsync(new
+            {
+                Message = "An unexpected internal exception occurred."
+            });
+        });
+    };
 }
 
 public partial class Program { }
