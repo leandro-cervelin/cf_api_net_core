@@ -28,7 +28,7 @@ public class CustomerServiceTest
         //Act
         var mockRepository = new Mock<ICustomerRepository>();
         var mockPassword = new Mock<IPasswordHasherService>();
-        var filter = new CustomerFilter { Id = 1 };
+        var filter = new CustomerFilter {Id = 1};
         mockRepository.Setup(x => x.GetByFilterAsync(filter)).ReturnsAsync(customer);
         var mockService = new CustomerService(mockRepository.Object, mockPassword.Object);
         var result = await mockService.GetByFilterAsync(filter);
@@ -72,7 +72,7 @@ public class CustomerServiceTest
         //Act
         var mockRepository = new Mock<ICustomerRepository>();
         var mockPassword = new Mock<IPasswordHasherService>();
-        var filter = new CustomerFilter { PageSize = 10, CurrentPage = 1 };
+        var filter = new CustomerFilter {PageSize = 10, CurrentPage = 1};
         mockRepository.Setup(x => x.CountByFilterAsync(filter))
             .ReturnsAsync(customers.Count);
         mockRepository.Setup(x => x.GetListByFilterAsync(filter))
@@ -421,7 +421,7 @@ public class CustomerServiceTest
         //Act
         var mockRepository = new Mock<ICustomerRepository>();
         var mockPassword = new Mock<IPasswordHasherService>();
-        var filter = new CustomerFilter { Email = customer.Email };
+        var filter = new CustomerFilter {Email = customer.Email};
         mockRepository.Setup(x => x.GetByFilterAsync(filter)).ReturnsAsync(customer);
 
         //Assert

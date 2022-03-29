@@ -67,8 +67,8 @@ public class CustomerFacadeTest
             FullName = "First Name Surname"
         };
 
-        var filterDto = new CustomerFilterDto { Id = 1 };
-        var filter = new CustomerFilter { Id = 1 };
+        var filterDto = new CustomerFilterDto {Id = 1};
+        var filter = new CustomerFilter {Id = 1};
 
         //Act
         var mockService = new Mock<ICustomerService>();
@@ -154,8 +154,8 @@ public class CustomerFacadeTest
             Result = customersDto
         };
 
-        var filterDto = new CustomerFilterDto { Id = 1 };
-        var filter = new CustomerFilter { Id = 1 };
+        var filterDto = new CustomerFilterDto {Id = 1};
+        var filter = new CustomerFilter {Id = 1};
 
         //Act
         var mockService = new Mock<ICustomerService>();
