@@ -1,4 +1,5 @@
 ﻿using System.IO.Compression;
+using CF.Api.Filters;
 using CF.Api.Middleware;
 using CF.Customer.Application.Facades;
 using CF.Customer.Application.Facades.Interfaces;
@@ -10,6 +11,7 @@ using CF.Customer.Infrastructure.Mappers;
 using CF.Customer.Infrastructure.Repositories;
 using CorrelationId;
 using CorrelationId.DependencyInjection;
+using Hellang.Middleware.ProblemDetails;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
@@ -23,7 +25,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Host.UseNLog();
 
-builder.Services.AddControllers();
+builder.Services.AddControllers(x => x.Filters.Add<ExceptionFilter>());
+builder.Services.AddProblemDetails();
 builder.Services.AddDefaultCorrelationId(ConfigureCorrelationId());
 builder.Services.AddTransient<ICustomerFacade, CustomerFacade>();
 builder.Services.AddTransient<ICustomerService, CustomerService>();
@@ -78,7 +81,7 @@ Action<SwaggerGenOptions> SetupSwagger()
 {
     return c =>
     {
-        c.SwaggerDoc("v1", new OpenApiInfo { Title = "CF API", Version = "v1" });
+        c.SwaggerDoc("v1", new OpenApiInfo {Title = "CF API", Version = "v1"});
 
         c.CustomSchemaIds(x => x.FullName);
 
@@ -135,4 +138,6 @@ Action<IApplicationBuilder> ConfigureExceptionHandler()
     };
 }
 
-public partial class Program { }
+public partial class Program
+{
+}

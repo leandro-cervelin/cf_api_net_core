@@ -88,7 +88,7 @@ public class CustomerService : ICustomerService
         Validate(customer);
 
         var isAvailableEmail = await IsAvailableEmailAsync(customer.Email);
-        if (!isAvailableEmail) throw new ValidationException("Email is not available.");
+        if (!isAvailableEmail) throw new ValidationException("Email is not available.", new ValidationException());
 
         customer.Password = _passwordHasherService.Hash(customer.Password);
         customer.SetCreatedDate();
@@ -113,7 +113,7 @@ public class CustomerService : ICustomerService
 
     public async Task<bool> IsAvailableEmailAsync(string email)
     {
-        var existingEmail = await _customerRepository.GetByFilterAsync(new CustomerFilter { Email = email });
+        var existingEmail = await _customerRepository.GetByFilterAsync(new CustomerFilter {Email = email});
         return existingEmail == null;
     }
 

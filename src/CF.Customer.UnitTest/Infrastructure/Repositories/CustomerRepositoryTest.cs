@@ -51,7 +51,7 @@ public class CustomerRepositoryTest
             await repository.SaveChangesAsync();
 
             //Assert
-            var filter = new CustomerFilter { FirstName = "FirstName" };
+            var filter = new CustomerFilter {FirstName = "FirstName"};
             var result = await repository.GetListByFilterAsync(filter);
             Assert.Equal(2, result.Count);
         }
@@ -91,7 +91,7 @@ public class CustomerRepositoryTest
             await repository.SaveChangesAsync();
 
             //Assert
-            var filter = new CustomerFilter { Email = "test1@test.com" };
+            var filter = new CustomerFilter {Email = "test1@test.com"};
             var result = await repository.GetByFilterAsync(filter);
             Assert.Equal("test1@test.com", result.Email);
         }
@@ -168,13 +168,13 @@ public class CustomerRepositoryTest
             repository.Add(newCustomer);
             await repository.SaveChangesAsync();
 
-            var filterStored = new CustomerFilter { Id = newCustomer.Id };
+            var filterStored = new CustomerFilter {Id = newCustomer.Id};
             var storedCustomer = await repository.GetByFilterAsync(filterStored);
             repository.Remove(storedCustomer);
             await repository.SaveChangesAsync();
 
             //Assert
-            var filterNonExistentUser = new CustomerFilter { Id = newCustomer.Id };
+            var filterNonExistentUser = new CustomerFilter {Id = newCustomer.Id};
             var nonExistentUser = await repository.GetByFilterAsync(filterNonExistentUser);
             Assert.Null(nonExistentUser);
         }
