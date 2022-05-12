@@ -47,6 +47,7 @@ AddNLog();
 
 await using var app = builder.Build();
 
+RunMigration();
 app.UseCorrelationId();
 AddExceptionHandler();
 AddSwagger();
@@ -138,6 +139,17 @@ Action<IApplicationBuilder> ConfigureExceptionHandler()
     };
 }
 
+void RunMigration()
+{
+    using var serviceScope = app.Services.GetRequiredService<IServiceScopeFactory>().CreateScope();
+
+    if (!serviceScope.ServiceProvider.GetRequiredService<CustomerContext>().Database.GetPendingMigrations().Any())
+    {
+        return;
+    }
+
+    serviceScope.ServiceProvider.GetRequiredService<CustomerContext>().Database.Migrate();
+}
 public partial class Program
 {
 }
