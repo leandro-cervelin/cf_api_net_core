@@ -11,7 +11,6 @@ using CF.Customer.Infrastructure.Mappers;
 using CF.Customer.Infrastructure.Repositories;
 using CorrelationId;
 using CorrelationId.DependencyInjection;
-using Hellang.Middleware.ProblemDetails;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
