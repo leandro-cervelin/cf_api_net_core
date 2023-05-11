@@ -10,7 +10,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
-		<PackageReference Include="CorrelationId-ForkWithLogLevelSeverityOption" Version="3.0.1-WithLogLevelSeverityOption" />
+		<PackageReference Include="CorrelationId-ForkWithLogLevelSeverityOption" Version="4.0.0" />
 		<PackageReference Include="Microsoft.AspNetCore.ResponseCompression" Version="2.2.0" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="7.0.5" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="7.0.5">
