@@ -17,46 +17,46 @@ public class CustomerFacade : ICustomerFacade
         _mapper = mapper;
     }
 
-    public async Task<PaginationDto<CustomerResponseDto>> GetListByFilterAsync(CustomerFilterDto filterDto)
+    public async Task<PaginationDto<CustomerResponseDto>> GetListByFilterAsync(CustomerFilterDto filterDto, CancellationToken cancellationToken)
     {
         var filter = _mapper.Map<CustomerFilter>(filterDto);
 
-        var result = await _customerService.GetListByFilterAsync(filter);
+        var result = await _customerService.GetListByFilterAsync(filter, cancellationToken);
 
         var paginationDto = _mapper.Map<PaginationDto<CustomerResponseDto>>(result);
 
         return paginationDto;
     }
 
-    public async Task<CustomerResponseDto> GetByFilterAsync(CustomerFilterDto filterDto)
+    public async Task<CustomerResponseDto> GetByFilterAsync(CustomerFilterDto filterDto, CancellationToken cancellationToken)
     {
         var filter = _mapper.Map<CustomerFilter>(filterDto);
 
-        var result = await _customerService.GetByFilterAsync(filter);
+        var result = await _customerService.GetByFilterAsync(filter, cancellationToken);
 
         var resultDto = _mapper.Map<CustomerResponseDto>(result);
 
         return resultDto;
     }
 
-    public async Task UpdateAsync(long id, CustomerRequestDto customerRequestDto)
+    public async Task UpdateAsync(long id, CustomerRequestDto customerRequestDto, CancellationToken cancellationToken)
     {
         var customer = _mapper.Map<Domain.Entities.Customer>(customerRequestDto);
 
-        await _customerService.UpdateAsync(id, customer);
+        await _customerService.UpdateAsync(id, customer, cancellationToken);
     }
 
-    public async Task<long> CreateAsync(CustomerRequestDto customerRequestDto)
+    public async Task<long> CreateAsync(CustomerRequestDto customerRequestDto, CancellationToken cancellationToken)
     {
         var customer = _mapper.Map<Domain.Entities.Customer>(customerRequestDto);
 
-        var id = await _customerService.CreateAsync(customer);
+        var id = await _customerService.CreateAsync(customer, cancellationToken);
 
         return id;
     }
 
-    public async Task DeleteAsync(long id)
+    public async Task DeleteAsync(long id, CancellationToken cancellationToken)
     {
-        await _customerService.DeleteAsync(id);
+        await _customerService.DeleteAsync(id, cancellationToken);
     }
 }

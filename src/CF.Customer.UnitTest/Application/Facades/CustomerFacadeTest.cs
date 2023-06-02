@@ -33,15 +33,18 @@ public class CustomerFacadeTest
             ConfirmPassword = "P@013333343"
         };
 
-        //Act
+        
         const long id = 1;
         var mockService = new Mock<ICustomerService>();
         var mockMapper = new Mock<IMapper>();
+        var cancellationTokenSource = new CancellationTokenSource();
         mockMapper.Setup(x => x.Map<Customer.Domain.Entities.Customer>(customerRequestDto)).Returns(customer);
-        mockService.Setup(x => x.CreateAsync(customer)).ReturnsAsync(id);
-        //Assert
+        mockService.Setup(x => x.CreateAsync(customer, cancellationTokenSource.Token)).ReturnsAsync(id);
+        //Act
         var mockFacade = new CustomerFacade(mockService.Object, mockMapper.Object);
-        var result = await mockFacade.CreateAsync(customerRequestDto);
+        var result = await mockFacade.CreateAsync(customerRequestDto, cancellationTokenSource.Token);
+        
+        //Assert
         Assert.Equal(id, result);
     }
 
@@ -70,16 +73,19 @@ public class CustomerFacadeTest
         var filterDto = new CustomerFilterDto {Id = 1};
         var filter = new CustomerFilter {Id = 1};
 
-        //Act
+        
         var mockService = new Mock<ICustomerService>();
         var mockMapper = new Mock<IMapper>();
+        var cancellationTokenSource = new CancellationTokenSource();
         mockMapper.Setup(x => x.Map<CustomerResponseDto>(customer)).Returns(customerResponseDto);
         mockMapper.Setup(x => x.Map<CustomerFilter>(filterDto)).Returns(filter);
-        mockService.Setup(x => x.GetByFilterAsync(filter)).ReturnsAsync(customer);
+        mockService.Setup(x => x.GetByFilterAsync(filter, cancellationTokenSource.Token)).ReturnsAsync(customer);
 
-        //Assert
+        //act
         var mockFacade = new CustomerFacade(mockService.Object, mockMapper.Object);
-        var result = await mockFacade.GetByFilterAsync(filterDto);
+        var result = await mockFacade.GetByFilterAsync(filterDto, cancellationTokenSource.Token);
+        
+        //assert
         Assert.Equal(customer.Id, result.Id);
     }
 
@@ -157,16 +163,18 @@ public class CustomerFacadeTest
         var filterDto = new CustomerFilterDto {Id = 1};
         var filter = new CustomerFilter {Id = 1};
 
-        //Act
         var mockService = new Mock<ICustomerService>();
         var mockMapper = new Mock<IMapper>();
+        var cancellationTokenSource = new CancellationTokenSource();
         mockMapper.Setup(x => x.Map<CustomerFilter>(filterDto)).Returns(filter);
         mockMapper.Setup(x => x.Map<PaginationDto<CustomerResponseDto>>(pagination)).Returns(paginationDto);
-        mockService.Setup(x => x.GetListByFilterAsync(filter)).ReturnsAsync(pagination);
+        mockService.Setup(x => x.GetListByFilterAsync(filter, cancellationTokenSource.Token)).ReturnsAsync(pagination);
 
-        //Assert
+        //Act
         var mockFacade = new CustomerFacade(mockService.Object, mockMapper.Object);
-        var result = await mockFacade.GetListByFilterAsync(filterDto);
+        var result = await mockFacade.GetListByFilterAsync(filterDto, cancellationTokenSource.Token);
+        
+        //Assert
         Assert.Equal(paginationDto.Count, result.Count);
     }
 
@@ -193,16 +201,17 @@ public class CustomerFacadeTest
 
         const long id = 1;
 
-        //Act
+        
         var mockService = new Mock<ICustomerService>();
         var mockMapper = new Mock<IMapper>();
-
-        //Assert
+        var cancellationTokenSource = new CancellationTokenSource();
+        //Act
         mockMapper.Setup(x => x.Map<Customer.Domain.Entities.Customer>(customerRequestDto)).Returns(customer);
         var mockFacade = new CustomerFacade(mockService.Object, mockMapper.Object);
+        //Assert
         try
         {
-            await Assert.ThrowsAsync<Exception>(() => mockFacade.UpdateAsync(id, customerRequestDto));
+            await Assert.ThrowsAsync<Exception>(() => mockFacade.UpdateAsync(id, customerRequestDto, cancellationTokenSource.Token));
         }
         catch (AssertActualExpectedException exception)
         {
@@ -216,15 +225,16 @@ public class CustomerFacadeTest
         //Arrange
         const long id = 1;
 
-        //Act
         var mockService = new Mock<ICustomerService>();
         var mockMapper = new Mock<IMapper>();
+        var cancellationTokenSource = new CancellationTokenSource();
 
-        //Assert
+        //Act
         var mockFacade = new CustomerFacade(mockService.Object, mockMapper.Object);
+        //Assert
         try
         {
-            await Assert.ThrowsAsync<Exception>(() => mockFacade.DeleteAsync(id));
+            await Assert.ThrowsAsync<Exception>(() => mockFacade.DeleteAsync(id, cancellationTokenSource.Token));
         }
         catch (AssertActualExpectedException exception)
         {

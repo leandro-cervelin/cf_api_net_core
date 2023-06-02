@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using CF.Api.Controllers;
 using CF.Customer.Application.Dtos;
@@ -52,7 +53,9 @@ public class CustomerControllerTest
             }
         };
 
-        _customerFacade.Setup(x => x.GetListByFilterAsync(It.IsAny<CustomerFilterDto>())).ReturnsAsync(facadeResult);
+        var cancellationTokenSource = new CancellationTokenSource();
+
+        _customerFacade.Setup(x => x.GetListByFilterAsync(It.IsAny<CustomerFilterDto>(), cancellationTokenSource.Token)).ReturnsAsync(facadeResult);
 
         var controller = new CustomerController(_correlationContext.Object, _logger.Object, _customerFacade.Object);
 
@@ -61,7 +64,7 @@ public class CustomerControllerTest
             FirstName = "Elden"
         };
 
-        var actionResult = await controller.Get(requestDto);
+        var actionResult = await controller.Get(requestDto, cancellationTokenSource.Token);
 
         Assert.NotNull(actionResult);
         Assert.Equal(2, actionResult?.Value?.Count);
@@ -80,11 +83,13 @@ public class CustomerControllerTest
             Id = 1
         };
 
-        _customerFacade.Setup(x => x.GetByFilterAsync(It.IsAny<CustomerFilterDto>())).ReturnsAsync(facadeResult);
+        var cancellationTokenSource = new CancellationTokenSource();
+
+        _customerFacade.Setup(x => x.GetByFilterAsync(It.IsAny<CustomerFilterDto>(), cancellationTokenSource.Token)).ReturnsAsync(facadeResult);
 
         var controller = new CustomerController(_correlationContext.Object, _logger.Object, _customerFacade.Object);
 
-        var actionResult = await controller.Get(1);
+        var actionResult = await controller.Get(1, cancellationTokenSource.Token);
 
         Assert.NotNull(actionResult);
         Assert.Equal(1, actionResult?.Value?.Id);
@@ -94,7 +99,9 @@ public class CustomerControllerTest
     [Fact]
     public async Task PostTest()
     {
-        _customerFacade.Setup(x => x.CreateAsync(It.IsAny<CustomerRequestDto>())).ReturnsAsync(1);
+        var cancellationTokenSource = new CancellationTokenSource();
+
+        _customerFacade.Setup(x => x.CreateAsync(It.IsAny<CustomerRequestDto>(), cancellationTokenSource.Token)).ReturnsAsync(1);
 
         var controller = new CustomerController(_correlationContext.Object, _logger.Object, _customerFacade.Object);
 
@@ -107,7 +114,7 @@ public class CustomerControllerTest
             Surname = "Souls"
         };
 
-        var actionResult = await controller.Post(requestDto);
+        var actionResult = await controller.Post(requestDto, cancellationTokenSource.Token);
 
         Assert.NotNull(actionResult);
     }
@@ -115,7 +122,9 @@ public class CustomerControllerTest
     [Fact]
     public async Task PutTest()
     {
-        _customerFacade.Setup(x => x.UpdateAsync(It.IsAny<long>(), It.IsAny<CustomerRequestDto>()));
+        var cancellationTokenSource = new CancellationTokenSource();
+
+        _customerFacade.Setup(x => x.UpdateAsync(It.IsAny<long>(), It.IsAny<CustomerRequestDto>(), cancellationTokenSource.Token));
 
         var controller = new CustomerController(_correlationContext.Object, _logger.Object, _customerFacade.Object);
 
@@ -128,7 +137,7 @@ public class CustomerControllerTest
             Surname = "Souls"
         };
 
-        var actionResult = await controller.Put(1, requestDto);
+        var actionResult = await controller.Put(1, requestDto, cancellationTokenSource.Token);
 
         Assert.NotNull(actionResult);
     }
@@ -136,11 +145,13 @@ public class CustomerControllerTest
     [Fact]
     public async Task DeleteTest()
     {
-        _customerFacade.Setup(x => x.DeleteAsync(It.IsAny<long>()));
+        var cancellationTokenSource = new CancellationTokenSource();
+
+        _customerFacade.Setup(x => x.DeleteAsync(It.IsAny<long>(), cancellationTokenSource.Token));
 
         var controller = new CustomerController(_correlationContext.Object, _logger.Object, _customerFacade.Object);
 
-        var actionResult = await controller.Delete(1);
+        var actionResult = await controller.Delete(1, cancellationTokenSource.Token);
 
         Assert.NotNull(actionResult);
     }

@@ -25,13 +25,15 @@ public class CustomerServiceTest
             Created = DateTime.Now
         };
 
+        var cancellationTokenSource = new CancellationTokenSource();
+
         //Act
         var mockRepository = new Mock<ICustomerRepository>();
         var mockPassword = new Mock<IPasswordHasherService>();
         var filter = new CustomerFilter {Id = 1};
-        mockRepository.Setup(x => x.GetByFilterAsync(filter)).ReturnsAsync(customer);
+        mockRepository.Setup(x => x.GetByFilterAsync(filter, cancellationTokenSource.Token)).ReturnsAsync(customer);
         var mockService = new CustomerService(mockRepository.Object, mockPassword.Object);
-        var result = await mockService.GetByFilterAsync(filter);
+        var result = await mockService.GetByFilterAsync(filter, cancellationTokenSource.Token);
 
         //Assert
         Assert.Equal(customer.Id, result.Id);
@@ -69,16 +71,18 @@ public class CustomerServiceTest
             customerTwo
         };
 
+        var cancellationTokenSource = new CancellationTokenSource();
+
         //Act
         var mockRepository = new Mock<ICustomerRepository>();
         var mockPassword = new Mock<IPasswordHasherService>();
         var filter = new CustomerFilter {PageSize = 10, CurrentPage = 1};
-        mockRepository.Setup(x => x.CountByFilterAsync(filter))
+        mockRepository.Setup(x => x.CountByFilterAsync(filter, cancellationTokenSource.Token))
             .ReturnsAsync(customers.Count);
-        mockRepository.Setup(x => x.GetListByFilterAsync(filter))
+        mockRepository.Setup(x => x.GetListByFilterAsync(filter, cancellationTokenSource.Token))
             .ReturnsAsync(customers);
         var mockService = new CustomerService(mockRepository.Object, mockPassword.Object);
-        var result = await mockService.GetListByFilterAsync(filter);
+        var result = await mockService.GetListByFilterAsync(filter, cancellationTokenSource.Token);
 
         //Assert
         Assert.Equal(2, result.Count);
@@ -96,11 +100,13 @@ public class CustomerServiceTest
             FirstName = "F"
         };
 
+        var cancellationTokenSource = new CancellationTokenSource();
+
         //Act
         var mockRepository = new Mock<ICustomerRepository>();
         var mockPassword = new Mock<IPasswordHasherService>();
         var mockService = new CustomerService(mockRepository.Object, mockPassword.Object);
-        var exception = await Assert.ThrowsAsync<ValidationException>(() => mockService.CreateAsync(customer));
+        var exception = await Assert.ThrowsAsync<ValidationException>(() => mockService.CreateAsync(customer, cancellationTokenSource.Token));
 
         //Assert
         Assert.NotNull(exception);
@@ -118,11 +124,13 @@ public class CustomerServiceTest
             FirstName = ""
         };
 
+        var cancellationTokenSource = new CancellationTokenSource();
+
         //Act
         var mockRepository = new Mock<ICustomerRepository>();
         var mockPassword = new Mock<IPasswordHasherService>();
         var mockService = new CustomerService(mockRepository.Object, mockPassword.Object);
-        var exception = await Assert.ThrowsAsync<ValidationException>(() => mockService.CreateAsync(customer));
+        var exception = await Assert.ThrowsAsync<ValidationException>(() => mockService.CreateAsync(customer, cancellationTokenSource.Token));
 
         //Assert
         Assert.NotNull(exception);
@@ -141,11 +149,13 @@ public class CustomerServiceTest
                 "First Name First Name First Name First Name First Name First Name First Name First Name First Name First Name First Name."
         };
 
+        var cancellationTokenSource = new CancellationTokenSource();
+
         //Act
         var mockRepository = new Mock<ICustomerRepository>();
         var mockPassword = new Mock<IPasswordHasherService>();
         var mockService = new CustomerService(mockRepository.Object, mockPassword.Object);
-        var exception = await Assert.ThrowsAsync<ValidationException>(() => mockService.CreateAsync(customer));
+        var exception = await Assert.ThrowsAsync<ValidationException>(() => mockService.CreateAsync(customer, cancellationTokenSource.Token));
 
         //Assert
         Assert.NotNull(exception);
@@ -163,12 +173,13 @@ public class CustomerServiceTest
                 "Surname Surname Surname Surname Surname Surname Surname Surname Surname Surname Surname Surname Surname Surname Surname Surname",
             FirstName = "First Name"
         };
+        var cancellationTokenSource = new CancellationTokenSource();
 
         //Act
         var mockRepository = new Mock<ICustomerRepository>();
         var mockPassword = new Mock<IPasswordHasherService>();
         var mockService = new CustomerService(mockRepository.Object, mockPassword.Object);
-        var exception = await Assert.ThrowsAsync<ValidationException>(() => mockService.CreateAsync(customer));
+        var exception = await Assert.ThrowsAsync<ValidationException>(() => mockService.CreateAsync(customer, cancellationTokenSource.Token));
 
         //Assert
         Assert.NotNull(exception);
@@ -186,12 +197,13 @@ public class CustomerServiceTest
                 "Surname Surname Surname Surname Surname Surname Surname Surname Surname Surname Surname Surname Surname Surname Surname Surname",
             FirstName = "First Name"
         };
+        var cancellationTokenSource = new CancellationTokenSource();
 
         //Act
         var mockRepository = new Mock<ICustomerRepository>();
         var mockPassword = new Mock<IPasswordHasherService>();
         var mockService = new CustomerService(mockRepository.Object, mockPassword.Object);
-        var exception = await Assert.ThrowsAsync<ValidationException>(() => mockService.CreateAsync(customer));
+        var exception = await Assert.ThrowsAsync<ValidationException>(() => mockService.CreateAsync(customer, cancellationTokenSource.Token));
 
         //Assert
         Assert.NotNull(exception);
@@ -208,12 +220,12 @@ public class CustomerServiceTest
             Surname = "S",
             FirstName = "First Name"
         };
-
+        var cancellationTokenSource = new CancellationTokenSource();
         //Act
         var mockRepository = new Mock<ICustomerRepository>();
         var mockPassword = new Mock<IPasswordHasherService>();
         var mockService = new CustomerService(mockRepository.Object, mockPassword.Object);
-        var exception = await Assert.ThrowsAsync<ValidationException>(() => mockService.CreateAsync(customer));
+        var exception = await Assert.ThrowsAsync<ValidationException>(() => mockService.CreateAsync(customer, cancellationTokenSource.Token));
 
         //Assert
         Assert.NotNull(exception);
@@ -230,12 +242,13 @@ public class CustomerServiceTest
             Surname = "Surname",
             FirstName = "First Name"
         };
+        var cancellationTokenSource = new CancellationTokenSource();
 
         //Act
         var mockRepository = new Mock<ICustomerRepository>();
         var mockPassword = new Mock<IPasswordHasherService>();
         var mockService = new CustomerService(mockRepository.Object, mockPassword.Object);
-        var exception = await Assert.ThrowsAsync<ValidationException>(() => mockService.CreateAsync(customer));
+        var exception = await Assert.ThrowsAsync<ValidationException>(() => mockService.CreateAsync(customer, cancellationTokenSource.Token));
 
         //Assert
         Assert.NotNull(exception);
@@ -252,12 +265,14 @@ public class CustomerServiceTest
             Surname = "Surname",
             FirstName = "First Name"
         };
+        
+        var cancellationTokenSource = new CancellationTokenSource();
 
         //Act
         var mockRepository = new Mock<ICustomerRepository>();
         var mockPassword = new Mock<IPasswordHasherService>();
         var mockService = new CustomerService(mockRepository.Object, mockPassword.Object);
-        var exception = await Assert.ThrowsAsync<ValidationException>(() => mockService.CreateAsync(customer));
+        var exception = await Assert.ThrowsAsync<ValidationException>(() => mockService.CreateAsync(customer, cancellationTokenSource.Token));
 
         //Assert
         Assert.NotNull(exception);
@@ -276,11 +291,13 @@ public class CustomerServiceTest
             FirstName = "First Name"
         };
 
+        var cancellationTokenSource = new CancellationTokenSource();
+
         //Act
         var mockRepository = new Mock<ICustomerRepository>();
         var mockPassword = new Mock<IPasswordHasherService>();
         var mockService = new CustomerService(mockRepository.Object, mockPassword.Object);
-        var exception = await Assert.ThrowsAsync<ValidationException>(() => mockService.CreateAsync(customer));
+        var exception = await Assert.ThrowsAsync<ValidationException>(() => mockService.CreateAsync(customer, cancellationTokenSource.Token));
 
         //Assert
         Assert.NotNull(exception);
@@ -290,6 +307,8 @@ public class CustomerServiceTest
     public async Task CreateInvalidPasswordMinLengthTest()
     {
         //Arrange
+        var cancellationTokenSource = new CancellationTokenSource();
+
         var customer = new Customer.Domain.Entities.Customer
         {
             Password = "P@01",
@@ -302,7 +321,7 @@ public class CustomerServiceTest
         var mockRepository = new Mock<ICustomerRepository>();
         var mockPassword = new Mock<IPasswordHasherService>();
         var mockService = new CustomerService(mockRepository.Object, mockPassword.Object);
-        var exception = await Assert.ThrowsAsync<ValidationException>(() => mockService.CreateAsync(customer));
+        var exception = await Assert.ThrowsAsync<ValidationException>(() => mockService.CreateAsync(customer, cancellationTokenSource.Token));
 
         //Assert
         Assert.NotNull(exception);
@@ -313,6 +332,8 @@ public class CustomerServiceTest
     {
         //Arrange
         const long id = 0;
+        var cancellationTokenSource = new CancellationTokenSource();
+
         var customer = new Customer.Domain.Entities.Customer
         {
             Password = "P@01",
@@ -325,7 +346,7 @@ public class CustomerServiceTest
         var mockRepository = new Mock<ICustomerRepository>();
         var mockPassword = new Mock<IPasswordHasherService>();
         var mockService = new CustomerService(mockRepository.Object, mockPassword.Object);
-        var exception = await Assert.ThrowsAsync<ValidationException>(() => mockService.UpdateAsync(id, customer));
+        var exception = await Assert.ThrowsAsync<ValidationException>(() => mockService.UpdateAsync(id, customer, cancellationTokenSource.Token));
 
         //Assert
         Assert.NotNull(exception);
@@ -336,12 +357,13 @@ public class CustomerServiceTest
     {
         //Arrange
         const long id = 1;
+        var cancellationTokenSource = new CancellationTokenSource();
 
         //Act
         var mockRepository = new Mock<ICustomerRepository>();
         var mockPassword = new Mock<IPasswordHasherService>();
         var mockService = new CustomerService(mockRepository.Object, mockPassword.Object);
-        var exception = await Assert.ThrowsAsync<ValidationException>(() => mockService.UpdateAsync(id, null));
+        var exception = await Assert.ThrowsAsync<ValidationException>(() => mockService.UpdateAsync(id, null, cancellationTokenSource.Token));
 
         //Assert
         Assert.NotNull(exception);
@@ -352,6 +374,7 @@ public class CustomerServiceTest
     {
         //Arrange
         const long id = 1;
+        var cancellationTokenSource = new CancellationTokenSource();
 
         var customer = new Customer.Domain.Entities.Customer
         {
@@ -367,7 +390,7 @@ public class CustomerServiceTest
         var mockPassword = new Mock<IPasswordHasherService>();
         var mockService = new CustomerService(mockRepository.Object, mockPassword.Object);
         var exception =
-            await Assert.ThrowsAsync<EntityNotFoundException>(() => mockService.UpdateAsync(id, customer));
+            await Assert.ThrowsAsync<EntityNotFoundException>(() => mockService.UpdateAsync(id, customer, cancellationTokenSource.Token));
 
         //Assert
         Assert.NotNull(exception);
@@ -378,12 +401,13 @@ public class CustomerServiceTest
     {
         //Arrange
         const long id = 0;
+        var cancellationTokenSource = new CancellationTokenSource();
 
         //Act
         var mockRepository = new Mock<ICustomerRepository>();
         var mockPassword = new Mock<IPasswordHasherService>();
         var mockService = new CustomerService(mockRepository.Object, mockPassword.Object);
-        var exception = await Assert.ThrowsAsync<ValidationException>(() => mockService.DeleteAsync(id));
+        var exception = await Assert.ThrowsAsync<ValidationException>(() => mockService.DeleteAsync(id, cancellationTokenSource.Token));
 
         //Assert
         Assert.NotNull(exception);
@@ -394,12 +418,13 @@ public class CustomerServiceTest
     {
         //Arrange
         const long id = 1;
+        var cancellationTokenSource = new CancellationTokenSource();
 
         //Act
         var mockRepository = new Mock<ICustomerRepository>();
         var mockPassword = new Mock<IPasswordHasherService>();
         var mockService = new CustomerService(mockRepository.Object, mockPassword.Object);
-        var exception = await Assert.ThrowsAsync<EntityNotFoundException>(() => mockService.DeleteAsync(id));
+        var exception = await Assert.ThrowsAsync<EntityNotFoundException>(() => mockService.DeleteAsync(id, cancellationTokenSource.Token));
 
         //Assert
         Assert.NotNull(exception);
@@ -418,15 +443,17 @@ public class CustomerServiceTest
             FirstName = "First Name"
         };
 
+        var cancellationTokenSource = new CancellationTokenSource();
+
         //Act
         var mockRepository = new Mock<ICustomerRepository>();
         var mockPassword = new Mock<IPasswordHasherService>();
         var filter = new CustomerFilter {Email = customer.Email};
-        mockRepository.Setup(x => x.GetByFilterAsync(filter)).ReturnsAsync(customer);
+        mockRepository.Setup(x => x.GetByFilterAsync(filter, cancellationTokenSource.Token)).ReturnsAsync(customer);
 
         //Assert
         var mockService = new CustomerService(mockRepository.Object, mockPassword.Object);
-        var existingEmail = await mockService.IsAvailableEmailAsync(customer.Email);
+        var existingEmail = await mockService.IsAvailableEmailAsync(customer.Email, cancellationTokenSource.Token);
         Assert.True(existingEmail);
     }
 }

@@ -24,6 +24,8 @@ public class CustomerRepositoryTest
             Assert.True(await context.Database.EnsureCreatedAsync());
 
             //Arrange
+            var cancellationTokenSource = new CancellationTokenSource();
+
             var customerOne = new Customer.Domain.Entities.Customer
             {
                 Password = "Password01@",
@@ -48,11 +50,11 @@ public class CustomerRepositoryTest
             var repository = new CustomerRepository(context);
             repository.Add(customerOne);
             repository.Add(customerTwo);
-            await repository.SaveChangesAsync();
+            await repository.SaveChangesAsync(cancellationTokenSource.Token);
 
             //Assert
             var filter = new CustomerFilter {FirstName = "FirstName"};
-            var result = await repository.GetListByFilterAsync(filter);
+            var result = await repository.GetListByFilterAsync(filter, cancellationTokenSource.Token);
             Assert.Equal(2, result.Count);
         }
         finally
@@ -75,6 +77,8 @@ public class CustomerRepositoryTest
             Assert.True(await context.Database.EnsureCreatedAsync());
 
             //Arrange
+            var cancellationTokenSource = new CancellationTokenSource();
+
             var customerOne = new Customer.Domain.Entities.Customer
             {
                 Password = "Password01@",
@@ -88,11 +92,11 @@ public class CustomerRepositoryTest
             //Act
             var repository = new CustomerRepository(context);
             repository.Add(customerOne);
-            await repository.SaveChangesAsync();
+            await repository.SaveChangesAsync(cancellationTokenSource.Token);
 
             //Assert
             var filter = new CustomerFilter {Email = "test1@test.com"};
-            var result = await repository.GetByFilterAsync(filter);
+            var result = await repository.GetByFilterAsync(filter, cancellationTokenSource.Token);
             Assert.Equal("test1@test.com", result.Email);
         }
         finally
@@ -115,6 +119,8 @@ public class CustomerRepositoryTest
             Assert.True(await context.Database.EnsureCreatedAsync());
 
             //Arrange
+            var cancellationTokenSource = new CancellationTokenSource();
+
             var customer = new Customer.Domain.Entities.Customer
             {
                 Password = "Password01@",
@@ -128,7 +134,7 @@ public class CustomerRepositoryTest
             //Act
             var repository = new CustomerRepository(context);
             repository.Add(customer);
-            var result = await repository.SaveChangesAsync();
+            var result = await repository.SaveChangesAsync(cancellationTokenSource.Token);
 
             //Assert
             Assert.Equal(1, result);
@@ -153,6 +159,8 @@ public class CustomerRepositoryTest
             Assert.True(await context.Database.EnsureCreatedAsync());
 
             //Arrange
+            var cancellationTokenSource = new CancellationTokenSource();
+
             var newCustomer = new Customer.Domain.Entities.Customer
             {
                 Password = "Password01@",
@@ -166,16 +174,16 @@ public class CustomerRepositoryTest
             //Act
             var repository = new CustomerRepository(context);
             repository.Add(newCustomer);
-            await repository.SaveChangesAsync();
+            await repository.SaveChangesAsync(cancellationTokenSource.Token);
 
             var filterStored = new CustomerFilter {Id = newCustomer.Id};
-            var storedCustomer = await repository.GetByFilterAsync(filterStored);
+            var storedCustomer = await repository.GetByFilterAsync(filterStored, cancellationTokenSource.Token);
             repository.Remove(storedCustomer);
-            await repository.SaveChangesAsync();
+            await repository.SaveChangesAsync(cancellationTokenSource.Token);
 
             //Assert
             var filterNonExistentUser = new CustomerFilter {Id = newCustomer.Id};
-            var nonExistentUser = await repository.GetByFilterAsync(filterNonExistentUser);
+            var nonExistentUser = await repository.GetByFilterAsync(filterNonExistentUser, cancellationTokenSource.Token);
             Assert.Null(nonExistentUser);
         }
         finally
@@ -198,6 +206,8 @@ public class CustomerRepositoryTest
             Assert.True(await context.Database.EnsureCreatedAsync());
 
             //Arrange
+            var cancellationTokenSource = new CancellationTokenSource();
+
             var customerOne = new Customer.Domain.Entities.Customer
             {
                 Password = "Password01@",
@@ -219,12 +229,12 @@ public class CustomerRepositoryTest
             //Act
             var repository = new CustomerRepository(context);
             repository.Add(customerOne);
-            await repository.SaveChangesAsync();
+            await repository.SaveChangesAsync(cancellationTokenSource.Token);
 
             //Assert
             repository.Add(customerTwo);
             var exception =
-                await Assert.ThrowsAsync<DbUpdateException>(() => repository.SaveChangesAsync());
+                await Assert.ThrowsAsync<DbUpdateException>(() => repository.SaveChangesAsync(cancellationTokenSource.Token));
             Assert.NotNull(exception);
         }
         finally
@@ -246,6 +256,8 @@ public class CustomerRepositoryTest
             await using var context = new CustomerContext(options);
             Assert.True(await context.Database.EnsureCreatedAsync());
 
+            var cancellationTokenSource = new CancellationTokenSource();
+
             //Arrange
             var customer = new Customer.Domain.Entities.Customer
             {
@@ -262,7 +274,7 @@ public class CustomerRepositoryTest
 
             //Assert
             var exception =
-                await Assert.ThrowsAsync<DbUpdateException>(() => repository.SaveChangesAsync());
+                await Assert.ThrowsAsync<DbUpdateException>(() => repository.SaveChangesAsync(cancellationTokenSource.Token));
             Assert.NotNull(exception);
         }
         finally
@@ -285,6 +297,8 @@ public class CustomerRepositoryTest
             Assert.True(await context.Database.EnsureCreatedAsync());
 
             //Arrange
+            var cancellationTokenSource = new CancellationTokenSource();
+
             var customer = new Customer.Domain.Entities.Customer
             {
                 Password = null,
@@ -300,7 +314,7 @@ public class CustomerRepositoryTest
 
             //Assert
             var exception =
-                await Assert.ThrowsAsync<DbUpdateException>(() => repository.SaveChangesAsync());
+                await Assert.ThrowsAsync<DbUpdateException>(() => repository.SaveChangesAsync(cancellationTokenSource.Token));
             Assert.NotNull(exception);
         }
         finally
@@ -323,6 +337,8 @@ public class CustomerRepositoryTest
             Assert.True(await context.Database.EnsureCreatedAsync());
 
             //Arrange
+            var cancellationTokenSource = new CancellationTokenSource();
+
             var customer = new Customer.Domain.Entities.Customer
             {
                 Password = "Passw0rd1",
@@ -338,7 +354,7 @@ public class CustomerRepositoryTest
 
             //Assert
             var exception =
-                await Assert.ThrowsAsync<DbUpdateException>(() => repository.SaveChangesAsync());
+                await Assert.ThrowsAsync<DbUpdateException>(() => repository.SaveChangesAsync(cancellationTokenSource.Token));
             Assert.NotNull(exception);
         }
         finally
@@ -370,12 +386,14 @@ public class CustomerRepositoryTest
                 Created = DateTime.Now
             };
 
+            var cancellationTokenSource = new CancellationTokenSource();
+
             //Act
             var repository = new CustomerRepository(context);
             repository.Add(customer);
 
             //Assert
-            var exception = await Assert.ThrowsAsync<DbUpdateException>(() => repository.SaveChangesAsync());
+            var exception = await Assert.ThrowsAsync<DbUpdateException>(() => repository.SaveChangesAsync(cancellationTokenSource.Token));
             Assert.NotNull(exception);
         }
         finally

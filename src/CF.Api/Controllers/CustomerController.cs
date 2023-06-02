@@ -28,11 +28,11 @@ public class CustomerController : ControllerBase
     [SwaggerResponse((int) HttpStatusCode.OK, "Customer successfully returned.",
         typeof(PaginationDto<CustomerResponseDto>))]
     public async Task<ActionResult<PaginationDto<CustomerResponseDto>>> Get(
-        [FromQuery] CustomerFilterDto customerFilterDto)
+        [FromQuery] CustomerFilterDto customerFilterDto, CancellationToken cancellationToken)
     {
         try
         {
-            var result = await _customerFacade.GetListByFilterAsync(customerFilterDto);
+            var result = await _customerFacade.GetListByFilterAsync(customerFilterDto, cancellationToken);
             return result;
         }
         catch (ValidationException e)
@@ -48,14 +48,14 @@ public class CustomerController : ControllerBase
     [SwaggerResponse((int) HttpStatusCode.BadRequest, "Invalid id.")]
     [SwaggerResponse((int) HttpStatusCode.NotFound, "Customer not found.")]
     [SwaggerResponse((int) HttpStatusCode.OK, "Customer successfully returned.")]
-    public async Task<ActionResult<CustomerResponseDto>> Get(long id)
+    public async Task<ActionResult<CustomerResponseDto>> Get(long id, CancellationToken cancellationToken)
     {
         try
         {
             if (id <= 0) return BadRequest(CreateProblemDetails("Id", "Invalid Id."));
 
             var filter = new CustomerFilterDto {Id = id};
-            var result = await _customerFacade.GetByFilterAsync(filter);
+            var result = await _customerFacade.GetByFilterAsync(filter, cancellationToken);
 
             if (result == null) return NotFound();
 
@@ -73,11 +73,11 @@ public class CustomerController : ControllerBase
     [HttpPost]
     [SwaggerResponse((int) HttpStatusCode.BadRequest, "Invalid Request.")]
     [SwaggerResponse((int) HttpStatusCode.Created, "Customer has been created successfully.")]
-    public async Task<IActionResult> Post([FromBody] CustomerRequestDto customerRequestDto)
+    public async Task<IActionResult> Post([FromBody] CustomerRequestDto customerRequestDto, CancellationToken cancellationToken)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
 
-        var id = await _customerFacade.CreateAsync(customerRequestDto);
+        var id = await _customerFacade.CreateAsync(customerRequestDto, cancellationToken);
 
         return CreatedAtAction(nameof(Get), new {id}, new {id});
     }
@@ -86,7 +86,7 @@ public class CustomerController : ControllerBase
     [SwaggerResponse((int) HttpStatusCode.BadRequest, "Invalid id.")]
     [SwaggerResponse((int) HttpStatusCode.NotFound, "Customer not found")]
     [SwaggerResponse((int) HttpStatusCode.NoContent, "Customer has been updated successfully.")]
-    public async Task<IActionResult> Put(long id, [FromBody] CustomerRequestDto customerRequestDto)
+    public async Task<IActionResult> Put(long id, [FromBody] CustomerRequestDto customerRequestDto, CancellationToken cancellationToken)
     {
         try
         {
@@ -94,7 +94,7 @@ public class CustomerController : ControllerBase
 
             if (id <= 0) return BadRequest(CreateProblemDetails("Id", "Invalid Id."));
 
-            await _customerFacade.UpdateAsync(id, customerRequestDto);
+            await _customerFacade.UpdateAsync(id, customerRequestDto, cancellationToken);
             return NoContent();
         }
         catch (EntityNotFoundException e)
@@ -117,13 +117,13 @@ public class CustomerController : ControllerBase
     [SwaggerResponse((int) HttpStatusCode.BadRequest, "Invalid id.")]
     [SwaggerResponse((int) HttpStatusCode.NotFound, "Customer not found.")]
     [SwaggerResponse((int) HttpStatusCode.NoContent, "Customer has been deleted successfully.")]
-    public async Task<IActionResult> Delete(long id)
+    public async Task<IActionResult> Delete(long id, CancellationToken cancellationToken)
     {
         try
         {
             if (id <= 0) return BadRequest(CreateProblemDetails("Id", "Invalid Id."));
 
-            await _customerFacade.DeleteAsync(id);
+            await _customerFacade.DeleteAsync(id, cancellationToken);
 
             return NoContent();
         }

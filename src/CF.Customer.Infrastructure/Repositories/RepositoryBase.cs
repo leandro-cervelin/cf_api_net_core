@@ -27,19 +27,19 @@ public class RepositoryBase<TEntity> : IRepositoryBase<TEntity>
     ///     asynchronously. For all other cases the non async method should be used.
     ///     https://docs.microsoft.com/en-us/dotnet/api/microsoft.entityframeworkcore.dbset-1?view=efcore-3.1#Microsoft_EntityFrameworkCore_DbSet_1_AddAsync__0_System_Threading_CancellationToken_
     /// </summary>
-    public virtual async Task AddAsync(TEntity entity)
+    public virtual async Task AddAsync(TEntity entity, CancellationToken cancellationToken)
     {
-        await DbSet.AddAsync(entity);
+        await DbSet.AddAsync(entity, cancellationToken);
     }
 
-    public virtual async Task<TEntity> GetByIdAsync(long id)
+    public virtual async Task<TEntity> GetByIdAsync(long id, CancellationToken cancellationToken)
     {
-        return await DbSet.FindAsync(id);
+        return await DbSet.FindAsync(id, cancellationToken);
     }
 
-    public virtual async Task<IList<TEntity>> GetAllAsync()
+    public virtual async Task<IList<TEntity>> GetAllAsync(CancellationToken cancellationToken)
     {
-        return await DbSet.ToListAsync();
+        return await DbSet.ToListAsync(cancellationToken);
     }
 
     public virtual void Update(TEntity entity)
@@ -52,9 +52,9 @@ public class RepositoryBase<TEntity> : IRepositoryBase<TEntity>
         DbSet.Remove(entity);
     }
 
-    public async Task<int> SaveChangesAsync()
+    public async Task<int> SaveChangesAsync(CancellationToken cancellationToken)
     {
-        return await DbContext.SaveChangesAsync();
+        return await DbContext.SaveChangesAsync(cancellationToken);
     }
 
     public void Dispose()

@@ -11,25 +11,25 @@ public class CustomerRepository : RepositoryBase<Domain.Entities.Customer>, ICus
     {
     }
 
-    public async Task<int> CountByFilterAsync(CustomerFilter filter)
+    public async Task<int> CountByFilterAsync(CustomerFilter filter, CancellationToken cancellationToken)
     {
         var query = DbContext.Customers.AsQueryable();
 
         query = ApplyFilter(filter, query);
 
-        return await query.CountAsync();
+        return await query.CountAsync(cancellationToken);
     }
 
-    public async Task<Domain.Entities.Customer> GetByFilterAsync(CustomerFilter filter)
+    public async Task<Domain.Entities.Customer> GetByFilterAsync(CustomerFilter filter, CancellationToken cancellationToken)
     {
         var query = DbContext.Customers.AsQueryable();
 
         query = ApplyFilter(filter, query);
 
-        return await query.FirstOrDefaultAsync();
+        return await query.FirstOrDefaultAsync(cancellationToken);
     }
 
-    public async Task<List<Domain.Entities.Customer>> GetListByFilterAsync(CustomerFilter filter)
+    public async Task<List<Domain.Entities.Customer>> GetListByFilterAsync(CustomerFilter filter, CancellationToken cancellationToken)
     {
         var query = DbContext.Customers.AsQueryable();
 
@@ -40,7 +40,7 @@ public class CustomerRepository : RepositoryBase<Domain.Entities.Customer>, ICus
         if (filter.CurrentPage > 0)
             query = query.Skip((filter.CurrentPage - 1) * filter.PageSize).Take(filter.PageSize);
 
-        return await query.ToListAsync();
+        return await query.ToListAsync(cancellationToken);
     }
 
     private static IQueryable<Domain.Entities.Customer> ApplySorting(CustomerFilter filter,
