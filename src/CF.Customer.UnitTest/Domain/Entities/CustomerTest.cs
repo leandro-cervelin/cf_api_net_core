@@ -1,7 +1,6 @@
 ﻿using CF.Customer.Domain.Entities;
 using CF.Customer.Domain.Exceptions;
 using Xunit;
-using Xunit.Sdk;
 
 namespace CF.Customer.UnitTest.Domain.Entities;
 
@@ -42,14 +41,12 @@ public class CustomerTest
         {
             Password = "P@ssWord1"
         };
-        try
-        {
-            Assert.Throws<Exception>(() => customer.ValidatePassword());
-        }
-        catch (AssertActualExpectedException exception)
-        {
-            Assert.Equal("(No exception was thrown)", exception.Actual);
-        }
+
+        //Act
+        var exception = Record.Exception(customer.ValidatePassword);
+
+        //Assert
+        Assert.Null(exception);
     }
 
     [Theory]
@@ -69,7 +66,7 @@ public class CustomerTest
 
         const string invalidEmailFormatErrorMessage = "The Email is not a valid e-mail address.";
 
-        var exception = Assert.Throws<ValidationException>(() => customer.ValidateEmail());
+        var exception = Assert.Throws<ValidationException>(customer.ValidateEmail);
         Assert.Equal(invalidEmailFormatErrorMessage, exception.Message);
     }
 
@@ -94,14 +91,12 @@ public class CustomerTest
         {
             Email = "valdivia@gmail.com"
         };
-        try
-        {
-            Assert.Throws<Exception>(() => customer.ValidateEmail());
-        }
-        catch (AssertActualExpectedException exception)
-        {
-            Assert.Equal("(No exception was thrown)", exception.Actual);
-        }
+
+        //Act
+        var exception = Record.Exception(customer.ValidateEmail);
+
+        //Assert
+        Assert.Null(exception);
     }
 
     [Theory]
@@ -129,14 +124,12 @@ public class CustomerTest
         {
             FirstName = "Valdivia"
         };
-        try
-        {
-            Assert.Throws<Exception>(() => customer.ValidateFirstName());
-        }
-        catch (AssertActualExpectedException exception)
-        {
-            Assert.Equal("(No exception was thrown)", exception.Actual);
-        }
+
+        //Act
+        var exception = Record.Exception(customer.ValidateFirstName);
+
+        //Assert
+        Assert.Null(exception);
     }
 
     [Fact]
@@ -149,7 +142,7 @@ public class CustomerTest
 
         const string invalidEmailFormatErrorMessage = "The First Name is required.";
 
-        var exception = Assert.Throws<ValidationException>(() => customer.ValidateFirstName());
+        var exception = Assert.Throws<ValidationException>(customer.ValidateFirstName);
         Assert.Equal(invalidEmailFormatErrorMessage, exception.Message);
     }
 
@@ -178,14 +171,12 @@ public class CustomerTest
         {
             Surname = "Valdivia"
         };
-        try
-        {
-            Assert.Throws<Exception>(() => customer.ValidateSurname());
-        }
-        catch (AssertActualExpectedException exception)
-        {
-            Assert.Equal("(No exception was thrown)", exception.Actual);
-        }
+
+        //Act
+        var exception = Record.Exception(customer.ValidateSurname);
+
+        //Assert
+        Assert.Null(exception);
     }
 
     [Fact]

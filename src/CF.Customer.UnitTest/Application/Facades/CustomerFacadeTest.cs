@@ -5,7 +5,6 @@ using CF.Customer.Domain.Models;
 using CF.Customer.Domain.Services.Interfaces;
 using Moq;
 using Xunit;
-using Xunit.Sdk;
 
 namespace CF.Customer.UnitTest.Application.Facades;
 
@@ -205,18 +204,14 @@ public class CustomerFacadeTest
         var mockService = new Mock<ICustomerService>();
         var mockMapper = new Mock<IMapper>();
         var cancellationTokenSource = new CancellationTokenSource();
-        //Act
         mockMapper.Setup(x => x.Map<Customer.Domain.Entities.Customer>(customerRequestDto)).Returns(customer);
         var mockFacade = new CustomerFacade(mockService.Object, mockMapper.Object);
+
+        //Act
+        var exception = await Record.ExceptionAsync(() => mockFacade.UpdateAsync(id, customerRequestDto, cancellationTokenSource.Token));
+
         //Assert
-        try
-        {
-            await Assert.ThrowsAsync<Exception>(() => mockFacade.UpdateAsync(id, customerRequestDto, cancellationTokenSource.Token));
-        }
-        catch (AssertActualExpectedException exception)
-        {
-            Assert.Equal("(No exception was thrown)", exception.Actual);
-        }
+        Assert.Null(exception);
     }
 
     [Fact]
@@ -228,17 +223,12 @@ public class CustomerFacadeTest
         var mockService = new Mock<ICustomerService>();
         var mockMapper = new Mock<IMapper>();
         var cancellationTokenSource = new CancellationTokenSource();
+        var mockFacade = new CustomerFacade(mockService.Object, mockMapper.Object);
 
         //Act
-        var mockFacade = new CustomerFacade(mockService.Object, mockMapper.Object);
+        var exception = await Record.ExceptionAsync(() => mockFacade.DeleteAsync(id, cancellationTokenSource.Token));
+
         //Assert
-        try
-        {
-            await Assert.ThrowsAsync<Exception>(() => mockFacade.DeleteAsync(id, cancellationTokenSource.Token));
-        }
-        catch (AssertActualExpectedException exception)
-        {
-            Assert.Equal("(No exception was thrown)", exception.Actual);
-        }
+        Assert.Null(exception);
     }
 }
