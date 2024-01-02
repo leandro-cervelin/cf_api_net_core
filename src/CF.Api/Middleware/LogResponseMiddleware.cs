@@ -2,19 +2,12 @@ using CorrelationId.Abstractions;
 
 namespace CF.Api.Middleware;
 
-public class LogResponseMiddleware
+public class LogResponseMiddleware(RequestDelegate next, ILogger<LogResponseMiddleware> logger,
+    ICorrelationContextAccessor correlationContext)
 {
-    private readonly ICorrelationContextAccessor _correlationContext;
-    private readonly ILogger _logger;
-    private readonly RequestDelegate _next;
-
-    public LogResponseMiddleware(RequestDelegate next, ILogger<LogResponseMiddleware> logger,
-        ICorrelationContextAccessor correlationContext)
-    {
-        _next = next;
-        _logger = logger;
-        _correlationContext = correlationContext;
-    }
+    private readonly ICorrelationContextAccessor _correlationContext = correlationContext;
+    private readonly ILogger _logger = logger;
+    private readonly RequestDelegate _next = next;
 
     public async Task Invoke(HttpContext context)
     {

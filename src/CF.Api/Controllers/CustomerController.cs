@@ -10,19 +10,12 @@ namespace CF.Api.Controllers;
 
 [ApiController]
 [Route("api/v1/customer")]
-public class CustomerController : ControllerBase
+public class CustomerController(ICorrelationContextAccessor correlationContext, ILogger<CustomerController> logger,
+    ICustomerFacade customerFacade) : ControllerBase
 {
-    private readonly ICorrelationContextAccessor _correlationContext;
-    private readonly ICustomerFacade _customerFacade;
-    private readonly ILogger _logger;
-
-    public CustomerController(ICorrelationContextAccessor correlationContext, ILogger<CustomerController> logger,
-        ICustomerFacade customerFacade)
-    {
-        _logger = logger;
-        _correlationContext = correlationContext;
-        _customerFacade = customerFacade;
-    }
+    private readonly ICorrelationContextAccessor _correlationContext = correlationContext;
+    private readonly ICustomerFacade _customerFacade = customerFacade;
+    private readonly ILogger _logger = logger;
 
     [HttpGet]
     [SwaggerResponse((int) HttpStatusCode.OK, "Customer successfully returned.",

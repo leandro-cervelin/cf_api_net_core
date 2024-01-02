@@ -6,16 +6,10 @@ using CF.Customer.Domain.Services.Interfaces;
 
 namespace CF.Customer.Application.Facades;
 
-public class CustomerFacade : ICustomerFacade
+public class CustomerFacade(ICustomerService customerService, IMapper mapper) : ICustomerFacade
 {
-    private readonly ICustomerService _customerService;
-    private readonly IMapper _mapper;
-
-    public CustomerFacade(ICustomerService customerService, IMapper mapper)
-    {
-        _customerService = customerService;
-        _mapper = mapper;
-    }
+    private readonly ICustomerService _customerService = customerService;
+    private readonly IMapper _mapper = mapper;
 
     public async Task<PaginationDto<CustomerResponseDto>> GetListByFilterAsync(CustomerFilterDto filterDto, CancellationToken cancellationToken)
     {

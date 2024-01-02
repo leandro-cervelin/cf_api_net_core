@@ -6,16 +6,10 @@ using CF.Customer.Domain.Services.Interfaces;
 
 namespace CF.Customer.Domain.Services;
 
-public class CustomerService : ICustomerService
+public class CustomerService(ICustomerRepository customerRepository, IPasswordHasherService passwordHasherService) : ICustomerService
 {
-    private readonly ICustomerRepository _customerRepository;
-    private readonly IPasswordHasherService _passwordHasherService;
-
-    public CustomerService(ICustomerRepository customerRepository, IPasswordHasherService passwordHasherService)
-    {
-        _customerRepository = customerRepository;
-        _passwordHasherService = passwordHasherService;
-    }
+    private readonly ICustomerRepository _customerRepository = customerRepository;
+    private readonly IPasswordHasherService _passwordHasherService = passwordHasherService;
 
     public async Task<Pagination<Entities.Customer>> GetListByFilterAsync(CustomerFilter filter, CancellationToken cancellationToken)
     {
@@ -38,7 +32,7 @@ public class CustomerService : ICustomerService
             Count = total,
             CurrentPage = filter.CurrentPage,
             PageSize = filter.PageSize,
-            Result = paginateResult.ToList()
+            Result = [.. paginateResult]
         };
 
         return result;
@@ -59,11 +53,7 @@ public class CustomerService : ICustomerService
         if (customer == null)
             throw new ValidationException("Customer is null.");
 
-        var entity = await _customerRepository.GetByIdAsync(id, cancellationToken);
-
-        if (entity == null)
-            throw new EntityNotFoundException(id);
-
+        var entity = await _customerRepository.GetByIdAsync(id, cancellationToken) ?? throw new EntityNotFoundException(id);
         Validate(customer);
 
         if (entity.Email != customer.Email && !await IsAvailableEmailAsync(customer.Email, cancellationToken))
@@ -102,10 +92,7 @@ public class CustomerService : ICustomerService
     {
         if (id <= 0) throw new ValidationException("Id is invalid.");
 
-        var entity = await _customerRepository.GetByIdAsync(id, cancellationToken);
-
-        if (entity == null) throw new EntityNotFoundException(id);
-
+        var entity = await _customerRepository.GetByIdAsync(id, cancellationToken) ?? throw new EntityNotFoundException(id);
         _customerRepository.Remove(entity);
 
         await _customerRepository.SaveChangesAsync(cancellationToken);

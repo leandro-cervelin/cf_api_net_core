@@ -5,12 +5,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CF.Customer.Infrastructure.Repositories;
 
-public class CustomerRepository : RepositoryBase<Domain.Entities.Customer>, ICustomerRepository
+public class CustomerRepository(CustomerContext context) : RepositoryBase<Domain.Entities.Customer>(context), ICustomerRepository
 {
-    public CustomerRepository(CustomerContext context) : base(context)
-    {
-    }
-
     public async Task<int> CountByFilterAsync(CustomerFilter filter, CancellationToken cancellationToken)
     {
         var query = DbContext.Customers.AsQueryable();
@@ -48,13 +44,13 @@ public class CustomerRepository : RepositoryBase<Domain.Entities.Customer>, ICus
     {
         query = filter?.OrderBy.ToLower() switch
         {
-            "firstname" => filter.SortBy.ToLower() == "asc"
+            "firstname" => filter.SortBy.Equals("asc", StringComparison.CurrentCultureIgnoreCase)
                 ? query.OrderBy(x => x.FirstName)
                 : query.OrderByDescending(x => x.FirstName),
-            "surname" => filter.SortBy.ToLower() == "asc"
+            "surname" => filter.SortBy.Equals("asc", StringComparison.CurrentCultureIgnoreCase)
                 ? query.OrderBy(x => x.Surname)
                 : query.OrderByDescending(x => x.Surname),
-            "email" => filter.SortBy.ToLower() == "asc"
+            "email" => filter.SortBy.Equals("asc", StringComparison.CurrentCultureIgnoreCase)
                 ? query.OrderBy(x => x.Email)
                 : query.OrderByDescending(x => x.Email),
             _ => query

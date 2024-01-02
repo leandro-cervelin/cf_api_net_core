@@ -34,7 +34,7 @@ public class RepositoryBase<TEntity> : IRepositoryBase<TEntity>
 
     public virtual async Task<TEntity> GetByIdAsync(long id, CancellationToken cancellationToken)
     {
-        return await DbSet.FindAsync(id, cancellationToken);
+        return await DbSet.FindAsync(new object[] { id, cancellationToken }, cancellationToken: cancellationToken);
     }
 
     public virtual async Task<IList<TEntity>> GetAllAsync(CancellationToken cancellationToken)

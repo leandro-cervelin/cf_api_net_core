@@ -2,12 +2,8 @@
 
 namespace CF.Customer.Infrastructure.DbContext;
 
-public class CustomerContext : Microsoft.EntityFrameworkCore.DbContext
+public class CustomerContext(DbContextOptions<CustomerContext> options) : Microsoft.EntityFrameworkCore.DbContext(options)
 {
-    public CustomerContext(DbContextOptions<CustomerContext> options) : base(options)
-    {
-    }
-
     public DbSet<Domain.Entities.Customer> Customers { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
