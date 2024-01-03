@@ -4,6 +4,7 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
+using Azure;
 using CF.Customer.Application.Dtos;
 using CF.IntegrationTest.Factories;
 using CF.IntegrationTest.Models;
@@ -399,6 +400,40 @@ public class CustomerIntegrationTest : IClassFixture<CustomWebApplicationFactory
             JsonConvert.DeserializeObject<CustomerResponseDto>(await getResponse.Content.ReadAsStringAsync());
 
         dto.FirstName = "New Name";
+        var contentUpdate = await CreateStringContent(dto);
+        var putResponse = await client.PutAsync($"{CustomerUrl}/{customer.Id}", contentUpdate);
+        Assert.True(putResponse.IsSuccessStatusCode);
+        Assert.Equal(HttpStatusCode.NoContent, putResponse.StatusCode);
+    }
+
+    [Fact]
+    public async Task UpdateCustomerIncludingPasswordOkTest()
+    {
+        var email = CreateValidEmail();
+
+        var dto = new CustomerRequestDto
+        {
+            FirstName = "Test Name",
+            Surname = "Test Surname",
+            Email = email,
+            Password = "Password1@",
+            ConfirmPassword = "Password1@"
+        };
+
+        var content = await CreateStringContent(dto);
+        var client = _factory.CreateClient();
+        var createResponse = await client.PostAsync(CustomerUrl, content);
+        Assert.Equal(HttpStatusCode.Created, createResponse.StatusCode);
+
+        client = _factory.CreateClient();
+        var getResponse = await client.GetAsync(createResponse.Headers.Location?.ToString());
+        Assert.Equal(HttpStatusCode.OK, getResponse.StatusCode);
+        var customer =
+            JsonConvert.DeserializeObject<CustomerResponseDto>(await getResponse.Content.ReadAsStringAsync());
+
+        dto.FirstName = "New Name";
+        dto.Password = "NewPassword3@";
+        dto.ConfirmPassword = "NewPassword3@";
         var contentUpdate = await CreateStringContent(dto);
         var putResponse = await client.PutAsync($"{CustomerUrl}/{customer.Id}", contentUpdate);
         Assert.True(putResponse.IsSuccessStatusCode);

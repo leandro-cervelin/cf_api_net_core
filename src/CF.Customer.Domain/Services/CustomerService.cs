@@ -63,8 +63,8 @@ public class CustomerService(ICustomerRepository customerRepository, IPasswordHa
         entity.FirstName = customer.FirstName;
         entity.Surname = customer.Surname;
 
-        var (verified, _) = _passwordHasherService.Check(entity.Password, customer.Password);
-        if (!verified) entity.Password = _passwordHasherService.Hash(customer.Password);
+        var isUnmodifiedPassword = _passwordHasherService.Verify(customer.Password, entity.Password);
+        if (!isUnmodifiedPassword) entity.Password = _passwordHasherService.Hash(customer.Password);
 
         entity.SetUpdatedDate();
         await _customerRepository.SaveChangesAsync(cancellationToken);
