@@ -39,7 +39,7 @@ builder.Services.AddResponseCompression(options => { options.Providers.Add<GzipC
 builder.Services.AddDbContext<CustomerContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("DbConnection"),
-        a => { a.MigrationsAssembly("CF.Api"); });
+        a => { a.MigrationsAssembly("CF.Migrations"); });
 });
 
 AddNLog();
