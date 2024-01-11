@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using CF.Api.Helpers;
 using CF.Customer.Application.Dtos;
 using CF.Customer.Application.Facades.Interfaces;
 using CF.Customer.Domain.Exceptions;
@@ -45,7 +46,7 @@ public class CustomerController(ICorrelationContextAccessor correlationContext, 
     {
         try
         {
-            if (id <= 0) return BadRequest(CreateProblemDetails("Id", "Invalid Id."));
+            if (id <= 0) return BadRequest(ControllerHelper.CreateProblemDetails("Id", "Invalid Id."));
 
             var filter = new CustomerFilterDto {Id = id};
             var result = await _customerFacade.GetByFilterAsync(filter, cancellationToken);
@@ -85,7 +86,7 @@ public class CustomerController(ICorrelationContextAccessor correlationContext, 
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            if (id <= 0) return BadRequest(CreateProblemDetails("Id", "Invalid Id."));
+            if (id <= 0) return BadRequest(ControllerHelper.CreateProblemDetails("Id", "Invalid Id."));
 
             await _customerFacade.UpdateAsync(id, customerRequestDto, cancellationToken);
             return NoContent();
@@ -114,7 +115,7 @@ public class CustomerController(ICorrelationContextAccessor correlationContext, 
     {
         try
         {
-            if (id <= 0) return BadRequest(CreateProblemDetails("Id", "Invalid Id."));
+            if (id <= 0) return BadRequest(ControllerHelper.CreateProblemDetails("Id", "Invalid Id."));
 
             await _customerFacade.DeleteAsync(id, cancellationToken);
 
@@ -134,22 +135,5 @@ public class CustomerController(ICorrelationContextAccessor correlationContext, 
 
             return BadRequest(e.Message);
         }
-    }
-
-    private static ProblemDetails CreateProblemDetails(string property, string errorMessage)
-    {
-        var error = new KeyValuePair<string, object>("Errors", new Dictionary<string, List<string>>
-            {
-                {property, new List<string> {errorMessage}}
-            }
-        );
-
-        return new ProblemDetails
-        {
-            Extensions = {error},
-            Title = "One validation error occurred.",
-            Status = StatusCodes.Status400BadRequest,
-            Type = "https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.1"
-        };
     }
 }
