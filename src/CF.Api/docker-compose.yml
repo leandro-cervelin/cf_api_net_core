@@ -1,4 +1,4 @@
-﻿version: "3"
+﻿version: "3.4"
 services:
     api:
         build: 
@@ -6,6 +6,8 @@ services:
           dockerfile: CF.Api/Dockerfile 
         ports:
             - "8888:80"
+        environment:
+            - ASPNETCORE_URLS=http://+:80
         depends_on:
             - db
     db:

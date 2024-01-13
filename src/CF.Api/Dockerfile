@@ -18,6 +18,3 @@ FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "CF.Api.dll"]
-
-RUN chmod +x ./entrypoint.sh
-CMD /bin/bash ./entrypoint.sh

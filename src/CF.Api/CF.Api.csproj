@@ -22,15 +22,12 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\CF.Customer.Infrastructure\CF.Customer.Infrastructure.csproj" />
-		<ProjectReference Include="..\CF.Migrations\CF.Migrations.csproj" />
+	  <ProjectReference Include="..\CF.Customer.Infrastructure\CF.Customer.Infrastructure.csproj" />
+	  <ProjectReference Include="..\CF.Migrations\CF.Migrations.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<None Update="Dockerfile">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</None>
-		<None Update="entrypoint.sh">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
 	</ItemGroup>

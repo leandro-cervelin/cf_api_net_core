@@ -66,7 +66,6 @@ void AddExceptionHandler()
 
 void AddSwagger()
 {
-    if (!app.Environment.IsDevelopment()) return;
     app.UseSwagger();
     app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "CF Api"));
 }
