@@ -5,7 +5,7 @@ namespace CF.Customer.Domain.Services;
 
 public class PasswordHasherService : IPasswordHasherService
 {
-    public string Hash(string password) => Crypt.HashPassword(password);
+    public async Task<string> HashAsync(string password) => await Task.FromResult(Crypt.HashPassword(password));
 
-    public bool Verify(string password, string hash) => Crypt.Verify(password, hash);
+    public async Task<bool> VerifyAsync(string password, string hash) => await Task.FromResult(Crypt.Verify(password, hash));
 }
