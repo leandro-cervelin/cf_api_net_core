@@ -51,7 +51,7 @@ public class CustomerController(ICorrelationContextAccessor correlationContext, 
             var filter = new CustomerFilterDto {Id = id};
             var result = await _customerFacade.GetByFilterAsync(filter, cancellationToken);
 
-            if (result == null) return NotFound();
+            if (result is null) return NotFound();
 
             return result;
         }
