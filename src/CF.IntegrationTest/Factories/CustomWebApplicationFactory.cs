@@ -49,9 +49,7 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
             }
             catch (Exception ex)
             {
-                logger.LogError(
-                    "An error occurred seeding the database with test messages. Error: {ex.Message}, {ex}",
-                    ex.Message, ex);
+                logger.LogError(ex, "An error occurred while seeding the database with test messages.");
             }
         });
 

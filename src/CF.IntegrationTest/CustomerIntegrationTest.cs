@@ -4,7 +4,6 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using Azure;
 using CF.Customer.Application.Dtos;
 using CF.IntegrationTest.Factories;
 using CF.IntegrationTest.Models;
@@ -15,15 +14,9 @@ using Xunit;
 
 namespace CF.IntegrationTest;
 
-public class CustomerIntegrationTest : IClassFixture<CustomWebApplicationFactory>
+public class CustomerIntegrationTest(CustomWebApplicationFactory factory) : IClassFixture<CustomWebApplicationFactory>
 {
     private const string CustomerUrl = "api/v1/customer";
-    private readonly CustomWebApplicationFactory _factory;
-
-    public CustomerIntegrationTest(CustomWebApplicationFactory factory)
-    {
-        _factory = factory;
-    }
 
     [Fact]
     public async Task CreateCustomerOkTest()
@@ -38,7 +31,7 @@ public class CustomerIntegrationTest : IClassFixture<CustomWebApplicationFactory
         };
 
         var content = await CreateStringContent(dto);
-        var client = _factory.CreateClient();
+        var client = factory.CreateClient();
         var response = await client.PostAsync(CustomerUrl, content);
         response.EnsureSuccessStatusCode();
 
@@ -58,7 +51,7 @@ public class CustomerIntegrationTest : IClassFixture<CustomWebApplicationFactory
         };
 
         var content = await CreateStringContent(dto);
-        var client = _factory.CreateClient();
+        var client = factory.CreateClient();
         var response = await client.PostAsync(CustomerUrl, content);
         var errors = await ExtractErrorsFromResponse(response);
 
@@ -84,11 +77,11 @@ public class CustomerIntegrationTest : IClassFixture<CustomWebApplicationFactory
         };
 
         var content = await CreateStringContent(dto);
-        var client = _factory.CreateClient();
+        var client = factory.CreateClient();
         var response = await client.PostAsync(CustomerUrl, content);
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
 
-        var clientNotOk = _factory.CreateClient();
+        var clientNotOk = factory.CreateClient();
         var responseNotOk = await clientNotOk.PostAsync(CustomerUrl, content);
         var errors = await ExtractErrorsFromResponse(responseNotOk);
 
@@ -106,13 +99,13 @@ public class CustomerIntegrationTest : IClassFixture<CustomWebApplicationFactory
         {
             FirstName = "Test Name",
             Surname = "Test Surname",
-            Email = "",
+            Email = string.Empty,
             Password = "Password1@",
             ConfirmPassword = "Password1@"
         };
 
         var content = await CreateStringContent(dto);
-        var client = _factory.CreateClient();
+        var client = factory.CreateClient();
         var response = await client.PostAsync(CustomerUrl, content);
         var errors = await ExtractErrorsFromResponse(response);
 
@@ -129,7 +122,7 @@ public class CustomerIntegrationTest : IClassFixture<CustomWebApplicationFactory
     {
         var dto = new CustomerRequestDto
         {
-            FirstName = "",
+            FirstName = string.Empty,
             Surname = "Test Surname",
             Email = CreateValidEmail(),
             Password = "Password1@",
@@ -137,7 +130,7 @@ public class CustomerIntegrationTest : IClassFixture<CustomWebApplicationFactory
         };
 
         var content = await CreateStringContent(dto);
-        var client = _factory.CreateClient();
+        var client = factory.CreateClient();
         var response = await client.PostAsync(CustomerUrl, content);
         var errors = await ExtractErrorsFromResponse(response);
 
@@ -154,14 +147,14 @@ public class CustomerIntegrationTest : IClassFixture<CustomWebApplicationFactory
         var dto = new CustomerRequestDto
         {
             FirstName = "Test First Name",
-            Surname = "",
+            Surname = string.Empty,
             Email = CreateValidEmail(),
             Password = "Password1@",
             ConfirmPassword = "Password1@"
         };
 
         var content = await CreateStringContent(dto);
-        var client = _factory.CreateClient();
+        var client = factory.CreateClient();
         var response = await client.PostAsync(CustomerUrl, content);
         var errors = await ExtractErrorsFromResponse(response);
 
@@ -186,7 +179,7 @@ public class CustomerIntegrationTest : IClassFixture<CustomWebApplicationFactory
         };
 
         var content = await CreateStringContent(dto);
-        var client = _factory.CreateClient();
+        var client = factory.CreateClient();
         var response = await client.PostAsync(CustomerUrl, content);
         var errors = await ExtractErrorsFromResponse(response);
 
@@ -211,7 +204,7 @@ public class CustomerIntegrationTest : IClassFixture<CustomWebApplicationFactory
         };
 
         var content = await CreateStringContent(dto);
-        var client = _factory.CreateClient();
+        var client = factory.CreateClient();
         var response = await client.PostAsync(CustomerUrl, content);
         var errors = await ExtractErrorsFromResponse(response);
 
@@ -237,7 +230,7 @@ public class CustomerIntegrationTest : IClassFixture<CustomWebApplicationFactory
         };
 
         var content = await CreateStringContent(dto);
-        var client = _factory.CreateClient();
+        var client = factory.CreateClient();
         var response = await client.PostAsync(CustomerUrl, content);
         var errors = await ExtractErrorsFromResponse(response);
 
@@ -262,7 +255,7 @@ public class CustomerIntegrationTest : IClassFixture<CustomWebApplicationFactory
         };
 
         var content = await CreateStringContent(dto);
-        var client = _factory.CreateClient();
+        var client = factory.CreateClient();
         var response = await client.PostAsync(CustomerUrl, content);
         var errors = await ExtractErrorsFromResponse(response);
 
@@ -282,11 +275,11 @@ public class CustomerIntegrationTest : IClassFixture<CustomWebApplicationFactory
             FirstName = "Test First",
             Surname = "Test Surname",
             Email = CreateValidEmail(),
-            Password = ""
+            Password = string.Empty
         };
 
         var content = await CreateStringContent(dto);
-        var client = _factory.CreateClient();
+        var client = factory.CreateClient();
         var response = await client.PostAsync(CustomerUrl, content);
         var errors = await ExtractErrorsFromResponse(response);
 
@@ -310,7 +303,7 @@ public class CustomerIntegrationTest : IClassFixture<CustomWebApplicationFactory
         };
 
         var content = await CreateStringContent(dto);
-        var client = _factory.CreateClient();
+        var client = factory.CreateClient();
         var response = await client.PostAsync(CustomerUrl, content);
 
         var errors = await ExtractErrorsFromResponse(response);
@@ -335,7 +328,7 @@ public class CustomerIntegrationTest : IClassFixture<CustomWebApplicationFactory
         };
 
         var content = await CreateStringContent(dto);
-        var client = _factory.CreateClient();
+        var client = factory.CreateClient();
         var response = await client.PostAsync(CustomerUrl, content);
         var errors = await ExtractErrorsFromResponse(response);
 
@@ -361,7 +354,7 @@ public class CustomerIntegrationTest : IClassFixture<CustomWebApplicationFactory
         };
 
         var content = await CreateStringContent(dto);
-        var client = _factory.CreateClient();
+        var client = factory.CreateClient();
         var response = await client.PostAsync(CustomerUrl, content);
         var errors = await ExtractErrorsFromResponse(response);
 
@@ -389,11 +382,11 @@ public class CustomerIntegrationTest : IClassFixture<CustomWebApplicationFactory
         };
 
         var content = await CreateStringContent(dto);
-        var client = _factory.CreateClient();
+        var client = factory.CreateClient();
         var createResponse = await client.PostAsync(CustomerUrl, content);
         Assert.Equal(HttpStatusCode.Created, createResponse.StatusCode);
 
-        client = _factory.CreateClient();
+        client = factory.CreateClient();
         var getResponse = await client.GetAsync(createResponse.Headers.Location?.ToString());
         Assert.Equal(HttpStatusCode.OK, getResponse.StatusCode);
         var customer =
@@ -421,11 +414,11 @@ public class CustomerIntegrationTest : IClassFixture<CustomWebApplicationFactory
         };
 
         var content = await CreateStringContent(dto);
-        var client = _factory.CreateClient();
+        var client = factory.CreateClient();
         var createResponse = await client.PostAsync(CustomerUrl, content);
         Assert.Equal(HttpStatusCode.Created, createResponse.StatusCode);
 
-        client = _factory.CreateClient();
+        client = factory.CreateClient();
         var getResponse = await client.GetAsync(createResponse.Headers.Location?.ToString());
         Assert.Equal(HttpStatusCode.OK, getResponse.StatusCode);
         var customer =
@@ -455,20 +448,20 @@ public class CustomerIntegrationTest : IClassFixture<CustomWebApplicationFactory
         };
 
         var contentCustomerOne = await CreateStringContent(dto);
-        var client = _factory.CreateClient();
+        var client = factory.CreateClient();
         var createCustomerOneResponse = await client.PostAsync(CustomerUrl, contentCustomerOne);
         Assert.Equal(HttpStatusCode.Created, createCustomerOneResponse.StatusCode);
 
         dto.Email = CreateValidEmail();
 
         var contentCustomerTwo = await CreateStringContent(dto);
-        client = _factory.CreateClient();
+        client = factory.CreateClient();
         var createCustomerTwoResponse = await client.PostAsync(CustomerUrl, contentCustomerTwo);
         Assert.Equal(HttpStatusCode.Created, createCustomerTwoResponse.StatusCode);
 
         var parameters = new Dictionary<string, string> {{"email", dto.Email}};
         var requestUri = QueryHelpers.AddQueryString(CustomerUrl, parameters);
-        client = _factory.CreateClient();
+        client = factory.CreateClient();
         var getResponse = await client.GetAsync(requestUri);
         Assert.Equal(HttpStatusCode.OK, getResponse.StatusCode);
         var customer =
@@ -476,7 +469,7 @@ public class CustomerIntegrationTest : IClassFixture<CustomWebApplicationFactory
 
         dto.Email = customerOneEmail;
         var content = await CreateStringContent(dto);
-        client = _factory.CreateClient();
+        client = factory.CreateClient();
         var response = await client.PutAsync($"{CustomerUrl}/{customer.Id}", content);
 
         var errors = await ExtractErrorsFromResponse(response);
@@ -503,11 +496,11 @@ public class CustomerIntegrationTest : IClassFixture<CustomWebApplicationFactory
         };
 
         var content = await CreateStringContent(dto);
-        var client = _factory.CreateClient();
+        var client = factory.CreateClient();
         var response = await client.PostAsync(CustomerUrl, content);
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
 
-        client = _factory.CreateClient();
+        client = factory.CreateClient();
         var getResponse = await client.GetAsync(response.Headers.Location?.ToString());
         Assert.Equal(HttpStatusCode.OK, getResponse.StatusCode);
     }
@@ -515,7 +508,7 @@ public class CustomerIntegrationTest : IClassFixture<CustomWebApplicationFactory
     [Fact]
     public async Task GetCustomerInvalidIdValueTest()
     {
-        var client = _factory.CreateClient();
+        var client = factory.CreateClient();
         var response = await client.GetAsync($"{CustomerUrl}/l");
         var errors = await ExtractErrorsFromResponse(response);
 
@@ -529,7 +522,7 @@ public class CustomerIntegrationTest : IClassFixture<CustomWebApplicationFactory
     [Fact]
     public async Task GetCustomerInvalidIdNegativeTest()
     {
-        var client = _factory.CreateClient();
+        var client = factory.CreateClient();
         var response = await client.GetAsync($"{CustomerUrl}/-1");
         var errors = await ExtractErrorsFromResponse(response);
 
@@ -553,13 +546,13 @@ public class CustomerIntegrationTest : IClassFixture<CustomWebApplicationFactory
         };
 
         var content = await CreateStringContent(dto);
-        var client = _factory.CreateClient();
+        var client = factory.CreateClient();
         var response = await client.PostAsync(CustomerUrl, content);
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
 
         dto.Email = CreateValidEmail();
         var contentTwo = await CreateStringContent(dto);
-        client = _factory.CreateClient();
+        client = factory.CreateClient();
         var responseTwo = await client.PostAsync(CustomerUrl, contentTwo);
         Assert.Equal(HttpStatusCode.Created, responseTwo.StatusCode);
 
@@ -574,7 +567,7 @@ public class CustomerIntegrationTest : IClassFixture<CustomWebApplicationFactory
 
         var requestUri = QueryHelpers.AddQueryString(CustomerUrl, parameters);
 
-        client = _factory.CreateClient();
+        client = factory.CreateClient();
         var getResponse = await client.GetAsync(requestUri);
         Assert.Equal(HttpStatusCode.OK, getResponse.StatusCode);
         var customers =
@@ -600,17 +593,17 @@ public class CustomerIntegrationTest : IClassFixture<CustomWebApplicationFactory
 
         var content = await CreateStringContent(dto);
 
-        var client = _factory.CreateClient();
+        var client = factory.CreateClient();
         var response = await client.PostAsync(CustomerUrl, content);
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
 
-        client = _factory.CreateClient();
+        client = factory.CreateClient();
         var getResponse = await client.GetAsync(response.Headers.Location?.ToString());
         Assert.Equal(HttpStatusCode.OK, getResponse.StatusCode);
         var customer =
             JsonConvert.DeserializeObject<CustomerResponseDto>(await getResponse.Content.ReadAsStringAsync());
 
-        client = _factory.CreateClient();
+        client = factory.CreateClient();
         var deleteResponse = await client.DeleteAsync($"{CustomerUrl}/{customer.Id}");
         Assert.Equal(HttpStatusCode.NoContent, deleteResponse.StatusCode);
     }

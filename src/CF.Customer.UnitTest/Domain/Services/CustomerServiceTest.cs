@@ -121,7 +121,7 @@ public class CustomerServiceTest
             Password = "Password@01",
             Email = "test1@test.com",
             Surname = "Surname",
-            FirstName = ""
+            FirstName = string.Empty
         };
 
         var cancellationTokenSource = new CancellationTokenSource();
@@ -261,7 +261,7 @@ public class CustomerServiceTest
         var customer = new Customer.Domain.Entities.Customer
         {
             Password = "Password@01",
-            Email = "",
+            Email = string.Empty,
             Surname = "Surname",
             FirstName = "First Name"
         };
@@ -284,7 +284,7 @@ public class CustomerServiceTest
         //Arrange
         var customer = new Customer.Domain.Entities.Customer
         {
-            Password = "",
+            Password = string.Empty,
             Email = "test1@test.com",
             Surname =
                 "Surname Surname Surname Surname Surname Surname Surname Surname Surname Surname Surname Surname Surname Surname Surname Surname",
