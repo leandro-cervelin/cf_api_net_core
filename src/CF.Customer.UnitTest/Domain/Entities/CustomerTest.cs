@@ -22,7 +22,7 @@ public class CustomerTest
     [InlineData("1123aaswdewwpfomwfpo4")]
     public void InvalidPasswordRequirementsTest(string password)
     {
-        //Arrange
+        // Arrange
         var customer = new Customer.Domain.Entities.Customer
         {
             Password = password
@@ -31,10 +31,10 @@ public class CustomerTest
         const string invalidPasswordErrorMessage =
             "Password must be at least 8 characters and contain at 3 of the following: upper case (A-Z), lower case (a-z), number (0-9) and special character (e.g. !@#$%^&*).";
         
-        //Act
+        // Act
         var exception = Assert.Throws<ValidationException>(customer.ValidatePassword);
 
-        //Assert
+        // Assert
         Assert.Equal(invalidPasswordErrorMessage, exception.Message);
     }
 
