@@ -25,7 +25,7 @@ namespace CF.IntegrationTest
         [Fact]
         public async Task CreateCustomerOkTestAsync()
         {
-            var dto = await CreateCustomerRequestDtoAsync();
+            var dto = CreateCustomerRequestDto();
             var content = await CreateStringContentAsync(dto);
             var response = await _httpClient.PostAsync(CustomerUrl, content);
             response.EnsureSuccessStatusCode();
@@ -33,26 +33,11 @@ namespace CF.IntegrationTest
             Assert.Equal(HttpStatusCode.Created, response.StatusCode);
         }
 
-        [Fact]
-        public async Task CreateCustomerInvalidEmailTestAsync()
-        {
-            var dto = await CreateCustomerRequestDtoAsync();
-            dto.Email = "invalid_at_test.com";
-            var content = await CreateStringContentAsync(dto);
-            var response = await _httpClient.PostAsync(CustomerUrl, content);
-            var errors = await ExtractErrorsFromResponse(response);
-
-            Assert.NotNull(errors);
-            Assert.Contains("Email", errors);
-            Assert.Single(errors["Email"]);
-            Assert.Equal("The Email field is not a valid email address.", errors["Email"][0]);
-            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-        }
 
         [Fact]
         public async Task CreateCustomerExistingEmailTestAsync()
         {
-            var dto = await CreateCustomerRequestDtoAsync();
+            var dto = CreateCustomerRequestDto();
             var content = await CreateStringContentAsync(dto);
             var response = await _httpClient.PostAsync(CustomerUrl, content);
             Assert.Equal(HttpStatusCode.Created, response.StatusCode);
@@ -68,11 +53,14 @@ namespace CF.IntegrationTest
             Assert.Equal(HttpStatusCode.BadRequest, responseNotOk.StatusCode);
         }
 
-        [Fact]
-        public async Task CreateCustomerRequiredEmailTestAsync()
+        [Theory]
+        [InlineData("invalid_email_at_test.com", "The Email field is not a valid email address.")]
+        [InlineData("", "The Email field is required.")]
+        [InlineData("eeeeeeeeeewedewfdwefweeemmmmmmmmaaaaaaaaaaaaaaiiiiiiiiiiiilllllllllll@teeeeeeesssssssssssssstttttttttttttttt.com", "The Email field must not exceed 100 characters.")]
+        public async Task CreateCustomerAsync_Email_Validation_Test(string email, string errorMessage)
         {
-            var dto = await CreateCustomerRequestDtoAsync();
-            dto.Email = string.Empty;
+            var dto = CreateCustomerRequestDto();
+            dto.Email = email;
 
             var content = await CreateStringContentAsync(dto);
             var response = await _httpClient.PostAsync(CustomerUrl, content);
@@ -81,34 +69,18 @@ namespace CF.IntegrationTest
             Assert.NotNull(errors);
             Assert.Contains("Email", errors);
             Assert.NotEmpty(errors["Email"]);
-            Assert.Equal("The Email field is required.", errors["Email"][0]);
-            Assert.Equal("The Email field is not a valid email address.", errors["Email"][1]);
+            Assert.Equal(errorMessage, errors["Email"][0]);
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         }
 
-        [Fact]
-        public async Task CreateCustomerEmailMustNotExceedTestAsync()
+        [Theory]
+        [InlineData("", "The First Name field is required.")]
+        [InlineData("Test First Name Test First Name Test First Name Test First Name Test First Name Test First Name Test First Name", "The First Name field must be between 2 and 100 characters.")]
+        [InlineData("T", "The First Name field must be between 2 and 100 characters.")]
+        public async Task CreateCustomerAsync_FirstName_Validation_Test(string firstName, string errorMessage)
         {
-            var dto = await CreateCustomerRequestDtoAsync();
-            dto.Email = "eeeeeeeeeewedewfdwefweeemmmmmmmmaaaaaaaaaaaaaaiiiiiiiiiiiilllllllllll@teeeeeeesssssssssssssstttttttttttttttt.com";
-
-            var content = await CreateStringContentAsync(dto);
-            var response = await _httpClient.PostAsync(CustomerUrl, content);
-            var errors = await ExtractErrorsFromResponse(response);
-
-            Assert.NotNull(errors);
-            Assert.Contains("Email", errors);
-            Assert.NotEmpty(errors["Email"]);
-            Assert.Equal("The Email field must not exceed 100 characters.", errors["Email"][0]);
-            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-        }
-
-        [Fact]
-        public async Task CreateCustomerRequiredFirstNameTestAsync()
-        {
-            var dto = await CreateCustomerRequestDtoAsync();
-            dto.FirstName = string.Empty;
-
+            var dto = CreateCustomerRequestDto();
+            dto.FirstName = firstName;
             var content = await CreateStringContentAsync(dto);
             var response = await _httpClient.PostAsync(CustomerUrl, content);
             var errors = await ExtractErrorsFromResponse(response);
@@ -116,16 +88,18 @@ namespace CF.IntegrationTest
             Assert.NotNull(errors);
             Assert.Contains("FirstName", errors);
             Assert.NotEmpty(errors["FirstName"]);
-            Assert.Equal("The First Name field is required.", errors["FirstName"][0]);
+            Assert.Equal(errorMessage, errors["FirstName"][0]);
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         }
 
-        [Fact]
-        public async Task CreateCustomerRequiredSurnameTestAsync()
+        [Theory]
+        [InlineData("", "The Surname field is required.")]
+        [InlineData("Test Surname Test Surname Test Surname Test Surname Test Surname Test Surname Test Surname Test Surname Test Surname", "The Surname field must be between 2 and 100 characters.")]
+        [InlineData("T", "The Surname field must be between 2 and 100 characters.")]
+        public async Task CreateCustomerAsync_Surname_Validation_Test(string surname, string errorMessage)
         {
-            var dto = await CreateCustomerRequestDtoAsync();
-            dto.Surname = string.Empty;
-
+            var dto = CreateCustomerRequestDto();
+            dto.Surname = surname;
             var content = await CreateStringContentAsync(dto);
             var response = await _httpClient.PostAsync(CustomerUrl, content);
             var errors = await ExtractErrorsFromResponse(response);
@@ -133,89 +107,18 @@ namespace CF.IntegrationTest
             Assert.NotNull(errors);
             Assert.Contains("Surname", errors);
             Assert.NotEmpty(errors["Surname"]);
-            Assert.Equal("The Surname field is required.", errors["Surname"][0]);
+            Assert.Equal(errorMessage, errors["Surname"][0]);
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         }
 
-        [Fact]
-        public async Task CreateCustomerMaxLengthFirstNameTestAsync()
+        [Theory]
+        [InlineData("", "The Password field is required.")]
+        [InlineData("@123RF", "Passwords must be at least 8 characters and contain at least 3 of the following: upper case (A-Z), lower case (a-z), number (0-9), and special character (e.g. !@#$%^&*).")]
+        [InlineData("01234567901234", "Passwords must be at least 8 characters and contain at least 3 of the following: upper case (A-Z), lower case (a-z), number (0-9), and special character (e.g. !@#$%^&*).")]
+        public async Task CreateCustomerAsync_Password_Validation_Test(string password, string errorMessage)
         {
-            var dto = await CreateCustomerRequestDtoAsync();
-            dto.FirstName = 
-                    "Test First Name Test First Name Test First Name Test First Name Test First Name Test First Name Test First Name";
-
-            var content = await CreateStringContentAsync(dto);
-            var response = await _httpClient.PostAsync(CustomerUrl, content);
-            var errors = await ExtractErrorsFromResponse(response);
-
-            Assert.NotNull(errors);
-            Assert.Contains("FirstName", errors);
-            Assert.NotEmpty(errors["FirstName"]);
-            Assert.Equal("The First Name field must be between 2 and 100 characters.",
-                errors["FirstName"][0]);
-            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-        }
-
-        [Fact]
-        public async Task CreateCustomerMinLengthFirstNameTestAsync()
-        {
-            var dto = await CreateCustomerRequestDtoAsync();
-            dto.FirstName = "T";
-
-            var content = await CreateStringContentAsync(dto);
-            var response = await _httpClient.PostAsync(CustomerUrl, content);
-            var errors = await ExtractErrorsFromResponse(response);
-
-            Assert.NotNull(errors);
-            Assert.Contains("FirstName", errors);
-            Assert.NotEmpty(errors["FirstName"]);
-            Assert.Equal("The First Name field must be between 2 and 100 characters.",
-                errors["FirstName"][0]);
-            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-        }
-
-        [Fact]
-        public async Task CreateCustomerMaxLengthSurnameTestAsync()
-        {
-            var dto = await CreateCustomerRequestDtoAsync();
-            dto.Surname =
-                    "Test Surname Test Surname Test Surname Test Surname Test Surname Test Surname Test Surname Test Surname Test Surname";
-
-            var content = await CreateStringContentAsync(dto);
-            var response = await _httpClient.PostAsync(CustomerUrl, content);
-            var errors = await ExtractErrorsFromResponse(response);
-
-            Assert.NotNull(errors);
-            Assert.Contains("Surname", errors);
-            Assert.NotEmpty(errors["Surname"]);
-            Assert.Equal("The Surname field must be between 2 and 100 characters.",
-                errors["Surname"][0]);
-            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-        }
-
-        [Fact]
-        public async Task CreateCustomerMinLengthSurnameTestAsync()
-        {
-            var dto = await CreateCustomerRequestDtoAsync();
-            dto.Surname = "T";
-
-            var content = await CreateStringContentAsync(dto);
-            var response = await _httpClient.PostAsync(CustomerUrl, content);
-            var errors = await ExtractErrorsFromResponse(response);
-
-            Assert.NotNull(errors);
-            Assert.Contains("Surname", errors);
-            Assert.NotEmpty(errors["Surname"]);
-            Assert.Equal("The Surname field must be between 2 and 100 characters.",
-                errors["Surname"][0]);
-            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-        }
-
-        [Fact]
-        public async Task CreateRequiredPasswordTestAsync()
-        {
-            var dto = await CreateCustomerRequestDtoAsync();
-            dto.Password = string.Empty;
+            var dto = CreateCustomerRequestDto();
+            dto.Password = password;
 
             var content = await CreateStringContentAsync(dto);
             var response = await _httpClient.PostAsync(CustomerUrl, content);
@@ -224,14 +127,14 @@ namespace CF.IntegrationTest
             Assert.NotNull(errors);
             Assert.Contains("Password", errors);
             Assert.NotEmpty(errors["Password"]);
-            Assert.Equal("The Password field is required.", errors["Password"][0]);
+            Assert.Equal(errorMessage, errors["Password"][0]);
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         }
 
         [Fact]
-        public async Task CreatePasswordsDoesNotMatchTestAsync()
+        public async Task CreateCustomerAsync_ConfirmPassword_Validation_Test()
         {
-            var dto = await CreateCustomerRequestDtoAsync();
+            var dto = CreateCustomerRequestDto();
             dto.ConfirmPassword = "Password3!";
 
             var content = await CreateStringContentAsync(dto);
@@ -247,46 +150,9 @@ namespace CF.IntegrationTest
         }
 
         [Fact]
-        public async Task CreateMinLengthPasswordTestAsync()
-        {
-            var dto = await CreateCustomerRequestDtoAsync();
-            dto.Password = "@123RF";
-            dto.ConfirmPassword = "@123RF";
-
-            var content = await CreateStringContentAsync(dto);
-            var response = await _httpClient.PostAsync(CustomerUrl, content);
-            var errors = await ExtractErrorsFromResponse(response);
-
-            Assert.NotNull(errors);
-            Assert.Contains("Password", errors);
-            Assert.NotEmpty(errors["Password"]);
-            Assert.Equal(
-                "Passwords must be at least 8 characters and contain at least 3 of the following: upper case (A-Z), lower case (a-z), number (0-9), and special character (e.g. !@#$%^&*).",
-                errors["Password"][0]);
-            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-        }
-
-        [Fact]
-        public async Task CreateInvalidPasswordTestAsync()
-        {
-            var dto = await CreateCustomerRequestDtoAsync();
-            dto.Password = "01234567901234";
-            dto.ConfirmPassword = "01234567901234";
-
-            var content = await CreateStringContentAsync(dto);
-            var response = await _httpClient.PostAsync(CustomerUrl, content);
-            var errors = await ExtractErrorsFromResponse(response);
-
-            Assert.NotNull(errors);
-            Assert.Contains("Password", errors);
-            Assert.NotEmpty(errors["Password"]);
-            Assert.Equal("Passwords must be at least 8 characters and contain at least 3 of the following: upper case (A-Z), lower case (a-z), number (0-9), and special character (e.g. !@#$%^&*).", errors["Password"][0]);
-            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-            }
-            [Fact]
         public async Task UpdateCustomerOkTestAsync()
         {
-            var dto = await CreateCustomerRequestDtoAsync();
+            var dto = CreateCustomerRequestDto();
 
             var content = await CreateStringContentAsync(dto);
             var createResponse = await _httpClient.PostAsync(CustomerUrl, content);
@@ -307,7 +173,7 @@ namespace CF.IntegrationTest
         [Fact]
         public async Task UpdateCustomerIncludingPasswordOkTestAsync()
         {
-            var dto = await CreateCustomerRequestDtoAsync();
+            var dto = CreateCustomerRequestDto();
 
             var content = await CreateStringContentAsync(dto);
             var createResponse = await _httpClient.PostAsync(CustomerUrl, content);
@@ -330,7 +196,7 @@ namespace CF.IntegrationTest
         [Fact]
         public async Task UpdateCustomerExistingEmailTestAsync()
         {
-            var dto = await CreateCustomerRequestDtoAsync();
+            var dto = CreateCustomerRequestDto();
             var customerOneEmail = dto.Email;
 
             var contentCustomerOne = await CreateStringContentAsync(dto);
@@ -366,7 +232,7 @@ namespace CF.IntegrationTest
         [Fact]
         public async Task GetCustomerTestAsync()
         {
-            var dto = await CreateCustomerRequestDtoAsync();
+            var dto = CreateCustomerRequestDto();
 
             var content = await CreateStringContentAsync(dto);
             var response = await _httpClient.PostAsync(CustomerUrl, content);
@@ -405,11 +271,11 @@ namespace CF.IntegrationTest
         [Fact]
         public async Task GetCustomerListTestAsync()
         {
-            var dto = await CreateCustomerRequestDtoAsync();
+            var dto = CreateCustomerRequestDto();
             var content = await CreateStringContentAsync(dto);
             var response = await _httpClient.PostAsync(CustomerUrl, content);
             Assert.Equal(HttpStatusCode.Created, response.StatusCode);
-            
+
             dto.Email = $"new_{dto.Email}";
             var contentTwo = await CreateStringContentAsync(dto);
             var responseTwo = await _httpClient.PostAsync(CustomerUrl, contentTwo);
@@ -437,7 +303,7 @@ namespace CF.IntegrationTest
         [Fact]
         public async Task DeleteCustomerOkTestAsync()
         {
-            var dto = await CreateCustomerRequestDtoAsync();
+            var dto = CreateCustomerRequestDto();
 
             var content = await CreateStringContentAsync(dto);
 
@@ -460,16 +326,16 @@ namespace CF.IntegrationTest
             return content;
         }
 
-        private static async Task<CustomerRequestDto> CreateCustomerRequestDtoAsync()
+        private static CustomerRequestDto CreateCustomerRequestDto()
         {
-            return await Task.FromResult(new CustomerRequestDto
+            return new CustomerRequestDto
             {
                 FirstName = "Test Name",
                 Surname = "Test Surname",
                 Email = $"{DateTime.Now:yyyyMMdd_hhmmssfff}@test.com",
                 Password = "Password1@",
                 ConfirmPassword = "Password1@"
-            });
+            };
         }
 
         private static async Task<IDictionary<string, string[]>> ExtractErrorsFromResponse(HttpResponseMessage response)
@@ -477,7 +343,7 @@ namespace CF.IntegrationTest
             var responseContent =
                 JsonConvert.DeserializeObject<ErrorResponse>(await response.Content.ReadAsStringAsync(), new ExpandoObjectConverter());
             var errors =
-                (IDictionary<string, string[]>) JsonConvert.DeserializeObject<Dictionary<string, string[]>>(responseContent.Errors.ToString());
+                (IDictionary<string, string[]>)JsonConvert.DeserializeObject<Dictionary<string, string[]>>(responseContent.Errors.ToString());
             return errors;
         }
     }
