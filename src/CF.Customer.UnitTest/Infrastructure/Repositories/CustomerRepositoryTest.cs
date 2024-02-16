@@ -10,407 +10,242 @@ namespace CF.Customer.UnitTest.Infrastructure.Repositories;
 
 public class CustomerRepositoryTest
 {
+    private readonly CancellationTokenSource _cancellationTokenSource = new();
+
     [Fact]
-    public async Task GetListTest()
+    public async Task GetListTestAsync()
     {
-        var connection = CreateSqLiteConnection();
-        connection.Open();
+        using var connection = await CreateAndOpenSqliteConnectionAsync();
 
-        try
-        {
-            var options = SetDbContextOptionsBuilder(connection);
+        var options = await SetDbContextOptionsBuilderAsync(connection);
 
-            await using var context = new CustomerContext(options);
-            Assert.True(await context.Database.EnsureCreatedAsync());
+        await using var context = new CustomerContext(options);
+        Assert.True(await context.Database.EnsureCreatedAsync());
 
-            //Arrange
-            var cancellationTokenSource = new CancellationTokenSource();
+        //Arrange
+        var customerOne = CreateCustomer();
+        var customerTwo = CreateCustomer();
+        customerTwo.Email = "email2@test.com";
 
-            var customerOne = new Customer.Domain.Entities.Customer
-            {
-                Password = "Password01@",
-                Email = "test1@test.com",
-                Surname = "Surname1",
-                FirstName = "FirstName1",
-                Updated = DateTime.Now,
-                Created = DateTime.Now
-            };
+        //Act
+        var repository = new CustomerRepository(context);
+        await repository.AddRangeAsync([customerOne, customerTwo]);
+        await repository.SaveChangesAsync(_cancellationTokenSource.Token);
 
-            var customerTwo = new Customer.Domain.Entities.Customer
-            {
-                Password = "Password01@",
-                Email = "test2@test.com",
-                Surname = "Surname2",
-                FirstName = "FirstName2",
-                Updated = DateTime.Now,
-                Created = DateTime.Now
-            };
+        var filter = new CustomerFilter { FirstName = "FirstName" };
+        var result = await repository.GetListByFilterAsync(filter, _cancellationTokenSource.Token);
 
-            //Act
-            var repository = new CustomerRepository(context);
-            repository.Add(customerOne);
-            repository.Add(customerTwo);
-            await repository.SaveChangesAsync(cancellationTokenSource.Token);
-
-            //Assert
-            var filter = new CustomerFilter {FirstName = "FirstName"};
-            var result = await repository.GetListByFilterAsync(filter, cancellationTokenSource.Token);
-            Assert.Equal(2, result.Count);
-        }
-        finally
-        {
-            connection.Close();
-        }
+        //Assert
+        Assert.Equal(2, result.Count);
     }
 
     [Fact]
-    public async Task GetTest()
+    public async Task GetTestAsync()
     {
-        var connection = CreateSqLiteConnection();
-        connection.Open();
+        using var connection = await CreateAndOpenSqliteConnectionAsync();
+        var options = await SetDbContextOptionsBuilderAsync(connection);
 
-        try
-        {
-            var options = SetDbContextOptionsBuilder(connection);
+        await using var context = new CustomerContext(options);
+        Assert.True(await context.Database.EnsureCreatedAsync());
 
-            await using var context = new CustomerContext(options);
-            Assert.True(await context.Database.EnsureCreatedAsync());
+        //Arrange
+        var customerOne = CreateCustomer();
 
-            //Arrange
-            var cancellationTokenSource = new CancellationTokenSource();
+        var repository = new CustomerRepository(context);
+        repository.Add(customerOne);
+        await repository.SaveChangesAsync(_cancellationTokenSource.Token);
 
-            var customerOne = new Customer.Domain.Entities.Customer
-            {
-                Password = "Password01@",
-                Email = "test1@test.com",
-                Surname = "Surname1",
-                FirstName = "FirstName1",
-                Updated = DateTime.Now,
-                Created = DateTime.Now
-            };
+        var filter = new CustomerFilter { Email = "test1@test.com" };
 
-            //Act
-            var repository = new CustomerRepository(context);
-            repository.Add(customerOne);
-            await repository.SaveChangesAsync(cancellationTokenSource.Token);
+        //Act
+        var result = await repository.GetByFilterAsync(filter, _cancellationTokenSource.Token);
 
-            //Assert
-            var filter = new CustomerFilter {Email = "test1@test.com"};
-            var result = await repository.GetByFilterAsync(filter, cancellationTokenSource.Token);
-            Assert.Equal("test1@test.com", result.Email);
-        }
-        finally
-        {
-            connection.Close();
-        }
+        //Assert
+        Assert.Equal("test1@test.com", result.Email);
     }
 
     [Fact]
-    public async Task CreateOkTest()
+    public async Task CreateOkTestAsync()
     {
-        var connection = CreateSqLiteConnection();
-        connection.Open();
+        using var connection = await CreateAndOpenSqliteConnectionAsync();
+        var options = await SetDbContextOptionsBuilderAsync(connection);
 
-        try
-        {
-            var options = SetDbContextOptionsBuilder(connection);
+        await using var context = new CustomerContext(options);
+        Assert.True(await context.Database.EnsureCreatedAsync());
 
-            await using var context = new CustomerContext(options);
-            Assert.True(await context.Database.EnsureCreatedAsync());
+        //Arrange
+        var customer = CreateCustomer();
+        var repository = new CustomerRepository(context);
+        repository.Add(customer);
 
-            //Arrange
-            var cancellationTokenSource = new CancellationTokenSource();
+        //Act
+        var result = await repository.SaveChangesAsync(_cancellationTokenSource.Token);
 
-            var customer = new Customer.Domain.Entities.Customer
-            {
-                Password = "Password01@",
-                Email = "test1@test.com",
-                Surname = "Surname1",
-                FirstName = "FirstName1",
-                Updated = DateTime.Now,
-                Created = DateTime.Now
-            };
-
-            //Act
-            var repository = new CustomerRepository(context);
-            repository.Add(customer);
-            var result = await repository.SaveChangesAsync(cancellationTokenSource.Token);
-
-            //Assert
-            Assert.Equal(1, result);
-        }
-        finally
-        {
-            connection.Close();
-        }
+        //Assert
+        Assert.Equal(1, result);
     }
 
     [Fact]
-    public async Task DeleteTest()
+    public async Task DeleteTestAsync()
     {
-        var connection = CreateSqLiteConnection();
-        connection.Open();
+        using var connection = await CreateAndOpenSqliteConnectionAsync();
+        var options = await SetDbContextOptionsBuilderAsync(connection);
 
-        try
-        {
-            var options = SetDbContextOptionsBuilder(connection);
+        await using var context = new CustomerContext(options);
+        Assert.True(await context.Database.EnsureCreatedAsync());
 
-            await using var context = new CustomerContext(options);
-            Assert.True(await context.Database.EnsureCreatedAsync());
+        //Arrange
+        var newCustomer = CreateCustomer();
 
-            //Arrange
-            var cancellationTokenSource = new CancellationTokenSource();
+        var repository = new CustomerRepository(context);
+        repository.Add(newCustomer);
+        await repository.SaveChangesAsync(_cancellationTokenSource.Token);
 
-            var newCustomer = new Customer.Domain.Entities.Customer
-            {
-                Password = "Password01@",
-                Email = "test1@test.com",
-                Surname = "Surname1",
-                FirstName = "FirstName1",
-                Updated = DateTime.Now,
-                Created = DateTime.Now
-            };
+        var storedCustomer = await repository.GetByIdAsync(newCustomer.Id, _cancellationTokenSource.Token);
+        repository.Remove(storedCustomer);
+        await repository.SaveChangesAsync(_cancellationTokenSource.Token);
 
-            //Act
-            var repository = new CustomerRepository(context);
-            repository.Add(newCustomer);
-            await repository.SaveChangesAsync(cancellationTokenSource.Token);
+        //Act
+        var nonExistentUser = await repository.GetByIdAsync(newCustomer.Id, _cancellationTokenSource.Token);
 
-            var filterStored = new CustomerFilter {Id = newCustomer.Id};
-            var storedCustomer = await repository.GetByFilterAsync(filterStored, cancellationTokenSource.Token);
-            repository.Remove(storedCustomer);
-            await repository.SaveChangesAsync(cancellationTokenSource.Token);
-
-            //Assert
-            var filterNonExistentUser = new CustomerFilter {Id = newCustomer.Id};
-            var nonExistentUser = await repository.GetByFilterAsync(filterNonExistentUser, cancellationTokenSource.Token);
-            Assert.Null(nonExistentUser);
-        }
-        finally
-        {
-            connection.Close();
-        }
+        //Assert
+        Assert.Null(nonExistentUser);
     }
 
     [Fact]
-    public async Task DuplicatedEmailTest()
+    public async Task DuplicatedEmailTestAsync()
     {
-        var connection = CreateSqLiteConnection();
-        connection.Open();
+        using var connection = await CreateAndOpenSqliteConnectionAsync();
+        var options = await SetDbContextOptionsBuilderAsync(connection);
 
-        try
-        {
-            var options = SetDbContextOptionsBuilder(connection);
+        await using var context = new CustomerContext(options);
+        Assert.True(await context.Database.EnsureCreatedAsync());
 
-            await using var context = new CustomerContext(options);
-            Assert.True(await context.Database.EnsureCreatedAsync());
+        //Arrange
+        var customerOne = CreateCustomer();
+        var customerTwo = CreateCustomer();
+        customerTwo.FirstName = "FirstNameTwo";
+        customerTwo.Surname = "Surname Two";
 
-            //Arrange
-            var cancellationTokenSource = new CancellationTokenSource();
+        var repository = new CustomerRepository(context);
+        repository.Add(customerOne);
+        await repository.SaveChangesAsync(_cancellationTokenSource.Token);
 
-            var customerOne = new Customer.Domain.Entities.Customer
-            {
-                Password = "Password01@",
-                Email = "test1@test.com",
-                Surname = "Surname1",
-                FirstName = "FirstName1",
-                Created = DateTime.Now
-            };
+         repository.Add(customerTwo);
 
-            var customerTwo = new Customer.Domain.Entities.Customer
-            {
-                Password = "Password01@",
-                Email = "test1@test.com",
-                Surname = "Surname2",
-                FirstName = "FirstName2",
-                Created = DateTime.Now
-            };
-
-            //Act
-            var repository = new CustomerRepository(context);
-            repository.Add(customerOne);
-            await repository.SaveChangesAsync(cancellationTokenSource.Token);
-
-            //Assert
-            repository.Add(customerTwo);
-            var exception =
-                await Assert.ThrowsAsync<DbUpdateException>(() => repository.SaveChangesAsync(cancellationTokenSource.Token));
-            Assert.NotNull(exception);
-        }
-        finally
-        {
-            connection.Close();
-        }
+        //Act & Assert
+        await Assert.ThrowsAsync<DbUpdateException>(() => repository.SaveChangesAsync(_cancellationTokenSource.Token));
     }
 
     [Fact]
-    public async Task CreateInvalidEmailTest()
+    public async Task CreateInvalidEmailTestAsync()
     {
-        var connection = CreateSqLiteConnection();
-        connection.Open();
+        using var connection = await CreateAndOpenSqliteConnectionAsync();
+        var options = await SetDbContextOptionsBuilderAsync(connection);
 
-        try
-        {
-            var options = SetDbContextOptionsBuilder(connection);
+        await using var context = new CustomerContext(options);
+        Assert.True(await context.Database.EnsureCreatedAsync());
 
-            await using var context = new CustomerContext(options);
-            Assert.True(await context.Database.EnsureCreatedAsync());
+        //Arrange
+        var customer = CreateCustomer();
+        customer.Email = null;
 
-            var cancellationTokenSource = new CancellationTokenSource();
+        var repository = new CustomerRepository(context);
+        repository.Add(customer);
 
-            //Arrange
-            var customer = new Customer.Domain.Entities.Customer
-            {
-                Password = "Password01@",
-                Email = null,
-                Surname = "Surname1",
-                FirstName = "FirstName1",
-                Created = DateTime.Now
-            };
-
-            //Act
-            var repository = new CustomerRepository(context);
-            repository.Add(customer);
-
-            //Assert
-            var exception =
-                await Assert.ThrowsAsync<DbUpdateException>(() => repository.SaveChangesAsync(cancellationTokenSource.Token));
-            Assert.NotNull(exception);
-        }
-        finally
-        {
-            connection.Close();
-        }
+        //Act & Assert
+        await Assert.ThrowsAsync<DbUpdateException>(() => repository.SaveChangesAsync(_cancellationTokenSource.Token));
     }
 
     [Fact]
-    public async Task CreateInvalidPasswordTest()
+    public async Task CreateInvalidPasswordTestAsync()
     {
-        var connection = CreateSqLiteConnection();
-        connection.Open();
+        using var connection = await CreateAndOpenSqliteConnectionAsync();
+        var options = await SetDbContextOptionsBuilderAsync(connection);
 
-        try
-        {
-            var options = SetDbContextOptionsBuilder(connection);
+        await using var context = new CustomerContext(options);
+        Assert.True(await context.Database.EnsureCreatedAsync());
 
-            await using var context = new CustomerContext(options);
-            Assert.True(await context.Database.EnsureCreatedAsync());
+        //Arrange
+        var customer = CreateCustomer();
+        customer.Password = null;
 
-            //Arrange
-            var cancellationTokenSource = new CancellationTokenSource();
+        var repository = new CustomerRepository(context);
+        repository.Add(customer);
 
-            var customer = new Customer.Domain.Entities.Customer
-            {
-                Password = null,
-                Email = "test@test.com",
-                Surname = "Surname1",
-                FirstName = "FirstName1",
-                Created = DateTime.Now
-            };
-
-            //Act
-            var repository = new CustomerRepository(context);
-            repository.Add(customer);
-
-            //Assert
-            var exception =
-                await Assert.ThrowsAsync<DbUpdateException>(() => repository.SaveChangesAsync(cancellationTokenSource.Token));
-            Assert.NotNull(exception);
-        }
-        finally
-        {
-            connection.Close();
-        }
+        //Act & Assert
+        await Assert.ThrowsAsync<DbUpdateException>(() => repository.SaveChangesAsync(_cancellationTokenSource.Token));
     }
 
     [Fact]
-    public async Task CreateInvalidFirstNameTest()
+    public async Task CreateInvalidFirstNameTestAsync()
     {
-        var connection = CreateSqLiteConnection();
-        connection.Open();
+        using var connection = await CreateAndOpenSqliteConnectionAsync();
+        var options = await SetDbContextOptionsBuilderAsync(connection);
 
-        try
-        {
-            var options = SetDbContextOptionsBuilder(connection);
+        await using var context = new CustomerContext(options);
+        Assert.True(await context.Database.EnsureCreatedAsync());
 
-            await using var context = new CustomerContext(options);
-            Assert.True(await context.Database.EnsureCreatedAsync());
+        //Arrange
+        var customer = CreateCustomer();
+        customer.FirstName = null;
 
-            //Arrange
-            var cancellationTokenSource = new CancellationTokenSource();
+        var repository = new CustomerRepository(context);
+        repository.Add(customer);
 
-            var customer = new Customer.Domain.Entities.Customer
-            {
-                Password = "Passw0rd1",
-                Email = "test@test.com",
-                Surname = "Surname1",
-                FirstName = null,
-                Created = DateTime.Now
-            };
-
-            //Act
-            var repository = new CustomerRepository(context);
-            repository.Add(customer);
-
-            //Assert
-            var exception =
-                await Assert.ThrowsAsync<DbUpdateException>(() => repository.SaveChangesAsync(cancellationTokenSource.Token));
-            Assert.NotNull(exception);
-        }
-        finally
-        {
-            connection.Close();
-        }
+        //Act & Assert
+        await Assert.ThrowsAsync<DbUpdateException>(() => repository.SaveChangesAsync(_cancellationTokenSource.Token));
     }
 
     [Fact]
-    public async Task CreateInvalidSurnameTest()
+    public async Task CreateInvalidSurnameTestAsync()
     {
-        var connection = CreateSqLiteConnection();
-        connection.Open();
+        using var connection = await CreateAndOpenSqliteConnectionAsync();
+        var options = await SetDbContextOptionsBuilderAsync(connection);
 
-        try
-        {
-            var options = SetDbContextOptionsBuilder(connection);
+        await using var context = new CustomerContext(options);
+        Assert.True(await context.Database.EnsureCreatedAsync());
 
-            await using var context = new CustomerContext(options);
-            Assert.True(await context.Database.EnsureCreatedAsync());
+        //Arrange
+        var customer = CreateCustomer();
+        customer.Surname = null;
 
-            //Arrange
-            var customer = new Customer.Domain.Entities.Customer
-            {
-                Password = "Passw0rd1",
-                Email = "test@test.com",
-                Surname = null,
-                FirstName = "FirstName",
-                Created = DateTime.Now
-            };
+        var repository = new CustomerRepository(context);
+        repository.Add(customer);
 
-            var cancellationTokenSource = new CancellationTokenSource();
-
-            //Act
-            var repository = new CustomerRepository(context);
-            repository.Add(customer);
-
-            //Assert
-            var exception = await Assert.ThrowsAsync<DbUpdateException>(() => repository.SaveChangesAsync(cancellationTokenSource.Token));
-            Assert.NotNull(exception);
-        }
-        finally
-        {
-            connection.Close();
-        }
+        //Act & Assert
+        await Assert.ThrowsAsync<DbUpdateException>(() => repository.SaveChangesAsync(_cancellationTokenSource.Token));
     }
 
-    private static DbContextOptions<CustomerContext> SetDbContextOptionsBuilder(DbConnection connection)
+    private static Customer.Domain.Entities.Customer CreateCustomer()
     {
-        return new DbContextOptionsBuilder<CustomerContext>()
+        return new Customer.Domain.Entities.Customer
+        {
+            Password = "Password01@",
+            Email = "test1@test.com",
+            Surname = "Surname1",
+            FirstName = "FirstName1",
+            Updated = DateTime.Now,
+            Created = DateTime.Now
+        };
+    }
+
+    private static async Task<DbContextOptions<CustomerContext>> SetDbContextOptionsBuilderAsync(DbConnection connection)
+    {
+        return await Task.FromResult(new DbContextOptionsBuilder<CustomerContext>()
             .UseSqlite(connection)
-            .Options;
+            .Options);
     }
 
-    private static SqliteConnection CreateSqLiteConnection()
+    private static async Task<SqliteConnection> CreateAndOpenSqliteConnectionAsync()
     {
-        return new SqliteConnection("DataSource=:memory:");
+        var connection = await CreateSqLiteConnectionAsync();
+        await connection.OpenAsync();
+        return connection;
+    }
+
+    private static async Task<SqliteConnection> CreateSqLiteConnectionAsync()
+    {
+        return await Task.FromResult(new SqliteConnection("DataSource=:memory:"));
     }
 }

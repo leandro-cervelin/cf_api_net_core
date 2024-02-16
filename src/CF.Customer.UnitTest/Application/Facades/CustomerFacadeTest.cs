@@ -6,229 +6,185 @@ using CF.Customer.Domain.Services.Interfaces;
 using Moq;
 using Xunit;
 
-namespace CF.Customer.UnitTest.Application.Facades;
-
-public class CustomerFacadeTest
+namespace CF.Customer.UnitTest.Application.Facades
 {
-    [Fact]
-    public async Task CreateTest()
+    public class CustomerFacadeTest
     {
-        //Arrange
-        var customer = new Customer.Domain.Entities.Customer
+        private readonly Mock<ICustomerService> _mockService = new();
+        private readonly Mock<IMapper> _mockMapper = new();
+        private readonly CancellationTokenSource _cancellationTokenSource = new();
+
+        [Fact]
+        public async Task CreateTestAsync()
         {
-            Id = 1,
-            Password = "P@013333343",
-            Email = "test1@test.com",
-            Surname = "Surname",
-            FirstName = "First Name"
-        };
+            // Arrange
+            var customer = CreateCustomer();
+            var customerRequestDto = CreateCustomerRequestDto();
+            const long id = 1;
 
-        var customerRequestDto = new CustomerRequestDto
+            _mockMapper.Setup(x => x.Map<Customer.Domain.Entities.Customer>(customerRequestDto)).Returns(customer);
+            _mockService.Setup(x => x.CreateAsync(customer, _cancellationTokenSource.Token)).ReturnsAsync(id);
+            var mockFacade = new CustomerFacade(_mockService.Object, _mockMapper.Object);
+
+            // Act
+            var result = await mockFacade.CreateAsync(customerRequestDto, _cancellationTokenSource.Token);
+
+            // Assert
+            Assert.Equal(id, result);
+            _mockService.Verify(x => x.CreateAsync(It.IsAny<Customer.Domain.Entities.Customer>(), _cancellationTokenSource.Token), Times.Once);
+            _mockMapper.Verify(x => x.Map<Customer.Domain.Entities.Customer>(customerRequestDto), Times.Once);
+        }
+
+        [Fact]
+        public async Task GetTestAsync()
         {
-            Email = "test1@test.com",
-            Surname = "Surname",
-            FirstName = "First Name",
-            Password = "P@013333343",
-            ConfirmPassword = "P@013333343"
-        };
+            // Arrange
+            var customer = CreateCustomer();
+            var customerResponseDto = CreateCustomerResponseDto();
 
-        
-        const long id = 1;
-        var mockService = new Mock<ICustomerService>();
-        var mockMapper = new Mock<IMapper>();
-        var cancellationTokenSource = new CancellationTokenSource();
-        mockMapper.Setup(x => x.Map<Customer.Domain.Entities.Customer>(customerRequestDto)).Returns(customer);
-        mockService.Setup(x => x.CreateAsync(customer, cancellationTokenSource.Token)).ReturnsAsync(id);
-        //Act
-        var mockFacade = new CustomerFacade(mockService.Object, mockMapper.Object);
-        var result = await mockFacade.CreateAsync(customerRequestDto, cancellationTokenSource.Token);
-        
-        //Assert
-        Assert.Equal(id, result);
-    }
+            var filterDto = new CustomerFilterDto { Id = 1 };
+            var filter = new CustomerFilter { Id = 1 };
 
-    [Fact]
-    public async Task GetTest()
-    {
-        //Arrange
-        var customer = new Customer.Domain.Entities.Customer
+            _mockMapper.Setup(x => x.Map<CustomerResponseDto>(customer)).Returns(customerResponseDto);
+            _mockMapper.Setup(x => x.Map<CustomerFilter>(filterDto)).Returns(filter);
+            _mockService.Setup(x => x.GetByFilterAsync(filter, _cancellationTokenSource.Token)).ReturnsAsync(customer);
+            var mockFacade = new CustomerFacade(_mockService.Object, _mockMapper.Object);
+
+            // Act
+            var result = await mockFacade.GetByFilterAsync(filterDto, _cancellationTokenSource.Token);
+
+            // Assert
+            Assert.Equal(customer.Id, result.Id);
+            _mockService.Verify(x => x.GetByFilterAsync(It.IsAny<CustomerFilter>(), _cancellationTokenSource.Token), Times.Once);
+            _mockMapper.Verify(x => x.Map<CustomerFilter>(filterDto), Times.Once);
+        }
+
+        [Fact]
+        public async Task GetListTestAsync()
         {
-            Id = 1,
-            Password = "P@013333343",
-            Email = "test1@test.com",
-            Surname = "Surname",
-            FirstName = "First Name"
-        };
+            // Arrange
+            var customers = new List<Customer.Domain.Entities.Customer>
+            {
+                CreateCustomer(),
+                CreateCustomer(2)
+            };
+            var pagination = CreatePagination(customers);
 
-        var customerResponseDto = new CustomerResponseDto
+            var customersDto = new List<CustomerResponseDto>
+            {
+                CreateCustomerResponseDto(),
+                CreateCustomerResponseDto(2)
+            };
+            var paginationDto = CreatePaginationDto(customersDto);
+
+            var filterDto = new CustomerFilterDto { Id = 1 };
+            var filter = new CustomerFilter { Id = 1 };
+
+            _mockMapper.Setup(x => x.Map<CustomerFilter>(filterDto)).Returns(filter);
+            _mockMapper.Setup(x => x.Map<PaginationDto<CustomerResponseDto>>(pagination)).Returns(paginationDto);
+            _mockService.Setup(x => x.GetListByFilterAsync(filter, _cancellationTokenSource.Token)).ReturnsAsync(pagination);
+            var mockFacade = new CustomerFacade(_mockService.Object, _mockMapper.Object);
+
+            // Act
+            var result = await mockFacade.GetListByFilterAsync(filterDto, _cancellationTokenSource.Token);
+
+            // Assert
+            Assert.Equal(paginationDto.Count, result.Count);
+            _mockService.Verify(x => x.GetListByFilterAsync(It.IsAny<CustomerFilter>(), _cancellationTokenSource.Token), Times.Once);
+            _mockMapper.Verify(x => x.Map<CustomerFilter>(filterDto), Times.Once);
+            _mockMapper.Verify(x => x.Map<PaginationDto<CustomerResponseDto>>(pagination), Times.Once);
+        }
+
+        [Fact]
+        public async Task UpdateTestAsync()
         {
-            Id = 1,
-            Email = "test1@test.com",
-            Surname = "Surname",
-            FirstName = "First Name",
-            FullName = "First Name Surname"
-        };
+            // Arrange
+            var customerRequestDto = CreateCustomerRequestDto();
+            var customer = CreateCustomer();
+            const long id = 1;
 
-        var filterDto = new CustomerFilterDto {Id = 1};
-        var filter = new CustomerFilter {Id = 1};
+            _mockMapper.Setup(x => x.Map<Customer.Domain.Entities.Customer>(customerRequestDto)).Returns(customer);
+            var mockFacade = new CustomerFacade(_mockService.Object, _mockMapper.Object);
 
-        
-        var mockService = new Mock<ICustomerService>();
-        var mockMapper = new Mock<IMapper>();
-        var cancellationTokenSource = new CancellationTokenSource();
-        mockMapper.Setup(x => x.Map<CustomerResponseDto>(customer)).Returns(customerResponseDto);
-        mockMapper.Setup(x => x.Map<CustomerFilter>(filterDto)).Returns(filter);
-        mockService.Setup(x => x.GetByFilterAsync(filter, cancellationTokenSource.Token)).ReturnsAsync(customer);
+            // Act
+            var exception = await Record.ExceptionAsync(() => mockFacade.UpdateAsync(id, customerRequestDto, _cancellationTokenSource.Token));
 
-        //act
-        var mockFacade = new CustomerFacade(mockService.Object, mockMapper.Object);
-        var result = await mockFacade.GetByFilterAsync(filterDto, cancellationTokenSource.Token);
-        
-        //assert
-        Assert.Equal(customer.Id, result.Id);
-    }
+            // Assert
+            Assert.Null(exception);
+            _mockMapper.Verify(x => x.Map<Customer.Domain.Entities.Customer>(customerRequestDto), Times.Once);
+        }
 
-    [Fact]
-    public async Task GetListTest()
-    {
-        //Arrange
-        var customerOne = new Customer.Domain.Entities.Customer
+        [Fact]
+        public async Task DeleteTestAsync()
         {
-            Id = 1,
-            Password = "sdfdsfdsfds",
-            Email = "test@test.com",
-            Surname = "Surname",
-            FirstName = "Ronaldo",
-            Updated = DateTime.Now,
-            Created = DateTime.Now
-        };
+            // Arrange
+            const long id = 1;
+            var mockFacade = new CustomerFacade(_mockService.Object, _mockMapper.Object);
 
-        var customerTwo = new Customer.Domain.Entities.Customer
+            // Act
+            var exception = await Record.ExceptionAsync(() => mockFacade.DeleteAsync(id, _cancellationTokenSource.Token));
+
+            // Assert
+            Assert.Null(exception);
+        }
+
+        private static PaginationDto<CustomerResponseDto> CreatePaginationDto(List<CustomerResponseDto> customersDto)
         {
-            Id = 2,
-            Password = "sdfdsfdsfds",
-            Email = "test@test.com",
-            Surname = "Surname",
-            FirstName = "Ronaldinho",
-            Updated = DateTime.Now,
-            Created = DateTime.Now
-        };
+            return new PaginationDto<CustomerResponseDto>
+            {
+                PageSize = 10,
+                CurrentPage = 1,
+                Count = 2,
+                TotalPages = 1,
+                Result = customersDto
+            };
+        }
 
-        var customers = new List<Customer.Domain.Entities.Customer>
+        private static Pagination<Customer.Domain.Entities.Customer> CreatePagination(List<Customer.Domain.Entities.Customer> customers)
         {
-            customerOne,
-            customerTwo
-        };
+            return new Pagination<Customer.Domain.Entities.Customer>
+            {
+                PageSize = 10,
+                CurrentPage = 1,
+                Count = 2,
+                Result = customers
+            };
+        }
 
-        var pagination = new Pagination<Customer.Domain.Entities.Customer>
+        private static CustomerRequestDto CreateCustomerRequestDto()
         {
-            PageSize = 10,
-            CurrentPage = 1,
-            Count = 2,
-            Result = customers
-        };
+            return new CustomerRequestDto
+            {
+                Email = "test1@test.com",
+                Surname = "Surname",
+                FirstName = "First Name",
+                Password = "P@013333343",
+                ConfirmPassword = "P@013333343"
+            };
+        }
 
-        var customerOneDto = new CustomerResponseDto
+        private static Customer.Domain.Entities.Customer CreateCustomer(int id = 1)
         {
-            Id = 1,
-            Email = "test@test.com",
-            Surname = "Surname",
-            FirstName = "Ronaldo"
-        };
+            return new Customer.Domain.Entities.Customer
+            {
+                Id = id,
+                Password = "P@013333343",
+                Email = "test1@test.com",
+                Surname = "Surname",
+                FirstName = "First Name"
+            };
+        }
 
-        var customerTwoDto = new CustomerResponseDto
+        private static CustomerResponseDto CreateCustomerResponseDto(int id = 1)
         {
-            Id = 2,
-            Email = "test@test.com",
-            Surname = "Surname",
-            FirstName = "Ronaldinho"
-        };
-
-        var customersDto = new List<CustomerResponseDto>
-        {
-            customerOneDto,
-            customerTwoDto
-        };
-
-        var paginationDto = new PaginationDto<CustomerResponseDto>
-        {
-            PageSize = 10,
-            CurrentPage = 1,
-            Count = 2,
-            TotalPages = 1,
-            Result = customersDto
-        };
-
-        var filterDto = new CustomerFilterDto {Id = 1};
-        var filter = new CustomerFilter {Id = 1};
-
-        var mockService = new Mock<ICustomerService>();
-        var mockMapper = new Mock<IMapper>();
-        var cancellationTokenSource = new CancellationTokenSource();
-        mockMapper.Setup(x => x.Map<CustomerFilter>(filterDto)).Returns(filter);
-        mockMapper.Setup(x => x.Map<PaginationDto<CustomerResponseDto>>(pagination)).Returns(paginationDto);
-        mockService.Setup(x => x.GetListByFilterAsync(filter, cancellationTokenSource.Token)).ReturnsAsync(pagination);
-
-        //Act
-        var mockFacade = new CustomerFacade(mockService.Object, mockMapper.Object);
-        var result = await mockFacade.GetListByFilterAsync(filterDto, cancellationTokenSource.Token);
-        
-        //Assert
-        Assert.Equal(paginationDto.Count, result.Count);
-    }
-
-    [Fact]
-    public async Task UpdateTest()
-    {
-        //Arrange
-        var customerRequestDto = new CustomerRequestDto
-        {
-            Password = "Passrrr@1",
-            ConfirmPassword = "Passrrr@1",
-            Email = "test@test.com",
-            Surname = "Surname",
-            FirstName = "First Name"
-        };
-
-        var customer = new Customer.Domain.Entities.Customer
-        {
-            Password = "Passrrr@1",
-            Email = "test@test.com",
-            Surname = "Surname",
-            FirstName = "First Name"
-        };
-
-        const long id = 1;
-
-        
-        var mockService = new Mock<ICustomerService>();
-        var mockMapper = new Mock<IMapper>();
-        var cancellationTokenSource = new CancellationTokenSource();
-        mockMapper.Setup(x => x.Map<Customer.Domain.Entities.Customer>(customerRequestDto)).Returns(customer);
-        var mockFacade = new CustomerFacade(mockService.Object, mockMapper.Object);
-
-        //Act
-        var exception = await Record.ExceptionAsync(() => mockFacade.UpdateAsync(id, customerRequestDto, cancellationTokenSource.Token));
-
-        //Assert
-        Assert.Null(exception);
-    }
-
-    [Fact]
-    public async Task DeleteTest()
-    {
-        //Arrange
-        const long id = 1;
-
-        var mockService = new Mock<ICustomerService>();
-        var mockMapper = new Mock<IMapper>();
-        var cancellationTokenSource = new CancellationTokenSource();
-        var mockFacade = new CustomerFacade(mockService.Object, mockMapper.Object);
-
-        //Act
-        var exception = await Record.ExceptionAsync(() => mockFacade.DeleteAsync(id, cancellationTokenSource.Token));
-
-        //Assert
-        Assert.Null(exception);
+            return new CustomerResponseDto
+            {
+                Id = id,
+                Email = "test1@test.com",
+                Surname = "Surname",
+                FirstName = "First Name",
+                FullName = "First Name Surname"
+            };
+        }
     }
 }

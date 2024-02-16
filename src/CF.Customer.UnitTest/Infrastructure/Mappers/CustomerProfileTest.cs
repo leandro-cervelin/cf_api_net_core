@@ -15,6 +15,7 @@ public class CustomerProfileTest
     [Fact]
     public void CustomerRequestDtoToCustomer()
     {
+        //Arrange
         var customerRequestDto = new CustomerRequestDto
         {
             Surname = "Dickinson",
@@ -24,8 +25,11 @@ public class CustomerProfileTest
         };
 
         var mapper = MapperConfiguration.CreateMapper();
+
+        //Act
         var customer = mapper.Map<Customer.Domain.Entities.Customer>(customerRequestDto);
 
+        //Assert
         Assert.Equal(customerRequestDto.FirstName, customer.FirstName);
         Assert.Equal(customerRequestDto.Surname, customer.Surname);
         Assert.Equal(customerRequestDto.Password, customer.Password);
@@ -35,6 +39,7 @@ public class CustomerProfileTest
     [Fact]
     public void CustomerToCustomerResponseDto()
     {
+        //Arrange
         var customer = new Customer.Domain.Entities.Customer
         {
             Surname = "Dickinson",
@@ -46,8 +51,11 @@ public class CustomerProfileTest
         };
 
         var mapper = MapperConfiguration.CreateMapper();
+        
+        //Act
         var customerResponseDto = mapper.Map<CustomerResponseDto>(customer);
 
+        //Arrange
         Assert.Equal(customer.FirstName, customerResponseDto.FirstName);
         Assert.Equal(customer.Surname, customerResponseDto.Surname);
         Assert.Equal(customer.Email, customerResponseDto.Email);
@@ -58,6 +66,7 @@ public class CustomerProfileTest
     [Fact]
     public void CustomerPaginationToCustomerResponseDtoPagination()
     {
+        //Arrange
         var customerList = new List<Customer.Domain.Entities.Customer>
         {
             new()
@@ -80,9 +89,12 @@ public class CustomerProfileTest
         };
 
         var mapper = MapperConfiguration.CreateMapper();
+
+        //Act
         var customerResponseDtoPagination = mapper.Map<PaginationDto<CustomerResponseDto>>(customerPagination);
         var customerResponseDtoList = mapper.Map<List<CustomerResponseDto>>(customerResponseDtoPagination.Result);
 
+        //Assert
         Assert.Equal(customerList.First().FirstName, customerResponseDtoList.First().FirstName);
         Assert.Equal(customerList.First().Surname, customerResponseDtoList.First().Surname);
         Assert.Equal(customerList.First().Email, customerResponseDtoList.First().Email);
@@ -93,6 +105,7 @@ public class CustomerProfileTest
     [Fact]
     public void CustomerFilterToCustomerFilterDto()
     {
+        //Arrange
         var customerFilterDto = new CustomerFilterDto
         {
             Surname = "Dickinson",
@@ -106,8 +119,11 @@ public class CustomerProfileTest
         };
 
         var mapper = MapperConfiguration.CreateMapper();
+
+        //Act
         var customerFilter = mapper.Map<CustomerFilter>(customerFilterDto);
 
+        //Assert
         Assert.Equal(customerFilterDto.FirstName, customerFilter.FirstName);
         Assert.Equal(customerFilterDto.Surname, customerFilter.Surname);
         Assert.Equal(customerFilterDto.Id, customerFilter.Id);

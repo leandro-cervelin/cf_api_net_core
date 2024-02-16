@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Text;
 using System.Threading.Tasks;
+using AutoMapper;
 using CF.Customer.Application.Dtos;
 using CF.IntegrationTest.Factories;
 using CF.IntegrationTest.Models;
@@ -12,627 +15,470 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Xunit;
 
-namespace CF.IntegrationTest;
-
-public class CustomerIntegrationTest(CustomWebApplicationFactory factory) : IClassFixture<CustomWebApplicationFactory>
+namespace CF.IntegrationTest
 {
-    private const string CustomerUrl = "api/v1/customer";
-
-    [Fact]
-    public async Task CreateCustomerOkTest()
+    public class CustomerIntegrationTest(CustomWebApplicationFactory factory) : IClassFixture<CustomWebApplicationFactory>
     {
-        var dto = new CustomerRequestDto
+        private const string CustomerUrl = "api/v1/customer";
+        private readonly HttpClient _httpClient = factory.CreateClient();
+
+        [Fact]
+        public async Task CreateCustomerOkTestAsync()
         {
-            FirstName = "Test Name",
-            Surname = "Test Surname",
-            Email = CreateValidEmail(),
-            Password = "Password1@",
-            ConfirmPassword = "Password1@"
-        };
+            var dto = await CreateCustomerRequestDtoAsync();
+            var content = await CreateStringContentAsync(dto);
+            var response = await _httpClient.PostAsync(CustomerUrl, content);
+            response.EnsureSuccessStatusCode();
 
-        var content = await CreateStringContent(dto);
-        var client = factory.CreateClient();
-        var response = await client.PostAsync(CustomerUrl, content);
-        response.EnsureSuccessStatusCode();
+            Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+        }
 
-        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
-    }
-
-    [Fact]
-    public async Task CreateCustomerInvalidEmailTest()
-    {
-        var dto = new CustomerRequestDto
+        [Fact]
+        public async Task CreateCustomerInvalidEmailTestAsync()
         {
-            FirstName = "Test Name",
-            Surname = "Test Surname",
-            Email = CreateInvalidEmail(),
-            Password = "Password1@",
-            ConfirmPassword = "Password1@"
-        };
+            var dto = await CreateCustomerRequestDtoAsync();
+            dto.Email = "invalid_at_test.com";
+            var content = await CreateStringContentAsync(dto);
+            var response = await _httpClient.PostAsync(CustomerUrl, content);
+            var errors = await ExtractErrorsFromResponse(response);
 
-        var content = await CreateStringContent(dto);
-        var client = factory.CreateClient();
-        var response = await client.PostAsync(CustomerUrl, content);
-        var errors = await ExtractErrorsFromResponse(response);
+            Assert.NotNull(errors);
+            Assert.Contains("Email", errors);
+            Assert.Single(errors["Email"]);
+            Assert.Equal("The Email field is not a valid email address.", errors["Email"][0]);
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        }
 
-        Assert.NotNull(errors);
-        Assert.Contains("Email", errors);
-        Assert.Single(errors["Email"]);
-        Assert.Equal("The Email field is not a valid e-mail address.", errors["Email"][0]);
-        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-    }
-
-    [Fact]
-    public async Task CreateCustomerExistingEmailTest()
-    {
-        var email = CreateValidEmail();
-
-        var dto = new CustomerRequestDto
+        [Fact]
+        public async Task CreateCustomerExistingEmailTestAsync()
         {
-            FirstName = "Test Name",
-            Surname = "Test Surname",
-            Email = email,
-            Password = "Password1@",
-            ConfirmPassword = "Password1@"
-        };
+            var dto = await CreateCustomerRequestDtoAsync();
+            var content = await CreateStringContentAsync(dto);
+            var response = await _httpClient.PostAsync(CustomerUrl, content);
+            Assert.Equal(HttpStatusCode.Created, response.StatusCode);
 
-        var content = await CreateStringContent(dto);
-        var client = factory.CreateClient();
-        var response = await client.PostAsync(CustomerUrl, content);
-        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+            content = await CreateStringContentAsync(dto);
+            var responseNotOk = await _httpClient.PostAsync(CustomerUrl, content);
+            var errors = await ExtractErrorsFromResponse(responseNotOk);
 
-        var clientNotOk = factory.CreateClient();
-        var responseNotOk = await clientNotOk.PostAsync(CustomerUrl, content);
-        var errors = await ExtractErrorsFromResponse(responseNotOk);
+            Assert.NotNull(errors);
+            Assert.Contains("Validation", errors);
+            Assert.Single(errors["Validation"]);
+            Assert.Equal("Email is not available.", errors["Validation"][0]);
+            Assert.Equal(HttpStatusCode.BadRequest, responseNotOk.StatusCode);
+        }
 
-        Assert.NotNull(errors);
-        Assert.Contains("Validation", errors);
-        Assert.Single(errors["Validation"]);
-        Assert.Equal("Email is not available.", errors["Validation"][0]);
-        Assert.Equal(HttpStatusCode.BadRequest, responseNotOk.StatusCode);
-    }
-
-    [Fact]
-    public async Task CreateCustomerRequiredEmailTest()
-    {
-        var dto = new CustomerRequestDto
+        [Fact]
+        public async Task CreateCustomerRequiredEmailTestAsync()
         {
-            FirstName = "Test Name",
-            Surname = "Test Surname",
-            Email = string.Empty,
-            Password = "Password1@",
-            ConfirmPassword = "Password1@"
-        };
+            var dto = await CreateCustomerRequestDtoAsync();
+            dto.Email = string.Empty;
 
-        var content = await CreateStringContent(dto);
-        var client = factory.CreateClient();
-        var response = await client.PostAsync(CustomerUrl, content);
-        var errors = await ExtractErrorsFromResponse(response);
+            var content = await CreateStringContentAsync(dto);
+            var response = await _httpClient.PostAsync(CustomerUrl, content);
+            var errors = await ExtractErrorsFromResponse(response);
 
-        Assert.NotNull(errors);
-        Assert.Contains("Email", errors);
-        Assert.NotEmpty(errors["Email"]);
-        Assert.Equal("The Email field is required.", errors["Email"][0]);
-        Assert.Equal("The Email field is not a valid e-mail address.", errors["Email"][1]);
-        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-    }
+            Assert.NotNull(errors);
+            Assert.Contains("Email", errors);
+            Assert.NotEmpty(errors["Email"]);
+            Assert.Equal("The Email field is required.", errors["Email"][0]);
+            Assert.Equal("The Email field is not a valid email address.", errors["Email"][1]);
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        }
 
-    [Fact]
-    public async Task CreateCustomerRequiredFirstNameTest()
-    {
-        var dto = new CustomerRequestDto
+        [Fact]
+        public async Task CreateCustomerEmailMustNotExceedTestAsync()
         {
-            FirstName = string.Empty,
-            Surname = "Test Surname",
-            Email = CreateValidEmail(),
-            Password = "Password1@",
-            ConfirmPassword = "Password1@"
-        };
+            var dto = await CreateCustomerRequestDtoAsync();
+            dto.Email = "eeeeeeeeeewedewfdwefweeemmmmmmmmaaaaaaaaaaaaaaiiiiiiiiiiiilllllllllll@teeeeeeesssssssssssssstttttttttttttttt.com";
 
-        var content = await CreateStringContent(dto);
-        var client = factory.CreateClient();
-        var response = await client.PostAsync(CustomerUrl, content);
-        var errors = await ExtractErrorsFromResponse(response);
+            var content = await CreateStringContentAsync(dto);
+            var response = await _httpClient.PostAsync(CustomerUrl, content);
+            var errors = await ExtractErrorsFromResponse(response);
 
-        Assert.NotNull(errors);
-        Assert.Contains("FirstName", errors);
-        Assert.NotEmpty(errors["FirstName"]);
-        Assert.Equal("The First Name field is required.", errors["FirstName"][0]);
-        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-    }
+            Assert.NotNull(errors);
+            Assert.Contains("Email", errors);
+            Assert.NotEmpty(errors["Email"]);
+            Assert.Equal("The Email field must not exceed 100 characters.", errors["Email"][0]);
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        }
 
-    [Fact]
-    public async Task CreateCustomerRequiredSurnameTest()
-    {
-        var dto = new CustomerRequestDto
+        [Fact]
+        public async Task CreateCustomerRequiredFirstNameTestAsync()
         {
-            FirstName = "Test First Name",
-            Surname = string.Empty,
-            Email = CreateValidEmail(),
-            Password = "Password1@",
-            ConfirmPassword = "Password1@"
-        };
+            var dto = await CreateCustomerRequestDtoAsync();
+            dto.FirstName = string.Empty;
 
-        var content = await CreateStringContent(dto);
-        var client = factory.CreateClient();
-        var response = await client.PostAsync(CustomerUrl, content);
-        var errors = await ExtractErrorsFromResponse(response);
+            var content = await CreateStringContentAsync(dto);
+            var response = await _httpClient.PostAsync(CustomerUrl, content);
+            var errors = await ExtractErrorsFromResponse(response);
 
-        Assert.NotNull(errors);
-        Assert.Contains("Surname", errors);
-        Assert.NotEmpty(errors["Surname"]);
-        Assert.Equal("The Surname field is required.", errors["Surname"][0]);
-        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-    }
+            Assert.NotNull(errors);
+            Assert.Contains("FirstName", errors);
+            Assert.NotEmpty(errors["FirstName"]);
+            Assert.Equal("The First Name field is required.", errors["FirstName"][0]);
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        }
 
-    [Fact]
-    public async Task CreateCustomerMaxLengthFirstNameTest()
-    {
-        var dto = new CustomerRequestDto
+        [Fact]
+        public async Task CreateCustomerRequiredSurnameTestAsync()
         {
-            FirstName =
-                "Test First Name Test First Name Test First Name Test First Name Test First Name Test First Name Test First Name",
-            Surname = "Test Surname",
-            Email = CreateValidEmail(),
-            Password = "Password1@",
-            ConfirmPassword = "Password1@"
-        };
+            var dto = await CreateCustomerRequestDtoAsync();
+            dto.Surname = string.Empty;
 
-        var content = await CreateStringContent(dto);
-        var client = factory.CreateClient();
-        var response = await client.PostAsync(CustomerUrl, content);
-        var errors = await ExtractErrorsFromResponse(response);
+            var content = await CreateStringContentAsync(dto);
+            var response = await _httpClient.PostAsync(CustomerUrl, content);
+            var errors = await ExtractErrorsFromResponse(response);
 
-        Assert.NotNull(errors);
-        Assert.Contains("FirstName", errors);
-        Assert.NotEmpty(errors["FirstName"]);
-        Assert.Equal("The field First Name must be a string with a minimum length of 2 and a maximum length of 100.",
-            errors["FirstName"][0]);
-        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-    }
+            Assert.NotNull(errors);
+            Assert.Contains("Surname", errors);
+            Assert.NotEmpty(errors["Surname"]);
+            Assert.Equal("The Surname field is required.", errors["Surname"][0]);
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        }
 
-    [Fact]
-    public async Task CreateCustomerMinLengthFirstNameTest()
-    {
-        var dto = new CustomerRequestDto
+        [Fact]
+        public async Task CreateCustomerMaxLengthFirstNameTestAsync()
         {
-            FirstName = "T",
-            Surname = "Test Surname",
-            Email = CreateValidEmail(),
-            Password = "Password1@",
-            ConfirmPassword = "Password1@"
-        };
+            var dto = await CreateCustomerRequestDtoAsync();
+            dto.FirstName = 
+                    "Test First Name Test First Name Test First Name Test First Name Test First Name Test First Name Test First Name";
 
-        var content = await CreateStringContent(dto);
-        var client = factory.CreateClient();
-        var response = await client.PostAsync(CustomerUrl, content);
-        var errors = await ExtractErrorsFromResponse(response);
+            var content = await CreateStringContentAsync(dto);
+            var response = await _httpClient.PostAsync(CustomerUrl, content);
+            var errors = await ExtractErrorsFromResponse(response);
 
-        Assert.NotNull(errors);
-        Assert.Contains("FirstName", errors);
-        Assert.NotEmpty(errors["FirstName"]);
-        Assert.Equal("The field First Name must be a string with a minimum length of 2 and a maximum length of 100.",
-            errors["FirstName"][0]);
-        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-    }
+            Assert.NotNull(errors);
+            Assert.Contains("FirstName", errors);
+            Assert.NotEmpty(errors["FirstName"]);
+            Assert.Equal("The First Name field must be between 2 and 100 characters.",
+                errors["FirstName"][0]);
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        }
 
-    [Fact]
-    public async Task CreateCustomerMaxLengthSurnameTest()
-    {
-        var dto = new CustomerRequestDto
+        [Fact]
+        public async Task CreateCustomerMinLengthFirstNameTestAsync()
         {
-            FirstName = "Test First",
-            Surname =
-                "Test Surname Test Surname Test Surname Test Surname Test Surname Test Surname Test Surname Test Surname Test Surname",
-            Email = CreateValidEmail(),
-            Password = "Password1@",
-            ConfirmPassword = "Password1@"
-        };
+            var dto = await CreateCustomerRequestDtoAsync();
+            dto.FirstName = "T";
 
-        var content = await CreateStringContent(dto);
-        var client = factory.CreateClient();
-        var response = await client.PostAsync(CustomerUrl, content);
-        var errors = await ExtractErrorsFromResponse(response);
+            var content = await CreateStringContentAsync(dto);
+            var response = await _httpClient.PostAsync(CustomerUrl, content);
+            var errors = await ExtractErrorsFromResponse(response);
 
-        Assert.NotNull(errors);
-        Assert.Contains("Surname", errors);
-        Assert.NotEmpty(errors["Surname"]);
-        Assert.Equal("The field Surname must be a string with a minimum length of 2 and a maximum length of 100.",
-            errors["Surname"][0]);
-        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-    }
+            Assert.NotNull(errors);
+            Assert.Contains("FirstName", errors);
+            Assert.NotEmpty(errors["FirstName"]);
+            Assert.Equal("The First Name field must be between 2 and 100 characters.",
+                errors["FirstName"][0]);
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        }
 
-    [Fact]
-    public async Task CreateCustomerMinLengthSurnameTest()
-    {
-        var dto = new CustomerRequestDto
+        [Fact]
+        public async Task CreateCustomerMaxLengthSurnameTestAsync()
         {
-            FirstName = "Test First",
-            Surname = "T",
-            Email = CreateValidEmail(),
-            Password = "Password1@",
-            ConfirmPassword = "Password1@"
-        };
+            var dto = await CreateCustomerRequestDtoAsync();
+            dto.Surname =
+                    "Test Surname Test Surname Test Surname Test Surname Test Surname Test Surname Test Surname Test Surname Test Surname";
 
-        var content = await CreateStringContent(dto);
-        var client = factory.CreateClient();
-        var response = await client.PostAsync(CustomerUrl, content);
-        var errors = await ExtractErrorsFromResponse(response);
+            var content = await CreateStringContentAsync(dto);
+            var response = await _httpClient.PostAsync(CustomerUrl, content);
+            var errors = await ExtractErrorsFromResponse(response);
 
-        Assert.NotNull(errors);
-        Assert.Contains("Surname", errors);
-        Assert.NotEmpty(errors["Surname"]);
-        Assert.Equal("The field Surname must be a string with a minimum length of 2 and a maximum length of 100.",
-            errors["Surname"][0]);
-        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-    }
+            Assert.NotNull(errors);
+            Assert.Contains("Surname", errors);
+            Assert.NotEmpty(errors["Surname"]);
+            Assert.Equal("The Surname field must be between 2 and 100 characters.",
+                errors["Surname"][0]);
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        }
 
-    [Fact]
-    public async Task CreateRequiredPasswordTest()
-    {
-        var dto = new CustomerRequestDto
+        [Fact]
+        public async Task CreateCustomerMinLengthSurnameTestAsync()
         {
-            FirstName = "Test First",
-            Surname = "Test Surname",
-            Email = CreateValidEmail(),
-            Password = string.Empty
-        };
+            var dto = await CreateCustomerRequestDtoAsync();
+            dto.Surname = "T";
 
-        var content = await CreateStringContent(dto);
-        var client = factory.CreateClient();
-        var response = await client.PostAsync(CustomerUrl, content);
-        var errors = await ExtractErrorsFromResponse(response);
+            var content = await CreateStringContentAsync(dto);
+            var response = await _httpClient.PostAsync(CustomerUrl, content);
+            var errors = await ExtractErrorsFromResponse(response);
 
-        Assert.NotNull(errors);
-        Assert.Contains("Password", errors);
-        Assert.NotEmpty(errors["Password"]);
-        Assert.Equal("The Password field is required.", errors["Password"][0]);
-        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-    }
+            Assert.NotNull(errors);
+            Assert.Contains("Surname", errors);
+            Assert.NotEmpty(errors["Surname"]);
+            Assert.Equal("The Surname field must be between 2 and 100 characters.",
+                errors["Surname"][0]);
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        }
 
-    [Fact]
-    public async Task CreatePasswordsDoesNotMatchTest()
-    {
-        var dto = new CustomerRequestDto
+        [Fact]
+        public async Task CreateRequiredPasswordTestAsync()
         {
-            FirstName = "Test First",
-            Surname = "Test Surname",
-            Email = CreateValidEmail(),
-            Password = "Password1@",
-            ConfirmPassword = "Password3!"
-        };
+            var dto = await CreateCustomerRequestDtoAsync();
+            dto.Password = string.Empty;
 
-        var content = await CreateStringContent(dto);
-        var client = factory.CreateClient();
-        var response = await client.PostAsync(CustomerUrl, content);
+            var content = await CreateStringContentAsync(dto);
+            var response = await _httpClient.PostAsync(CustomerUrl, content);
+            var errors = await ExtractErrorsFromResponse(response);
 
-        var errors = await ExtractErrorsFromResponse(response);
+            Assert.NotNull(errors);
+            Assert.Contains("Password", errors);
+            Assert.NotEmpty(errors["Password"]);
+            Assert.Equal("The Password field is required.", errors["Password"][0]);
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        }
 
-        Assert.NotNull(errors);
-        Assert.Contains("ConfirmPassword", errors);
-        Assert.NotEmpty(errors["ConfirmPassword"]);
-        Assert.Equal("The passwords do not match.", errors["ConfirmPassword"][0]);
-        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-    }
-
-    [Fact]
-    public async Task CreateMinLengthPasswordTest()
-    {
-        var dto = new CustomerRequestDto
+        [Fact]
+        public async Task CreatePasswordsDoesNotMatchTestAsync()
         {
-            FirstName = "Test First",
-            Surname = "Test Surname",
-            Email = CreateValidEmail(),
-            Password = "@123RF",
-            ConfirmPassword = "@123RF"
-        };
+            var dto = await CreateCustomerRequestDtoAsync();
+            dto.ConfirmPassword = "Password3!";
 
-        var content = await CreateStringContent(dto);
-        var client = factory.CreateClient();
-        var response = await client.PostAsync(CustomerUrl, content);
-        var errors = await ExtractErrorsFromResponse(response);
+            var content = await CreateStringContentAsync(dto);
+            var response = await _httpClient.PostAsync(CustomerUrl, content);
 
-        Assert.NotNull(errors);
-        Assert.Contains("Password", errors);
-        Assert.NotEmpty(errors["Password"]);
-        Assert.Equal(
-            "Passwords must be at least 8 characters and contain at 3 of the following: upper case (A-Z), lower case (a-z), number (0-9) and special character (e.g. !@#$%^&*).",
-            errors["Password"][0]);
-        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-    }
+            var errors = await ExtractErrorsFromResponse(response);
 
-    [Fact]
-    public async Task CreateInvalidPasswordTest()
-    {
-        var dto = new CustomerRequestDto
+            Assert.NotNull(errors);
+            Assert.Contains("ConfirmPassword", errors);
+            Assert.NotEmpty(errors["ConfirmPassword"]);
+            Assert.Equal("The passwords do not match.", errors["ConfirmPassword"][0]);
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task CreateMinLengthPasswordTestAsync()
         {
-            FirstName = "Test First",
-            Surname = "Test Surname",
-            Email = CreateValidEmail(),
-            Password = "01234567901234",
-            ConfirmPassword = "01234567901234"
-        };
+            var dto = await CreateCustomerRequestDtoAsync();
+            dto.Password = "@123RF";
+            dto.ConfirmPassword = "@123RF";
 
-        var content = await CreateStringContent(dto);
-        var client = factory.CreateClient();
-        var response = await client.PostAsync(CustomerUrl, content);
-        var errors = await ExtractErrorsFromResponse(response);
+            var content = await CreateStringContentAsync(dto);
+            var response = await _httpClient.PostAsync(CustomerUrl, content);
+            var errors = await ExtractErrorsFromResponse(response);
 
-        Assert.NotNull(errors);
-        Assert.Contains("Password", errors);
-        Assert.NotEmpty(errors["Password"]);
-        Assert.Equal(
-            "Passwords must be at least 8 characters and contain at 3 of the following: upper case (A-Z), lower case (a-z), number (0-9) and special character (e.g. !@#$%^&*).",
-            errors["Password"][0]);
-        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-    }
+            Assert.NotNull(errors);
+            Assert.Contains("Password", errors);
+            Assert.NotEmpty(errors["Password"]);
+            Assert.Equal(
+                "Passwords must be at least 8 characters and contain at least 3 of the following: upper case (A-Z), lower case (a-z), number (0-9), and special character (e.g. !@#$%^&*).",
+                errors["Password"][0]);
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        }
 
-    [Fact]
-    public async Task UpdateCustomerOkTest()
-    {
-        var email = CreateValidEmail();
-
-        var dto = new CustomerRequestDto
+        [Fact]
+        public async Task CreateInvalidPasswordTestAsync()
         {
-            FirstName = "Test Name",
-            Surname = "Test Surname",
-            Email = email,
-            Password = "Password1@",
-            ConfirmPassword = "Password1@"
-        };
+            var dto = await CreateCustomerRequestDtoAsync();
+            dto.Password = "01234567901234";
+            dto.ConfirmPassword = "01234567901234";
 
-        var content = await CreateStringContent(dto);
-        var client = factory.CreateClient();
-        var createResponse = await client.PostAsync(CustomerUrl, content);
-        Assert.Equal(HttpStatusCode.Created, createResponse.StatusCode);
+            var content = await CreateStringContentAsync(dto);
+            var response = await _httpClient.PostAsync(CustomerUrl, content);
+            var errors = await ExtractErrorsFromResponse(response);
 
-        client = factory.CreateClient();
-        var getResponse = await client.GetAsync(createResponse.Headers.Location?.ToString());
-        Assert.Equal(HttpStatusCode.OK, getResponse.StatusCode);
-        var customer =
-            JsonConvert.DeserializeObject<CustomerResponseDto>(await getResponse.Content.ReadAsStringAsync());
-
-        dto.FirstName = "New Name";
-        var contentUpdate = await CreateStringContent(dto);
-        var putResponse = await client.PutAsync($"{CustomerUrl}/{customer.Id}", contentUpdate);
-        Assert.True(putResponse.IsSuccessStatusCode);
-        Assert.Equal(HttpStatusCode.NoContent, putResponse.StatusCode);
-    }
-
-    [Fact]
-    public async Task UpdateCustomerIncludingPasswordOkTest()
-    {
-        var email = CreateValidEmail();
-
-        var dto = new CustomerRequestDto
+            Assert.NotNull(errors);
+            Assert.Contains("Password", errors);
+            Assert.NotEmpty(errors["Password"]);
+            Assert.Equal("Passwords must be at least 8 characters and contain at least 3 of the following: upper case (A-Z), lower case (a-z), number (0-9), and special character (e.g. !@#$%^&*).", errors["Password"][0]);
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+            }
+            [Fact]
+        public async Task UpdateCustomerOkTestAsync()
         {
-            FirstName = "Test Name",
-            Surname = "Test Surname",
-            Email = email,
-            Password = "Password1@",
-            ConfirmPassword = "Password1@"
-        };
+            var dto = await CreateCustomerRequestDtoAsync();
 
-        var content = await CreateStringContent(dto);
-        var client = factory.CreateClient();
-        var createResponse = await client.PostAsync(CustomerUrl, content);
-        Assert.Equal(HttpStatusCode.Created, createResponse.StatusCode);
+            var content = await CreateStringContentAsync(dto);
+            var createResponse = await _httpClient.PostAsync(CustomerUrl, content);
+            Assert.Equal(HttpStatusCode.Created, createResponse.StatusCode);
 
-        client = factory.CreateClient();
-        var getResponse = await client.GetAsync(createResponse.Headers.Location?.ToString());
-        Assert.Equal(HttpStatusCode.OK, getResponse.StatusCode);
-        var customer =
-            JsonConvert.DeserializeObject<CustomerResponseDto>(await getResponse.Content.ReadAsStringAsync());
+            var getResponse = await _httpClient.GetAsync(createResponse.Headers.Location?.ToString());
+            Assert.Equal(HttpStatusCode.OK, getResponse.StatusCode);
+            var customer =
+                JsonConvert.DeserializeObject<CustomerResponseDto>(await getResponse.Content.ReadAsStringAsync());
 
-        dto.FirstName = "New Name";
-        dto.Password = "NewPassword3@";
-        dto.ConfirmPassword = "NewPassword3@";
-        var contentUpdate = await CreateStringContent(dto);
-        var putResponse = await client.PutAsync($"{CustomerUrl}/{customer.Id}", contentUpdate);
-        Assert.True(putResponse.IsSuccessStatusCode);
-        Assert.Equal(HttpStatusCode.NoContent, putResponse.StatusCode);
-    }
+            dto.FirstName = "New Name";
+            var contentUpdate = await CreateStringContentAsync(dto);
+            var putResponse = await _httpClient.PutAsync($"{CustomerUrl}/{customer.Id}", contentUpdate);
+            Assert.True(putResponse.IsSuccessStatusCode);
+            Assert.Equal(HttpStatusCode.NoContent, putResponse.StatusCode);
+        }
 
-    [Fact]
-    public async Task UpdateCustomerExistingEmailTest()
-    {
-        var customerOneEmail = CreateValidEmail();
-
-        var dto = new CustomerRequestDto
+        [Fact]
+        public async Task UpdateCustomerIncludingPasswordOkTestAsync()
         {
-            FirstName = "Test Name",
-            Surname = "Test Surname",
-            Email = customerOneEmail,
-            Password = "Password1@",
-            ConfirmPassword = "Password1@"
-        };
+            var dto = await CreateCustomerRequestDtoAsync();
 
-        var contentCustomerOne = await CreateStringContent(dto);
-        var client = factory.CreateClient();
-        var createCustomerOneResponse = await client.PostAsync(CustomerUrl, contentCustomerOne);
-        Assert.Equal(HttpStatusCode.Created, createCustomerOneResponse.StatusCode);
+            var content = await CreateStringContentAsync(dto);
+            var createResponse = await _httpClient.PostAsync(CustomerUrl, content);
+            Assert.Equal(HttpStatusCode.Created, createResponse.StatusCode);
 
-        dto.Email = CreateValidEmail();
+            var getResponse = await _httpClient.GetAsync(createResponse.Headers.Location?.ToString());
+            Assert.Equal(HttpStatusCode.OK, getResponse.StatusCode);
+            var customer =
+                JsonConvert.DeserializeObject<CustomerResponseDto>(await getResponse.Content.ReadAsStringAsync());
 
-        var contentCustomerTwo = await CreateStringContent(dto);
-        client = factory.CreateClient();
-        var createCustomerTwoResponse = await client.PostAsync(CustomerUrl, contentCustomerTwo);
-        Assert.Equal(HttpStatusCode.Created, createCustomerTwoResponse.StatusCode);
+            dto.FirstName = "New Name";
+            dto.Password = "NewPassword3@";
+            dto.ConfirmPassword = "NewPassword3@";
+            var contentUpdate = await CreateStringContentAsync(dto);
+            var putResponse = await _httpClient.PutAsync($"{CustomerUrl}/{customer.Id}", contentUpdate);
+            Assert.True(putResponse.IsSuccessStatusCode);
+            Assert.Equal(HttpStatusCode.NoContent, putResponse.StatusCode);
+        }
 
-        var parameters = new Dictionary<string, string> {{"email", dto.Email}};
-        var requestUri = QueryHelpers.AddQueryString(CustomerUrl, parameters);
-        client = factory.CreateClient();
-        var getResponse = await client.GetAsync(requestUri);
-        Assert.Equal(HttpStatusCode.OK, getResponse.StatusCode);
-        var customer =
-            JsonConvert.DeserializeObject<CustomerResponseDto>(await getResponse.Content.ReadAsStringAsync());
-
-        dto.Email = customerOneEmail;
-        var content = await CreateStringContent(dto);
-        client = factory.CreateClient();
-        var response = await client.PutAsync($"{CustomerUrl}/{customer.Id}", content);
-
-        var errors = await ExtractErrorsFromResponse(response);
-
-        Assert.NotNull(errors);
-        Assert.Contains("Id", errors);
-        Assert.NotEmpty(errors["Id"]);
-        Assert.Equal("Invalid Id.", errors["Id"][0]);
-        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-    }
-
-    [Fact]
-    public async Task GetCustomerTest()
-    {
-        var customerOneEmail = CreateValidEmail();
-
-        var dto = new CustomerRequestDto
+        [Fact]
+        public async Task UpdateCustomerExistingEmailTestAsync()
         {
-            FirstName = "Test Name",
-            Surname = "Test Surname",
-            Email = customerOneEmail,
-            Password = "Password1@",
-            ConfirmPassword = "Password1@"
-        };
+            var dto = await CreateCustomerRequestDtoAsync();
+            var customerOneEmail = dto.Email;
 
-        var content = await CreateStringContent(dto);
-        var client = factory.CreateClient();
-        var response = await client.PostAsync(CustomerUrl, content);
-        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+            var contentCustomerOne = await CreateStringContentAsync(dto);
+            var createCustomerOneResponse = await _httpClient.PostAsync(CustomerUrl, contentCustomerOne);
+            Assert.Equal(HttpStatusCode.Created, createCustomerOneResponse.StatusCode);
 
-        client = factory.CreateClient();
-        var getResponse = await client.GetAsync(response.Headers.Location?.ToString());
-        Assert.Equal(HttpStatusCode.OK, getResponse.StatusCode);
-    }
+            dto.Email = $"new_{customerOneEmail}";
 
-    [Fact]
-    public async Task GetCustomerInvalidIdValueTest()
-    {
-        var client = factory.CreateClient();
-        var response = await client.GetAsync($"{CustomerUrl}/l");
-        var errors = await ExtractErrorsFromResponse(response);
+            var contentCustomerTwo = await CreateStringContentAsync(dto);
+            var createCustomerTwoResponse = await _httpClient.PostAsync(CustomerUrl, contentCustomerTwo);
+            Assert.Equal(HttpStatusCode.Created, createCustomerTwoResponse.StatusCode);
 
-        Assert.NotNull(errors);
-        Assert.Contains("id", errors);
-        Assert.NotEmpty(errors["id"]);
-        Assert.Equal("The value 'l' is not valid.", errors["id"][0]);
-        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-    }
+            var parameters = new Dictionary<string, string> { { "email", dto.Email } };
+            var requestUri = QueryHelpers.AddQueryString(CustomerUrl, parameters);
+            var getResponse = await _httpClient.GetAsync(requestUri);
+            Assert.Equal(HttpStatusCode.OK, getResponse.StatusCode);
+            var customer =
+                JsonConvert.DeserializeObject<CustomerResponseDto>(await getResponse.Content.ReadAsStringAsync());
 
-    [Fact]
-    public async Task GetCustomerInvalidIdNegativeTest()
-    {
-        var client = factory.CreateClient();
-        var response = await client.GetAsync($"{CustomerUrl}/-1");
-        var errors = await ExtractErrorsFromResponse(response);
+            dto.Email = customerOneEmail;
+            var content = await CreateStringContentAsync(dto);
+            var response = await _httpClient.PutAsync($"{CustomerUrl}/{customer.Id}", content);
 
-        Assert.NotNull(errors);
-        Assert.Contains("Id", errors);
-        Assert.NotEmpty(errors["Id"]);
-        Assert.Equal("Invalid Id.", errors["Id"][0]);
-        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-    }
+            var errors = await ExtractErrorsFromResponse(response);
 
-    [Fact]
-    public async Task GetCustomerListTest()
-    {
-        var dto = new CustomerRequestDto
+            Assert.NotNull(errors);
+            Assert.Contains("Id", errors);
+            Assert.NotEmpty(errors["Id"]);
+            Assert.Equal("Invalid Id.", errors["Id"][0]);
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task GetCustomerTestAsync()
         {
-            FirstName = "Test Name Get",
-            Surname = "Test Surname",
-            Email = CreateValidEmail(),
-            Password = "Password1@",
-            ConfirmPassword = "Password1@"
-        };
+            var dto = await CreateCustomerRequestDtoAsync();
 
-        var content = await CreateStringContent(dto);
-        var client = factory.CreateClient();
-        var response = await client.PostAsync(CustomerUrl, content);
-        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+            var content = await CreateStringContentAsync(dto);
+            var response = await _httpClient.PostAsync(CustomerUrl, content);
+            Assert.Equal(HttpStatusCode.Created, response.StatusCode);
 
-        dto.Email = CreateValidEmail();
-        var contentTwo = await CreateStringContent(dto);
-        client = factory.CreateClient();
-        var responseTwo = await client.PostAsync(CustomerUrl, contentTwo);
-        Assert.Equal(HttpStatusCode.Created, responseTwo.StatusCode);
+            var getResponse = await _httpClient.GetAsync(response.Headers.Location?.ToString());
+            Assert.Equal(HttpStatusCode.OK, getResponse.StatusCode);
+        }
 
-
-        var parameters = new Dictionary<string, string>
+        [Fact]
+        public async Task GetCustomerInvalidIdValueTestAsync()
         {
-            {"currentPage", "1"},
-            {"pageSize", "1"},
-            {"orderBy", dto.FirstName},
-            {"sortBy", "asc"}
-        };
+            var response = await _httpClient.GetAsync($"{CustomerUrl}/l");
+            var errors = await ExtractErrorsFromResponse(response);
 
-        var requestUri = QueryHelpers.AddQueryString(CustomerUrl, parameters);
+            Assert.NotNull(errors);
+            Assert.Contains("id", errors);
+            Assert.NotEmpty(errors["id"]);
+            Assert.Equal("The value 'l' is not valid.", errors["id"][0]);
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        }
 
-        client = factory.CreateClient();
-        var getResponse = await client.GetAsync(requestUri);
-        Assert.Equal(HttpStatusCode.OK, getResponse.StatusCode);
-        var customers =
-            JsonConvert.DeserializeObject<PaginationDto<CustomerResponseDto>>(
-                await getResponse.Content.ReadAsStringAsync());
-        Assert.True(customers.Count > 1);
-        Assert.NotEmpty(customers.Result);
-    }
-
-    [Fact]
-    public async Task DeleteCustomerOkTest()
-    {
-        var email = CreateValidEmail();
-
-        var dto = new CustomerRequestDto
+        [Fact]
+        public async Task GetCustomerInvalidIdNegativeTestAsync()
         {
-            FirstName = "Test Name",
-            Surname = "Test Surname",
-            Email = email,
-            Password = "Password1@",
-            ConfirmPassword = "Password1@"
-        };
+            var response = await _httpClient.GetAsync($"{CustomerUrl}/-1");
+            var errors = await ExtractErrorsFromResponse(response);
 
-        var content = await CreateStringContent(dto);
+            Assert.NotNull(errors);
+            Assert.Contains("Id", errors);
+            Assert.NotEmpty(errors["Id"]);
+            Assert.Equal("Invalid Id.", errors["Id"][0]);
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        }
 
-        var client = factory.CreateClient();
-        var response = await client.PostAsync(CustomerUrl, content);
-        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+        [Fact]
+        public async Task GetCustomerListTestAsync()
+        {
+            var dto = await CreateCustomerRequestDtoAsync();
+            var content = await CreateStringContentAsync(dto);
+            var response = await _httpClient.PostAsync(CustomerUrl, content);
+            Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+            
+            dto.Email = $"new_{dto.Email}";
+            var contentTwo = await CreateStringContentAsync(dto);
+            var responseTwo = await _httpClient.PostAsync(CustomerUrl, contentTwo);
+            Assert.Equal(HttpStatusCode.Created, responseTwo.StatusCode);
 
-        client = factory.CreateClient();
-        var getResponse = await client.GetAsync(response.Headers.Location?.ToString());
-        Assert.Equal(HttpStatusCode.OK, getResponse.StatusCode);
-        var customer =
-            JsonConvert.DeserializeObject<CustomerResponseDto>(await getResponse.Content.ReadAsStringAsync());
+            var parameters = new Dictionary<string, string>
+            {
+                {"currentPage", "1"},
+                {"pageSize", "1"},
+                {"orderBy", dto.FirstName},
+                {"sortBy", "asc"}
+            };
 
-        client = factory.CreateClient();
-        var deleteResponse = await client.DeleteAsync($"{CustomerUrl}/{customer.Id}");
-        Assert.Equal(HttpStatusCode.NoContent, deleteResponse.StatusCode);
-    }
+            var requestUri = QueryHelpers.AddQueryString(CustomerUrl, parameters);
 
-    private static async Task<StringContent> CreateStringContent(CustomerRequestDto dto)
-    {
-        var content = new StringContent(await Task.Factory.StartNew(() => JsonConvert.SerializeObject(dto)));
-        content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-        return content;
-    }
+            var getResponse = await _httpClient.GetAsync(requestUri);
+            Assert.Equal(HttpStatusCode.OK, getResponse.StatusCode);
+            var customers =
+                JsonConvert.DeserializeObject<PaginationDto<CustomerResponseDto>>(
+                    await getResponse.Content.ReadAsStringAsync());
+            Assert.True(customers.Count > 1);
+            Assert.NotEmpty(customers.Result);
+        }
 
-    private static string CreateValidEmail()
-    {
-        return $"{DateTime.Now:yyyyMMdd_hhmmssfff}@test.com";
-    }
+        [Fact]
+        public async Task DeleteCustomerOkTestAsync()
+        {
+            var dto = await CreateCustomerRequestDtoAsync();
 
-    private static string CreateInvalidEmail()
-    {
-        return $"{DateTime.Now:yyyyMMdd_hhmmssfff}attest.com";
-    }
+            var content = await CreateStringContentAsync(dto);
 
-    private static async Task<IDictionary<string, string[]>> ExtractErrorsFromResponse(HttpResponseMessage response)
-    {
-        var responseContent =
-            JsonConvert.DeserializeObject<ErrorResponse>(await response.Content.ReadAsStringAsync(),
-                new ExpandoObjectConverter());
-        var errors =
-            JsonConvert.DeserializeObject<Dictionary<string, string[]>>(responseContent.Errors.ToString()) as
-                IDictionary<string, string[]>;
-        return errors;
+            var response = await _httpClient.PostAsync(CustomerUrl, content);
+            Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+
+            var getResponse = await _httpClient.GetAsync(response.Headers.Location?.ToString());
+            Assert.Equal(HttpStatusCode.OK, getResponse.StatusCode);
+            var customer =
+                JsonConvert.DeserializeObject<CustomerResponseDto>(await getResponse.Content.ReadAsStringAsync());
+
+            var deleteResponse = await _httpClient.DeleteAsync($"{CustomerUrl}/{customer.Id}");
+            Assert.Equal(HttpStatusCode.NoContent, deleteResponse.StatusCode);
+        }
+
+        private static async Task<StringContent> CreateStringContentAsync(CustomerRequestDto dto)
+        {
+            var content = await Task.FromResult(new StringContent(JsonConvert.SerializeObject(dto)));
+            content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+            return content;
+        }
+
+        private static async Task<CustomerRequestDto> CreateCustomerRequestDtoAsync()
+        {
+            return await Task.FromResult(new CustomerRequestDto
+            {
+                FirstName = "Test Name",
+                Surname = "Test Surname",
+                Email = $"{DateTime.Now:yyyyMMdd_hhmmssfff}@test.com",
+                Password = "Password1@",
+                ConfirmPassword = "Password1@"
+            });
+        }
+
+        private static async Task<IDictionary<string, string[]>> ExtractErrorsFromResponse(HttpResponseMessage response)
+        {
+            var responseContent =
+                JsonConvert.DeserializeObject<ErrorResponse>(await response.Content.ReadAsStringAsync(), new ExpandoObjectConverter());
+            var errors =
+                (IDictionary<string, string[]>) JsonConvert.DeserializeObject<Dictionary<string, string[]>>(responseContent.Errors.ToString());
+            return errors;
+        }
     }
 }

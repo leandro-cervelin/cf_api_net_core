@@ -1,6 +1,6 @@
 ﻿namespace CF.Customer.Application.Dtos;
 
-public class CustomerResponseDto
+public record class CustomerResponseDto
 {
     public long Id { get; set; }
     public string Email { get; set; }

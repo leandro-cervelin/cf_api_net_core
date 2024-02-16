@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -19,6 +18,7 @@ public class CustomerControllerTest
     private readonly Mock<ICorrelationContextAccessor> _correlationContext = new();
     private readonly Mock<ICustomerFacade> _customerFacade = new();
     private readonly Mock<ILogger<CustomerController>> _logger = new();
+    private readonly CancellationTokenSource _cancellationTokenSource = new();
 
     public CustomerControllerTest()
     {
@@ -27,13 +27,14 @@ public class CustomerControllerTest
     }
 
     [Fact]
-    public async Task GetListTest()
+    public async Task GetListTestAsync()
     {
+        //Arrange
         var facadeResult = new PaginationDto<CustomerResponseDto>
         {
             Count = 2,
-            Result = new List<CustomerResponseDto>
-            {
+            Result =
+            [
                 new()
                 {
                     Email = "tarnished@test.com",
@@ -50,12 +51,10 @@ public class CustomerControllerTest
                     FullName = "Elden King",
                     Id = 2
                 }
-            }
+            ]
         };
 
-        var cancellationTokenSource = new CancellationTokenSource();
-
-        _customerFacade.Setup(x => x.GetListByFilterAsync(It.IsAny<CustomerFilterDto>(), cancellationTokenSource.Token)).ReturnsAsync(facadeResult);
+        _customerFacade.Setup(x => x.GetListByFilterAsync(It.IsAny<CustomerFilterDto>(), _cancellationTokenSource.Token)).ReturnsAsync(facadeResult);
 
         var controller = new CustomerController(_correlationContext.Object, _logger.Object, _customerFacade.Object);
 
@@ -64,16 +63,19 @@ public class CustomerControllerTest
             FirstName = "Elden"
         };
 
-        var actionResult = await controller.Get(requestDto, cancellationTokenSource.Token);
+        //Act
+        var actionResult = await controller.Get(requestDto, _cancellationTokenSource.Token);
 
+        //Assert
         Assert.NotNull(actionResult);
         Assert.Equal(2, actionResult?.Value?.Count);
         Assert.Equal(2, actionResult?.Value?.Result.Count(x => x.FirstName == "Elden"));
     }
 
     [Fact]
-    public async Task GetByIdTest()
+    public async Task GetByIdTestAsync()
     {
+        //Arrange
         var facadeResult = new CustomerResponseDto
         {
             Email = "tarnished@test.com",
@@ -83,25 +85,24 @@ public class CustomerControllerTest
             Id = 1
         };
 
-        var cancellationTokenSource = new CancellationTokenSource();
-
-        _customerFacade.Setup(x => x.GetByFilterAsync(It.IsAny<CustomerFilterDto>(), cancellationTokenSource.Token)).ReturnsAsync(facadeResult);
+        _customerFacade.Setup(x => x.GetByFilterAsync(It.IsAny<CustomerFilterDto>(), _cancellationTokenSource.Token)).ReturnsAsync(facadeResult);
 
         var controller = new CustomerController(_correlationContext.Object, _logger.Object, _customerFacade.Object);
 
-        var actionResult = await controller.Get(1, cancellationTokenSource.Token);
+        //Act
+        var actionResult = await controller.Get(1, _cancellationTokenSource.Token);
 
+        //Assert
         Assert.NotNull(actionResult);
         Assert.Equal(1, actionResult?.Value?.Id);
         Assert.Equal("tarnished@test.com", actionResult?.Value?.Email);
     }
 
     [Fact]
-    public async Task PostTest()
+    public async Task PostTestAsync()
     {
-        var cancellationTokenSource = new CancellationTokenSource();
-
-        _customerFacade.Setup(x => x.CreateAsync(It.IsAny<CustomerRequestDto>(), cancellationTokenSource.Token)).ReturnsAsync(1);
+        //Arrange
+        _customerFacade.Setup(x => x.CreateAsync(It.IsAny<CustomerRequestDto>(), _cancellationTokenSource.Token)).ReturnsAsync(1);
 
         var controller = new CustomerController(_correlationContext.Object, _logger.Object, _customerFacade.Object);
 
@@ -114,17 +115,18 @@ public class CustomerControllerTest
             Surname = "Souls"
         };
 
-        var actionResult = await controller.Post(requestDto, cancellationTokenSource.Token);
+        //Act
+        var actionResult = await controller.Post(requestDto, _cancellationTokenSource.Token);
 
+        //Assert
         Assert.NotNull(actionResult);
     }
 
     [Fact]
-    public async Task PutTest()
+    public async Task PutTestAsync()
     {
-        var cancellationTokenSource = new CancellationTokenSource();
-
-        _customerFacade.Setup(x => x.UpdateAsync(It.IsAny<long>(), It.IsAny<CustomerRequestDto>(), cancellationTokenSource.Token));
+        //Arrange
+        _customerFacade.Setup(x => x.UpdateAsync(It.IsAny<long>(), It.IsAny<CustomerRequestDto>(), _cancellationTokenSource.Token));
 
         var controller = new CustomerController(_correlationContext.Object, _logger.Object, _customerFacade.Object);
 
@@ -137,22 +139,25 @@ public class CustomerControllerTest
             Surname = "Souls"
         };
 
-        var actionResult = await controller.Put(1, requestDto, cancellationTokenSource.Token);
+        //Act
+        var actionResult = await controller.Put(1, requestDto, _cancellationTokenSource.Token);
 
+        //Assert
         Assert.NotNull(actionResult);
     }
 
     [Fact]
-    public async Task DeleteTest()
+    public async Task DeleteTestAsync()
     {
-        var cancellationTokenSource = new CancellationTokenSource();
-
-        _customerFacade.Setup(x => x.DeleteAsync(It.IsAny<long>(), cancellationTokenSource.Token));
+        //Arrange
+        _customerFacade.Setup(x => x.DeleteAsync(It.IsAny<long>(), _cancellationTokenSource.Token));
 
         var controller = new CustomerController(_correlationContext.Object, _logger.Object, _customerFacade.Object);
 
-        var actionResult = await controller.Delete(1, cancellationTokenSource.Token);
+        //Act
+        var actionResult = await controller.Delete(1, _cancellationTokenSource.Token);
 
+        //Assert
         Assert.NotNull(actionResult);
     }
 }

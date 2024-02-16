@@ -32,6 +32,11 @@ public class RepositoryBase<TEntity> : IRepositoryBase<TEntity>
         await DbSet.AddAsync(entity, cancellationToken);
     }
 
+    public virtual async Task AddRangeAsync(IList<TEntity> entities)
+    {
+        await DbSet.AddRangeAsync(entities);
+    }
+
     public virtual async Task<TEntity> GetByIdAsync(long id, CancellationToken cancellationToken)
     {
         return await DbSet.FindAsync(new object[] { id, cancellationToken }, cancellationToken: cancellationToken);
