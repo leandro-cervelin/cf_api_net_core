@@ -30,7 +30,7 @@ builder.Services.AddDefaultCorrelationId(ConfigureCorrelationId());
 builder.Services.AddTransient<ICustomerFacade, CustomerFacade>();
 builder.Services.AddTransient<ICustomerService, CustomerService>();
 builder.Services.AddTransient<ICustomerRepository, CustomerRepository>();
-builder.Services.AddSingleton<IPasswordHasherService, PasswordHasherService>();
+builder.Services.AddTransient<IPasswordHasherService, PasswordHasherService>();
 builder.Services.AddAutoMapper(typeof(CustomerProfile));
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(SetupSwagger());

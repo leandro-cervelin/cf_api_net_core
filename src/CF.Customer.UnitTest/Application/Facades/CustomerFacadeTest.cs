@@ -66,14 +66,14 @@ namespace CF.Customer.UnitTest.Application.Facades
             var customers = new List<Customer.Domain.Entities.Customer>
             {
                 CreateCustomer(),
-                CreateCustomer(2)
+                CreateCustomer(id: 2)
             };
             var pagination = CreatePagination(customers);
 
             var customersDto = new List<CustomerResponseDto>
             {
                 CreateCustomerResponseDto(),
-                CreateCustomerResponseDto(2)
+                CreateCustomerResponseDto(id: 2)
             };
             var paginationDto = CreatePaginationDto(customersDto);
 
