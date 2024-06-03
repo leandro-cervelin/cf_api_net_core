@@ -6,7 +6,7 @@ namespace CF.Customer.UnitTest.Domain.Services;
 public class PasswordHasherTest
 {
     [Fact]
-    public async void HashOkTestAsync()
+    public async Task HashOkTestAsync()
     {
         //Arrange
         const string password = "Blah@!1894";
@@ -20,7 +20,7 @@ public class PasswordHasherTest
     }
 
     [Fact]
-    public async void VerifyOkTestAsync()
+    public async Task VerifyOkTestAsync()
     {
         //Arrange
         const string password = "Blah@!1894";
@@ -35,7 +35,7 @@ public class PasswordHasherTest
     }
 
     [Fact]
-    public async void VerifyNotOkTestAsync()
+    public async Task VerifyNotOkTestAsync()
     {
         //Arrange
         const string password = "Blah@!1894";
