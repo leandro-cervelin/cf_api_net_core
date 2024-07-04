@@ -30,7 +30,7 @@ public class CustomerTest
 
         const string invalidPasswordErrorMessage =
             "Password must be at least 8 characters and contain at 3 of the following: upper case (A-Z), lower case (a-z), number (0-9) and special character (e.g. !@#$%^&*).";
-        
+
         // Act
         var exception = Assert.Throws<ValidationException>(customer.ValidatePassword);
 
@@ -115,8 +115,7 @@ public class CustomerTest
 
     [Theory]
     [InlineData("a")]
-    [InlineData(
-        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaawwwwwwwwwwwwwwwwwwwwwwwwwwwwwwewewe")]
+    [InlineData("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaawwwwwwwwwwwwwwwwwwwwwwwwwwwwwwewewe")]
     public void InvalidFirstNameTest(string firstName)
     {
         //Arrange
@@ -171,8 +170,7 @@ public class CustomerTest
 
     [Theory]
     [InlineData("a")]
-    [InlineData(
-        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaawwwwwwwwwwwwwwwwwwwwwwwwwwwwwwewewe")]
+    [InlineData("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaawwwwwwwwwwwwwwwwwwwwwwwwwwwwwwewewe")]
     public void InvalidSurnameTest(string surname)
     {
         //Arrange

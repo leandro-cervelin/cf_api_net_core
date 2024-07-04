@@ -2,7 +2,8 @@
 
 namespace CF.Customer.Infrastructure.DbContext;
 
-public class CustomerContext(DbContextOptions<CustomerContext> options) : Microsoft.EntityFrameworkCore.DbContext(options)
+public class CustomerContext(DbContextOptions<CustomerContext> options)
+    : Microsoft.EntityFrameworkCore.DbContext(options)
 {
     public DbSet<Domain.Entities.Customer> Customers { get; set; }
 

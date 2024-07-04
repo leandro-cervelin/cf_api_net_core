@@ -15,7 +15,7 @@ public class CustomerRepositoryTest
     [Fact]
     public async Task GetListTestAsync()
     {
-        using var connection = await CreateAndOpenSqliteConnectionAsync();
+        await using var connection = await CreateAndOpenSqliteConnectionAsync();
 
         var options = await SetDbContextOptionsBuilderAsync(connection);
 
@@ -42,7 +42,7 @@ public class CustomerRepositoryTest
     [Fact]
     public async Task GetTestAsync()
     {
-        using var connection = await CreateAndOpenSqliteConnectionAsync();
+        await using var connection = await CreateAndOpenSqliteConnectionAsync();
         var options = await SetDbContextOptionsBuilderAsync(connection);
 
         await using var context = new CustomerContext(options);
@@ -67,7 +67,7 @@ public class CustomerRepositoryTest
     [Fact]
     public async Task CreateOkTestAsync()
     {
-        using var connection = await CreateAndOpenSqliteConnectionAsync();
+        await using var connection = await CreateAndOpenSqliteConnectionAsync();
         var options = await SetDbContextOptionsBuilderAsync(connection);
 
         await using var context = new CustomerContext(options);
@@ -88,7 +88,7 @@ public class CustomerRepositoryTest
     [Fact]
     public async Task DeleteTestAsync()
     {
-        using var connection = await CreateAndOpenSqliteConnectionAsync();
+        await using var connection = await CreateAndOpenSqliteConnectionAsync();
         var options = await SetDbContextOptionsBuilderAsync(connection);
 
         await using var context = new CustomerContext(options);
@@ -115,7 +115,7 @@ public class CustomerRepositoryTest
     [Fact]
     public async Task DuplicatedEmailTestAsync()
     {
-        using var connection = await CreateAndOpenSqliteConnectionAsync();
+        await using var connection = await CreateAndOpenSqliteConnectionAsync();
         var options = await SetDbContextOptionsBuilderAsync(connection);
 
         await using var context = new CustomerContext(options);
@@ -131,7 +131,7 @@ public class CustomerRepositoryTest
         repository.Add(customerOne);
         await repository.SaveChangesAsync(_cancellationTokenSource.Token);
 
-         repository.Add(customerTwo);
+        repository.Add(customerTwo);
 
         //Act & Assert
         await Assert.ThrowsAsync<DbUpdateException>(() => repository.SaveChangesAsync(_cancellationTokenSource.Token));
@@ -140,7 +140,7 @@ public class CustomerRepositoryTest
     [Fact]
     public async Task CreateInvalidEmailTestAsync()
     {
-        using var connection = await CreateAndOpenSqliteConnectionAsync();
+        await using var connection = await CreateAndOpenSqliteConnectionAsync();
         var options = await SetDbContextOptionsBuilderAsync(connection);
 
         await using var context = new CustomerContext(options);
@@ -160,7 +160,7 @@ public class CustomerRepositoryTest
     [Fact]
     public async Task CreateInvalidPasswordTestAsync()
     {
-        using var connection = await CreateAndOpenSqliteConnectionAsync();
+        await using var connection = await CreateAndOpenSqliteConnectionAsync();
         var options = await SetDbContextOptionsBuilderAsync(connection);
 
         await using var context = new CustomerContext(options);
@@ -180,7 +180,7 @@ public class CustomerRepositoryTest
     [Fact]
     public async Task CreateInvalidFirstNameTestAsync()
     {
-        using var connection = await CreateAndOpenSqliteConnectionAsync();
+        await using var connection = await CreateAndOpenSqliteConnectionAsync();
         var options = await SetDbContextOptionsBuilderAsync(connection);
 
         await using var context = new CustomerContext(options);
@@ -200,7 +200,7 @@ public class CustomerRepositoryTest
     [Fact]
     public async Task CreateInvalidSurnameTestAsync()
     {
-        using var connection = await CreateAndOpenSqliteConnectionAsync();
+        await using var connection = await CreateAndOpenSqliteConnectionAsync();
         var options = await SetDbContextOptionsBuilderAsync(connection);
 
         await using var context = new CustomerContext(options);
@@ -230,7 +230,8 @@ public class CustomerRepositoryTest
         };
     }
 
-    private static async Task<DbContextOptions<CustomerContext>> SetDbContextOptionsBuilderAsync(DbConnection connection)
+    private static async Task<DbContextOptions<CustomerContext>> SetDbContextOptionsBuilderAsync(
+        DbConnection connection)
     {
         return await Task.FromResult(new DbContextOptionsBuilder<CustomerContext>()
             .UseSqlite(connection)

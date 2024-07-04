@@ -1,6 +1,6 @@
 ﻿namespace CF.Customer.Application.Dtos;
 
-public record class PaginationDto<TDto> where TDto : class
+public record PaginationDto<TDto> where TDto : class
 {
     public int CurrentPage { get; set; }
     public int Count { get; set; }

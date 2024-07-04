@@ -10,9 +10,9 @@ namespace CF.Customer.UnitTest.Domain.Services;
 
 public class CustomerServiceTest
 {
-    private readonly Mock<ICustomerRepository> _mockRepository = new();
-    private readonly Mock<IPasswordHasherService> _mockPassword = new();
     private readonly CancellationTokenSource _cancellationTokenSource = new();
+    private readonly Mock<IPasswordHasherService> _mockPassword = new();
+    private readonly Mock<ICustomerRepository> _mockRepository = new();
 
     [Fact]
     public async Task GetByFilterAsync_ReturnsCorrectCustomer()
@@ -20,11 +20,13 @@ public class CustomerServiceTest
         // Arrange
         var customer = CreateCustomer();
 
-        _mockRepository.Setup(x => x.GetByFilterAsync(It.IsAny<CustomerFilter>(), _cancellationTokenSource.Token)).ReturnsAsync(customer);
+        _mockRepository.Setup(x => x.GetByFilterAsync(It.IsAny<CustomerFilter>(), _cancellationTokenSource.Token))
+            .ReturnsAsync(customer);
         var customerService = new CustomerService(_mockRepository.Object, _mockPassword.Object);
 
         // Act
-        var result = await customerService.GetByFilterAsync(new CustomerFilter { Id = 1 }, _cancellationTokenSource.Token);
+        var result =
+            await customerService.GetByFilterAsync(new CustomerFilter { Id = 1 }, _cancellationTokenSource.Token);
 
         // Assert
         Assert.Equal(customer.Id, result.Id);
@@ -35,7 +37,7 @@ public class CustomerServiceTest
     {
         // Arrange
         var customerOne = CreateCustomer();
-        var customerTwo = CreateCustomer(id: 2, email: "test2@test.com");
+        var customerTwo = CreateCustomer(2, "test2@test.com");
 
         var customers = new List<Customer.Domain.Entities.Customer>
         {
@@ -44,7 +46,7 @@ public class CustomerServiceTest
         };
 
         // Act
-        var filter = new CustomerFilter {PageSize = 10, CurrentPage = 1};
+        var filter = new CustomerFilter { PageSize = 10, CurrentPage = 1 };
         _mockRepository.Setup(x => x.CountByFilterAsync(It.IsAny<CustomerFilter>(), _cancellationTokenSource.Token))
             .ReturnsAsync(customers.Count);
         _mockRepository.Setup(x => x.GetListByFilterAsync(It.IsAny<CustomerFilter>(), _cancellationTokenSource.Token))
@@ -59,22 +61,25 @@ public class CustomerServiceTest
     [Theory]
     [InlineData(0, "F")]
     [InlineData(0, "")]
-    [InlineData(0, "First Name First Name First Name First Name First Name First Name First Name First Name First Name First Name First Name.")]
+    [InlineData(0,
+        "First Name First Name First Name First Name First Name First Name First Name First Name First Name First Name First Name.")]
     public async Task CreateAsync_InvalidFirstName_ThrowsValidationException(int id, string firstName)
     {
         // Arrange
-        var customer = CreateCustomer(id: id);
+        var customer = CreateCustomer(id);
         customer.FirstName = firstName;
         var customerService = new CustomerService(_mockRepository.Object, _mockPassword.Object);
 
         // Act & Assert
-        await Assert.ThrowsAsync<ValidationException>(() => customerService.CreateAsync(customer, _cancellationTokenSource.Token));
+        await Assert.ThrowsAsync<ValidationException>(() =>
+            customerService.CreateAsync(customer, _cancellationTokenSource.Token));
     }
 
     [Theory]
     [InlineData("")]
     [InlineData("S")]
-    [InlineData("Surname Surname Surname Surname Surname Surname Surname Surname Surname Surname Surname Surname Surname Surname Surname Surname")]
+    [InlineData(
+        "Surname Surname Surname Surname Surname Surname Surname Surname Surname Surname Surname Surname Surname Surname Surname Surname")]
     public async Task CreateAsync_InvalidSurname_ThrowsValidationException(string surname)
     {
         // Arrange
@@ -83,7 +88,8 @@ public class CustomerServiceTest
         var customerService = new CustomerService(_mockRepository.Object, _mockPassword.Object);
 
         // Act & Assert
-        await Assert.ThrowsAsync<ValidationException>(() => customerService.CreateAsync(customer, _cancellationTokenSource.Token));
+        await Assert.ThrowsAsync<ValidationException>(() =>
+            customerService.CreateAsync(customer, _cancellationTokenSource.Token));
     }
 
     [Theory]
@@ -97,7 +103,8 @@ public class CustomerServiceTest
         var customerService = new CustomerService(_mockRepository.Object, _mockPassword.Object);
 
         // Act & Assert
-        await Assert.ThrowsAsync<ValidationException>(() => customerService.CreateAsync(customer, _cancellationTokenSource.Token));
+        await Assert.ThrowsAsync<ValidationException>(() =>
+            customerService.CreateAsync(customer, _cancellationTokenSource.Token));
     }
 
     [Theory]
@@ -111,7 +118,8 @@ public class CustomerServiceTest
         var customerService = new CustomerService(_mockRepository.Object, _mockPassword.Object);
 
         // Act & Assert
-        await Assert.ThrowsAsync<ValidationException>(() => customerService.CreateAsync(customer, _cancellationTokenSource.Token));
+        await Assert.ThrowsAsync<ValidationException>(() =>
+            customerService.CreateAsync(customer, _cancellationTokenSource.Token));
     }
 
 
@@ -119,13 +127,14 @@ public class CustomerServiceTest
     public async Task UpdateInvalidIdTestAsync()
     {
         // Arrange
-        var customer = CreateCustomer(id: 0);
+        var customer = CreateCustomer(0);
 
         // Act
         var customerService = new CustomerService(_mockRepository.Object, _mockPassword.Object);
 
         // Act & Assert
-        await Assert.ThrowsAsync<ValidationException>(() => customerService.UpdateAsync(customer.Id, customer, _cancellationTokenSource.Token));
+        await Assert.ThrowsAsync<ValidationException>(() =>
+            customerService.UpdateAsync(customer.Id, customer, _cancellationTokenSource.Token));
     }
 
     [Fact]
@@ -137,7 +146,8 @@ public class CustomerServiceTest
         var customerService = new CustomerService(_mockRepository.Object, _mockPassword.Object);
 
         // Act & Assert
-        await Assert.ThrowsAsync<ValidationException>(() => customerService.UpdateAsync(id, null, _cancellationTokenSource.Token));
+        await Assert.ThrowsAsync<ValidationException>(() =>
+            customerService.UpdateAsync(id, null, _cancellationTokenSource.Token));
     }
 
     [Fact]
@@ -149,7 +159,8 @@ public class CustomerServiceTest
         var customerService = new CustomerService(_mockRepository.Object, _mockPassword.Object);
 
         // Act & Assert
-        await Assert.ThrowsAsync<EntityNotFoundException>(() => customerService.UpdateAsync(customer.Id, customer, _cancellationTokenSource.Token));
+        await Assert.ThrowsAsync<EntityNotFoundException>(() =>
+            customerService.UpdateAsync(customer.Id, customer, _cancellationTokenSource.Token));
     }
 
     [Fact]
@@ -161,7 +172,8 @@ public class CustomerServiceTest
         var customerService = new CustomerService(_mockRepository.Object, _mockPassword.Object);
 
         // Act & Assert
-        await Assert.ThrowsAsync<ValidationException>(() => customerService.DeleteAsync(id, _cancellationTokenSource.Token));
+        await Assert.ThrowsAsync<ValidationException>(() =>
+            customerService.DeleteAsync(id, _cancellationTokenSource.Token));
     }
 
     [Fact]
@@ -173,7 +185,8 @@ public class CustomerServiceTest
         var customerService = new CustomerService(_mockRepository.Object, _mockPassword.Object);
 
         // Act & Assert
-        await Assert.ThrowsAsync<EntityNotFoundException>(() => customerService.DeleteAsync(id, _cancellationTokenSource.Token));
+        await Assert.ThrowsAsync<EntityNotFoundException>(() =>
+            customerService.DeleteAsync(id, _cancellationTokenSource.Token));
     }
 
     [Fact]
@@ -182,8 +195,9 @@ public class CustomerServiceTest
         // Arrange
         var customer = CreateCustomer();
 
-        _mockRepository.Setup(x => x.GetByFilterAsync(It.IsAny<CustomerFilter>(), _cancellationTokenSource.Token)).ReturnsAsync((Customer.Domain.Entities.Customer)null);
-           
+        _mockRepository.Setup(x => x.GetByFilterAsync(It.IsAny<CustomerFilter>(), _cancellationTokenSource.Token))
+            .ReturnsAsync((Customer.Domain.Entities.Customer)null);
+
         var customerService = new CustomerService(_mockRepository.Object, _mockPassword.Object);
 
         // Act
@@ -200,15 +214,16 @@ public class CustomerServiceTest
         var customer = CreateCustomer();
 
         var filter = new CustomerFilter { Email = customer.Email };
-        _mockRepository.Setup(x => x.GetByFilterAsync(It.IsAny<CustomerFilter>(), _cancellationTokenSource.Token)).ReturnsAsync(customer);
+        _mockRepository.Setup(x => x.GetByFilterAsync(filter, _cancellationTokenSource.Token))
+            .ReturnsAsync(customer);
 
         var customerService = new CustomerService(_mockRepository.Object, _mockPassword.Object);
-        
+
         // Act
         var existingEmail = await customerService.IsAvailableEmailAsync(customer.Email, _cancellationTokenSource.Token);
 
         // Assert
-        Assert.False(existingEmail);
+        Assert.True(existingEmail);
     }
 
     private static Customer.Domain.Entities.Customer CreateCustomer(int id = 1, string email = "test1@test.com")

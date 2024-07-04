@@ -51,7 +51,7 @@ public class CustomerProfileTest
         };
 
         var mapper = MapperConfiguration.CreateMapper();
-        
+
         //Act
         var customerResponseDto = mapper.Map<CustomerResponseDto>(customer);
 
@@ -100,6 +100,7 @@ public class CustomerProfileTest
         Assert.Equal(customerList.First().Email, customerResponseDtoList.First().Email);
         Assert.Equal(customerList.First().Id, customerResponseDtoList.First().Id);
         Assert.Equal(customerList.First().GetFullName(), customerResponseDtoList.First().FullName);
+        Assert.Equal(1, customerResponseDtoPagination.TotalPages);
     }
 
     [Fact]

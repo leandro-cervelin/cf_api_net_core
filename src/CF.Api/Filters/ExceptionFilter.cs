@@ -8,8 +8,6 @@ public class ExceptionFilter : IExceptionFilter
 {
     public void OnException(ExceptionContext context)
     {
-        if (context is null) return;
-
         context.ExceptionHandled = context.Exception switch
         {
             ValidationException => HandleValidationException(context),
@@ -29,13 +27,13 @@ public class ExceptionFilter : IExceptionFilter
     {
         var error = new KeyValuePair<string, object>("Errors", new Dictionary<string, List<string>>
             {
-                {"Validation", new List<string> {context.Exception.Message}}
+                { "Validation", [context.Exception.Message] }
             }
         );
 
         var details = new ProblemDetails
         {
-            Extensions = {error},
+            Extensions = { error },
             Title = "One validation error occurred.",
             Status = StatusCodes.Status400BadRequest,
             Type = "https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.1"

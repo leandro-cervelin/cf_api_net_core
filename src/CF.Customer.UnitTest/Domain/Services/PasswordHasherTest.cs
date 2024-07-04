@@ -14,7 +14,7 @@ public class PasswordHasherTest
 
         //Act
         var result = await service.HashAsync(password);
-        
+
         //Assert
         Assert.NotEqual(password, result);
     }
@@ -29,7 +29,7 @@ public class PasswordHasherTest
         //Act
         var hash = await service.HashAsync(password);
         var isValid = await service.VerifyAsync(password, hash);
-        
+
         //Assert
         Assert.True(isValid);
     }
@@ -41,11 +41,11 @@ public class PasswordHasherTest
         const string password = "Blah@!1894";
         const string fakePassword = "Blah@!4981";
         var service = new PasswordHasherService();
-        
+
         //Act
         var hash = await service.HashAsync(password);
         var isValid = await service.VerifyAsync(fakePassword, hash);
-        
+
         //Assert
         Assert.False(isValid);
     }

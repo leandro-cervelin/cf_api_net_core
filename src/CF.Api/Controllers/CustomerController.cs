@@ -11,7 +11,9 @@ namespace CF.Api.Controllers;
 
 [ApiController]
 [Route("api/v1/customer")]
-public class CustomerController(ICorrelationContextAccessor correlationContext, ILogger<CustomerController> logger,
+public class CustomerController(
+    ICorrelationContextAccessor correlationContext,
+    ILogger<CustomerController> logger,
     ICustomerFacade customerFacade) : ControllerBase
 {
     [HttpGet]
@@ -63,7 +65,8 @@ public class CustomerController(ICorrelationContextAccessor correlationContext, 
     [HttpPost]
     [SwaggerResponse((int)HttpStatusCode.BadRequest, "Invalid Request.")]
     [SwaggerResponse((int)HttpStatusCode.Created, "Customer has been created successfully.")]
-    public async Task<IActionResult> Post([FromBody] CustomerRequestDto customerRequestDto, CancellationToken cancellationToken)
+    public async Task<IActionResult> Post([FromBody] CustomerRequestDto customerRequestDto,
+        CancellationToken cancellationToken)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
 
@@ -76,7 +79,8 @@ public class CustomerController(ICorrelationContextAccessor correlationContext, 
     [SwaggerResponse((int)HttpStatusCode.BadRequest, "Invalid id.")]
     [SwaggerResponse((int)HttpStatusCode.NotFound, "Customer not found")]
     [SwaggerResponse((int)HttpStatusCode.NoContent, "Customer has been updated successfully.")]
-    public async Task<IActionResult> Put(long id, [FromBody] CustomerRequestDto customerRequestDto, CancellationToken cancellationToken)
+    public async Task<IActionResult> Put(long id, [FromBody] CustomerRequestDto customerRequestDto,
+        CancellationToken cancellationToken)
     {
         try
         {

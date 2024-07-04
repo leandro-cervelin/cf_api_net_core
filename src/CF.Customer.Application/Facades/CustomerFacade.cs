@@ -8,7 +8,8 @@ namespace CF.Customer.Application.Facades;
 
 public class CustomerFacade(ICustomerService customerService, IMapper mapper) : ICustomerFacade
 {
-    public async Task<PaginationDto<CustomerResponseDto>> GetListByFilterAsync(CustomerFilterDto filterDto, CancellationToken cancellationToken)
+    public async Task<PaginationDto<CustomerResponseDto>> GetListByFilterAsync(CustomerFilterDto filterDto,
+        CancellationToken cancellationToken)
     {
         var filter = mapper.Map<CustomerFilter>(filterDto);
 
@@ -19,7 +20,8 @@ public class CustomerFacade(ICustomerService customerService, IMapper mapper) : 
         return paginationDto;
     }
 
-    public async Task<CustomerResponseDto> GetByFilterAsync(CustomerFilterDto filterDto, CancellationToken cancellationToken)
+    public async Task<CustomerResponseDto> GetByFilterAsync(CustomerFilterDto filterDto,
+        CancellationToken cancellationToken)
     {
         var filter = mapper.Map<CustomerFilter>(filterDto);
 

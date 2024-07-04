@@ -2,7 +2,9 @@
 
 namespace CF.Api.Middleware;
 
-public class LogExceptionMiddleware(RequestDelegate next, ILogger<LogExceptionMiddleware> logger,
+public class LogExceptionMiddleware(
+    RequestDelegate next,
+    ILogger<LogExceptionMiddleware> logger,
     ICorrelationContextAccessor correlationContext)
 {
     public async Task InvokeAsync(HttpContext httpContext)

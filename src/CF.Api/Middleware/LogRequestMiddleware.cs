@@ -3,7 +3,9 @@ using Microsoft.AspNetCore.Http.Extensions;
 
 namespace CF.Api.Middleware;
 
-public class LogRequestMiddleware(RequestDelegate next, ILogger<LogRequestMiddleware> logger,
+public class LogRequestMiddleware(
+    RequestDelegate next,
+    ILogger<LogRequestMiddleware> logger,
     ICorrelationContextAccessor correlationContext)
 {
     public async Task Invoke(HttpContext context)

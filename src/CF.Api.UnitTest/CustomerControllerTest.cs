@@ -15,10 +15,10 @@ namespace CF.Api.UnitTest;
 
 public class CustomerControllerTest
 {
+    private readonly CancellationTokenSource _cancellationTokenSource = new();
     private readonly Mock<ICorrelationContextAccessor> _correlationContext = new();
     private readonly Mock<ICustomerFacade> _customerFacade = new();
     private readonly Mock<ILogger<CustomerController>> _logger = new();
-    private readonly CancellationTokenSource _cancellationTokenSource = new();
 
     public CustomerControllerTest()
     {
@@ -35,7 +35,7 @@ public class CustomerControllerTest
             Count = 2,
             Result =
             [
-                new()
+                new CustomerResponseDto
                 {
                     Email = "tarnished@test.com",
                     FirstName = "Elden",
@@ -43,7 +43,7 @@ public class CustomerControllerTest
                     FullName = "Elden Ring",
                     Id = 1
                 },
-                new()
+                new CustomerResponseDto
                 {
                     Email = "nameless_king@test.com",
                     FirstName = "Elden",
@@ -54,7 +54,9 @@ public class CustomerControllerTest
             ]
         };
 
-        _customerFacade.Setup(x => x.GetListByFilterAsync(It.IsAny<CustomerFilterDto>(), _cancellationTokenSource.Token)).ReturnsAsync(facadeResult);
+        _customerFacade
+            .Setup(x => x.GetListByFilterAsync(It.IsAny<CustomerFilterDto>(), _cancellationTokenSource.Token))
+            .ReturnsAsync(facadeResult);
 
         var controller = new CustomerController(_correlationContext.Object, _logger.Object, _customerFacade.Object);
 
@@ -68,8 +70,8 @@ public class CustomerControllerTest
 
         //Assert
         Assert.NotNull(actionResult);
-        Assert.Equal(2, actionResult?.Value?.Count);
-        Assert.Equal(2, actionResult?.Value?.Result.Count(x => x.FirstName == "Elden"));
+        Assert.Equal(2, actionResult.Value?.Count);
+        Assert.Equal(2, actionResult.Value?.Result.Count(x => x.FirstName == "Elden"));
     }
 
     [Fact]
@@ -85,7 +87,8 @@ public class CustomerControllerTest
             Id = 1
         };
 
-        _customerFacade.Setup(x => x.GetByFilterAsync(It.IsAny<CustomerFilterDto>(), _cancellationTokenSource.Token)).ReturnsAsync(facadeResult);
+        _customerFacade.Setup(x => x.GetByFilterAsync(It.IsAny<CustomerFilterDto>(), _cancellationTokenSource.Token))
+            .ReturnsAsync(facadeResult);
 
         var controller = new CustomerController(_correlationContext.Object, _logger.Object, _customerFacade.Object);
 
@@ -94,15 +97,16 @@ public class CustomerControllerTest
 
         //Assert
         Assert.NotNull(actionResult);
-        Assert.Equal(1, actionResult?.Value?.Id);
-        Assert.Equal("tarnished@test.com", actionResult?.Value?.Email);
+        Assert.Equal(1, actionResult.Value?.Id);
+        Assert.Equal("tarnished@test.com", actionResult.Value?.Email);
     }
 
     [Fact]
     public async Task PostTestAsync()
     {
         //Arrange
-        _customerFacade.Setup(x => x.CreateAsync(It.IsAny<CustomerRequestDto>(), _cancellationTokenSource.Token)).ReturnsAsync(1);
+        _customerFacade.Setup(x => x.CreateAsync(It.IsAny<CustomerRequestDto>(), _cancellationTokenSource.Token))
+            .ReturnsAsync(1);
 
         var controller = new CustomerController(_correlationContext.Object, _logger.Object, _customerFacade.Object);
 
@@ -126,7 +130,8 @@ public class CustomerControllerTest
     public async Task PutTestAsync()
     {
         //Arrange
-        _customerFacade.Setup(x => x.UpdateAsync(It.IsAny<long>(), It.IsAny<CustomerRequestDto>(), _cancellationTokenSource.Token));
+        _customerFacade.Setup(x =>
+            x.UpdateAsync(It.IsAny<long>(), It.IsAny<CustomerRequestDto>(), _cancellationTokenSource.Token));
 
         var controller = new CustomerController(_correlationContext.Object, _logger.Object, _customerFacade.Object);
 

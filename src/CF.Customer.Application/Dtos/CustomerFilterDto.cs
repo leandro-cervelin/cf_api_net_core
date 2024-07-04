@@ -1,6 +1,6 @@
 ﻿namespace CF.Customer.Application.Dtos;
 
-public record class CustomerFilterDto
+public record CustomerFilterDto
 {
     public long Id { get; set; }
     public string Email { get; set; }

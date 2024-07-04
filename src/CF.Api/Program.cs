@@ -80,7 +80,7 @@ Action<SwaggerGenOptions> SetupSwagger()
 {
     return c =>
     {
-        c.SwaggerDoc("v1", new OpenApiInfo {Title = "CF API", Version = "v1"});
+        c.SwaggerDoc("v1", new OpenApiInfo { Title = "CF API", Version = "v1" });
 
         c.CustomSchemaIds(x => x.FullName);
 
@@ -141,13 +141,12 @@ void RunMigration()
 {
     using var serviceScope = app.Services.GetRequiredService<IServiceScopeFactory>().CreateScope();
 
-    if (!serviceScope.ServiceProvider.GetRequiredService<CustomerContext>().Database.GetPendingMigrations().Any())
-    {
-        return;
-    }
+    if (!serviceScope.ServiceProvider.GetRequiredService<CustomerContext>().Database.GetPendingMigrations()
+            .Any()) return;
 
     serviceScope.ServiceProvider.GetRequiredService<CustomerContext>().Database.Migrate();
 }
+
 public partial class Program
 {
 }

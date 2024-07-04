@@ -3,7 +3,7 @@ using CF.Customer.Domain.Exceptions;
 
 namespace CF.Customer.Domain.Entities;
 
-public static class CustomerExtensions
+public static partial class CustomerExtensions
 {
     public static string GetFullName(this Customer customer)
     {
@@ -38,9 +38,7 @@ public static class CustomerExtensions
         if (string.IsNullOrEmpty(customer.Email))
             throw new ValidationException("The Email is required.");
 
-        if (!Regex.IsMatch(customer.Email,
-                @"\A(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)\Z",
-                RegexOptions.IgnoreCase))
+        if (!EmailValidatorRegex().IsMatch(customer.Email))
             throw new ValidationException("The Email is not a valid e-mail address.");
     }
 
@@ -49,7 +47,7 @@ public static class CustomerExtensions
         if (string.IsNullOrEmpty(customer.Surname))
             throw new ValidationException("The Surname is required.");
 
-        if (customer.Surname.Length < 2 || customer.Surname.Length > 100)
+        if (customer.Surname.Length is < 2 or > 100)
             throw new ValidationException(
                 "The Surname must be a string with a minimum length of 2 and a maximum length of 100.");
     }
@@ -59,8 +57,11 @@ public static class CustomerExtensions
         if (string.IsNullOrEmpty(customer.FirstName))
             throw new ValidationException("The First Name is required.");
 
-        if (customer.FirstName.Length < 2 || customer.FirstName.Length > 100)
+        if (customer.FirstName.Length is < 2 or > 100)
             throw new ValidationException(
                 "The First Name must be a string with a minimum length of 2 and a maximum length of 100.");
     }
+
+    [GeneratedRegex(@"\A(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)\Z", RegexOptions.IgnoreCase, "en-US")]
+    private static partial Regex EmailValidatorRegex();
 }

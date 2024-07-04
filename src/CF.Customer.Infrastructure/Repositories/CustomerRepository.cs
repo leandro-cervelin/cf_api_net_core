@@ -5,7 +5,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CF.Customer.Infrastructure.Repositories;
 
-public class CustomerRepository(CustomerContext context) : RepositoryBase<Domain.Entities.Customer>(context), ICustomerRepository
+public class CustomerRepository(CustomerContext context)
+    : RepositoryBase<Domain.Entities.Customer>(context), ICustomerRepository
 {
     public async Task<int> CountByFilterAsync(CustomerFilter filter, CancellationToken cancellationToken)
     {
@@ -16,7 +17,8 @@ public class CustomerRepository(CustomerContext context) : RepositoryBase<Domain
         return await query.CountAsync(cancellationToken);
     }
 
-    public async Task<Domain.Entities.Customer> GetByFilterAsync(CustomerFilter filter, CancellationToken cancellationToken)
+    public async Task<Domain.Entities.Customer> GetByFilterAsync(CustomerFilter filter,
+        CancellationToken cancellationToken)
     {
         var query = DbContext.Customers.AsQueryable();
 
@@ -25,7 +27,8 @@ public class CustomerRepository(CustomerContext context) : RepositoryBase<Domain
         return await query.FirstOrDefaultAsync(cancellationToken);
     }
 
-    public async Task<List<Domain.Entities.Customer>> GetListByFilterAsync(CustomerFilter filter, CancellationToken cancellationToken)
+    public async Task<List<Domain.Entities.Customer>> GetListByFilterAsync(CustomerFilter filter,
+        CancellationToken cancellationToken)
     {
         var query = DbContext.Customers.AsQueryable();
 
