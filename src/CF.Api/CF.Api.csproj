@@ -11,7 +11,7 @@
 	<ItemGroup>
 		<PackageReference Include="CorrelationId-ForkWithLogLevelSeverityOption" Version="5.0.2" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.8" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.8">
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.10">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
 		</PackageReference>
