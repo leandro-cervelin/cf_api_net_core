@@ -22,7 +22,8 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
         {
             var registrationsTypeToRemove = new List<Type>
             {
-                typeof(DbContextOptions<CustomerContext>)
+                typeof(DbContextOptions<CustomerContext>),
+                typeof(CustomerContext)
             };
 
             RemoveRegistrations(services, registrationsTypeToRemove);
@@ -45,7 +46,7 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
 
             try
             {
-                Task.FromResult(CustomerSeed.Populate(dbContext));
+                Task.FromResult(CustomerSeed.PopulateAsync(dbContext));
             }
             catch (Exception ex)
             {

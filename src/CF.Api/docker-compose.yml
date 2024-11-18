@@ -1,17 +1,28 @@
-﻿version: "3.4"
+﻿version: "3.9"
+
 services:
-    api:
-        build: 
-          context: ..
-          dockerfile: CF.Api/Dockerfile 
-        ports:
-            - "8888:80"
-        environment:
-            - ASPNETCORE_URLS=http://+:80
-        depends_on:
-            - db
-    db:
-        image: "mcr.microsoft.com/mssql/server"
-        environment:
-            SA_PASSWORD: "CF@!1234FC6549"
-            ACCEPT_EULA: "Y"
+  api:
+    build:
+      context: ..
+      dockerfile: CF.Api/Dockerfile
+    ports:
+      - "8888:80"
+    environment:
+      - ASPNETCORE_URLS=http://+:80
+      - ConnectionStrings__DefaultConnection=Server=db;Database=CF;User Id=sa;Password=CF@!1234FC6549;Trusted_Connection=False;TrustServerCertificate=True;
+    depends_on:
+      - db
+    networks:
+      - app-network
+
+  db:
+    image: "mcr.microsoft.com/mssql/server:2022-latest"
+    environment:
+      SA_PASSWORD: "CF@!1234FC6549"
+      ACCEPT_EULA: "Y"
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

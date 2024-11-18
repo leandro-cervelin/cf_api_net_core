@@ -36,11 +36,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(SetupSwagger());
 builder.Services.Configure<GzipCompressionProviderOptions>(options => options.Level = CompressionLevel.Optimal);
 builder.Services.AddResponseCompression(options => { options.Providers.Add<GzipCompressionProvider>(); });
-builder.Services.AddDbContext<CustomerContext>(options =>
-{
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DbConnection"),
-        a => { a.MigrationsAssembly("CF.Migrations"); });
-});
+AddDbContext();
 
 AddNLog();
 
@@ -74,6 +70,17 @@ void AddNLog()
 {
     if (builder.Environment.EnvironmentName.Contains("Test")) return;
     LogManager.Setup().LoadConfigurationFromSection(builder.Configuration);
+}
+
+void AddDbContext()
+{
+    if (builder.Environment.EnvironmentName.Contains("Test")) return;
+
+    builder.Services.AddDbContext<CustomerContext>(options =>
+    {
+        options.UseSqlServer(builder.Configuration.GetConnectionString("DbConnection"),
+            a => { a.MigrationsAssembly("CF.Migrations"); });
+    });
 }
 
 Action<SwaggerGenOptions> SetupSwagger()

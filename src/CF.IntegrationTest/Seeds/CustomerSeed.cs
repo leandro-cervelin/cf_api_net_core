@@ -6,7 +6,7 @@ namespace CF.IntegrationTest.Seeds;
 
 public class CustomerSeed
 {
-    public static async Task Populate(CustomerContext dbContext)
+    public static async Task PopulateAsync(CustomerContext dbContext)
     {
         await dbContext.Customers.AddAsync(new Customer.Domain.Entities.Customer
         {
