@@ -14,3 +14,8 @@ A .NET 9.0 API leveraging **SQL Server** and **Entity Framework Core** for robus
    ```bash
    docker-compose -f CF.Api/docker-compose.yml build
    docker-compose -f CF.Api/docker-compose.yml up
+   
+## API Documentation
+
+Access the API documentation via Swagger:
+http://localhost:8888/swagger/index.html
