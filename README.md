@@ -1,21 +1,30 @@
-[![.NET 9.0](https://github.com/leandro-cervelin/cf_api_net_core/actions/workflows/dotnet-core.yml/badge.svg)](https://github.com/leandro-cervelin/cf_api_net_core/actions/workflows/dotnet-core.yml)[![CodeQL .NET 9.0](https://github.com/leandro-cervelin/cf_api_net_core/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/leandro-cervelin/cf_api_net_core/actions/workflows/codeql-analysis.yml)
-# .NET 9.0 Example API  
+[![.NET 9.0](https://github.com/leandro-cervelin/cf_api_net_core/actions/workflows/dotnet-core.yml/badge.svg)](https://github.com/leandro-cervelin/cf_api_net_core/actions/workflows/dotnet-core.yml)[![CodeQL .NET 9.0](https://github.com/leandro-cervelin/cf_api_net_core/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/leandro-cervelin/cf_api_net_core/actions/workflows/codeql-analysis.yml)  
 
-#NET 9.0 API Example
+# .NET 9.0 API Example
 
-A simple .NET 9.0 API using SQL Server and Entity Framework Core.
+A simple .NET 9.0 API leveraging SQL Server and Entity Framework Core for robust data operations.
 
-#Features
-	•	Unit and Integration Testing
-	•	Docker Compose for deployment
+## Features
+- **Unit and Integration Testing** for quality assurance.
+- **Docker Compose** for streamlined deployment.
 
-#Docker Setup
-	1.	Ensure Linux containers are enabled.
-	2.	Run from the src directory:
+## Prerequisites
+- Docker installed and set to **Linux containers**.
+
+## Getting Started
+
+### Running the Application
+1. Navigate to the `src` directory:
+   ```bash
+   cd src
+
+	2.	Build and start the Docker containers:
 
 docker-compose -f CF.Api/docker-compose.yml build
 docker-compose -f CF.Api/docker-compose.yml up
 
-#API Docs
 
-Access the Swagger UI: http://localhost:8888/swagger/index.html
+## API Documentation
+
+Access the Swagger UI at:
+http://localhost:8888/swagger/index.html
