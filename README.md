@@ -1,21 +1,21 @@
 [![.NET 9.0](https://github.com/leandro-cervelin/cf_api_net_core/actions/workflows/dotnet-core.yml/badge.svg)](https://github.com/leandro-cervelin/cf_api_net_core/actions/workflows/dotnet-core.yml)[![CodeQL .NET 9.0](https://github.com/leandro-cervelin/cf_api_net_core/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/leandro-cervelin/cf_api_net_core/actions/workflows/codeql-analysis.yml)
-# .NET 9.0 Example App / API  
+# .NET 9.0 Example API  
 
-A .NET 9.0 API leveraging **SQL Server** and **Entity Framework Core** for robust and efficient data operations.  
+##NET 9.0 API Example
 
-## Features  
-- **Unit Tests** and **Integration Tests** for code quality assurance.  
-- **Docker with Compose** for streamlined deployment.  
+A simple .NET 9.0 API using SQL Server and Entity Framework Core.
 
-## Docker Setup  
+##Features
+	•	Unit and Integration Testing
+	•	Docker Compose for deployment
 
-1. **Switch to Linux containers**.  
-2. From the `src` folder, run the following commands:  
-   ```bash
-   docker-compose -f CF.Api/docker-compose.yml build
-   docker-compose -f CF.Api/docker-compose.yml up
-   
-## API Documentation
+##Docker Setup
+	1.	Ensure Linux containers are enabled.
+	2.	Run from the src directory:
 
-Access the API documentation via Swagger:
-http://localhost:8888/swagger/index.html
+docker-compose -f CF.Api/docker-compose.yml build
+docker-compose -f CF.Api/docker-compose.yml up
+
+##API Docs
+
+Access the Swagger UI: http://localhost:8888/swagger/index.html
