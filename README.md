@@ -2,10 +2,10 @@
 
 # .NET 9.0 API Example
 
-A simple .NET 9.0 API using SQL Server and Entity Framework Core.
+A .NET 9.0 API using SQL Server and Entity Framework Core.
 
 ## Features
-- **Unit and Integration Testing** for quality assurance.
+- **Unit Test and Integration Testing** for quality assurance.
 - **Docker Compose** for streamlined deployment.
 
 ## Prerequisites
