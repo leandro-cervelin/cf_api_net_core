@@ -22,6 +22,7 @@ A simple .NET 9.0 API leveraging SQL Server and Entity Framework Core for robust
 ```bash
    docker-compose -f CF.Api/docker-compose.yml build
    docker-compose -f CF.Api/docker-compose.yml up
+```
 
 ## API Documentation
 
