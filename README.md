@@ -18,13 +18,13 @@ A .NET 9.0 API using SQL Server and Entity Framework Core.
 ```bash
    
    cd src
-
+```
 2.	Build and start the Docker containers:
-   ```bash
+```bash
    
    docker-compose -f CF.Api/docker-compose.yml build
    docker-compose -f CF.Api/docker-compose.yml up
-   ```
+```
 
 ## API Documentation
 
