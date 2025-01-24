@@ -15,7 +15,7 @@ A .NET 9.0 API using SQL Server and Entity Framework Core.
 
 ### Running the Application
 1. Navigate to the `src` directory:
-   ```bash
+```bash
    
    cd src
 
