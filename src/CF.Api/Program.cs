@@ -68,7 +68,6 @@ void AddSwagger()
 
 void AddNLog()
 {
-    if (builder.Environment.EnvironmentName.Contains("Test")) return;
     LogManager.Setup().LoadConfigurationFromSection(builder.Configuration);
 }
 
