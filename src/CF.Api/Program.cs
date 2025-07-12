@@ -31,7 +31,7 @@ builder.Services.AddTransient<ICustomerFacade, CustomerFacade>();
 builder.Services.AddTransient<ICustomerService, CustomerService>();
 builder.Services.AddTransient<ICustomerRepository, CustomerRepository>();
 builder.Services.AddTransient<IPasswordHasherService, PasswordHasherService>();
-builder.Services.AddAutoMapper(typeof(CustomerProfile));
+builder.Services.AddAutoMapper(x => x.AddProfile<CustomerProfile>());
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(SetupSwagger());
 builder.Services.Configure<GzipCompressionProviderOptions>(options => options.Level = CompressionLevel.Optimal);

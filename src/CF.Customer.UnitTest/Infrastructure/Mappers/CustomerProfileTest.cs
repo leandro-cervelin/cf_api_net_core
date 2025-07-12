@@ -3,14 +3,30 @@ using CF.Customer.Application.Dtos;
 using CF.Customer.Domain.Entities;
 using CF.Customer.Domain.Models;
 using CF.Customer.Infrastructure.Mappers;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Debug;
+using Moq;
 using Xunit;
 
 namespace CF.Customer.UnitTest.Infrastructure.Mappers;
 
 public class CustomerProfileTest
 {
-    public MapperConfiguration MapperConfiguration =
-        new(cfg => cfg.AddProfile<CustomerProfile>());
+    private readonly MapperConfiguration MapperConfiguration;
+    
+    public CustomerProfileTest()
+    {
+        var loggerFactory = LoggerFactory.Create(x => x.AddProvider(new DebugLoggerProvider()));
+        var logger = loggerFactory.CreateLogger<CustomerProfile>();
+
+        var profile = new CustomerProfile();
+        MapperConfiguration = new MapperConfiguration(cfg =>
+        {
+            cfg.AddProfile(profile);
+        }, loggerFactory);
+
+        MapperConfiguration.AssertConfigurationIsValid();
+    }
 
     [Fact]
     public void CustomerRequestDtoToCustomer()
