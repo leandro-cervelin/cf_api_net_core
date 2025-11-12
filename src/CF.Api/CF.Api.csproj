@@ -15,7 +15,7 @@
     </PackageReference>
     <PackageReference Include="NLog.Web.AspNetCore" Version="6.0.5" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.6" />
-    <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="9.0.6" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="10.0.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CF.Customer.Infrastructure\CF.Customer.Infrastructure.csproj" />
