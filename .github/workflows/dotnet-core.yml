@@ -1,4 +1,4 @@
-name: .NET 9.0
+name: .NET 10.0
 
 on:
   push:
