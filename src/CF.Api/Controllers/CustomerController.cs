@@ -5,7 +5,6 @@ using CF.Customer.Application.Facades.Interfaces;
 using CF.Customer.Domain.Exceptions;
 using CorrelationId.Abstractions;
 using Microsoft.AspNetCore.Mvc;
-using Swashbuckle.AspNetCore.Annotations;
 
 namespace CF.Api.Controllers;
 
@@ -17,8 +16,7 @@ public class CustomerController(
     ICustomerFacade customerFacade) : ControllerBase
 {
     [HttpGet]
-    [SwaggerResponse((int)HttpStatusCode.OK, "Customer successfully returned.",
-        typeof(PaginationDto<CustomerResponseDto>))]
+    [ProducesResponseType(typeof(PaginationDto<CustomerResponseDto>), (int)HttpStatusCode.OK)]
     public async Task<ActionResult<PaginationDto<CustomerResponseDto>>> Get(
         [FromQuery] CustomerFilterDto customerFilterDto, CancellationToken cancellationToken)
     {
@@ -37,9 +35,9 @@ public class CustomerController(
     }
 
     [HttpGet("{id}")]
-    [SwaggerResponse((int)HttpStatusCode.BadRequest, "Invalid id.")]
-    [SwaggerResponse((int)HttpStatusCode.NotFound, "Customer not found.")]
-    [SwaggerResponse((int)HttpStatusCode.OK, "Customer successfully returned.")]
+    [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+    [ProducesResponseType((int)HttpStatusCode.NotFound)]
+    [ProducesResponseType(typeof(CustomerResponseDto), (int)HttpStatusCode.OK)]
     public async Task<ActionResult<CustomerResponseDto>> Get(long id, CancellationToken cancellationToken)
     {
         try
@@ -63,8 +61,8 @@ public class CustomerController(
     }
 
     [HttpPost]
-    [SwaggerResponse((int)HttpStatusCode.BadRequest, "Invalid Request.")]
-    [SwaggerResponse((int)HttpStatusCode.Created, "Customer has been created successfully.")]
+    [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+    [ProducesResponseType((int)HttpStatusCode.Created)]
     public async Task<IActionResult> Post([FromBody] CustomerRequestDto customerRequestDto,
         CancellationToken cancellationToken)
     {
@@ -76,9 +74,9 @@ public class CustomerController(
     }
 
     [HttpPut("{id}")]
-    [SwaggerResponse((int)HttpStatusCode.BadRequest, "Invalid id.")]
-    [SwaggerResponse((int)HttpStatusCode.NotFound, "Customer not found")]
-    [SwaggerResponse((int)HttpStatusCode.NoContent, "Customer has been updated successfully.")]
+    [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+    [ProducesResponseType((int)HttpStatusCode.NotFound)]
+    [ProducesResponseType((int)HttpStatusCode.NoContent)]
     public async Task<IActionResult> Put(long id, [FromBody] CustomerRequestDto customerRequestDto,
         CancellationToken cancellationToken)
     {
@@ -108,9 +106,9 @@ public class CustomerController(
     }
 
     [HttpDelete("{id}")]
-    [SwaggerResponse((int)HttpStatusCode.BadRequest, "Invalid id.")]
-    [SwaggerResponse((int)HttpStatusCode.NotFound, "Customer not found.")]
-    [SwaggerResponse((int)HttpStatusCode.NoContent, "Customer has been deleted successfully.")]
+    [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+    [ProducesResponseType((int)HttpStatusCode.NotFound)]
+    [ProducesResponseType((int)HttpStatusCode.NoContent)]
     public async Task<IActionResult> Delete(long id, CancellationToken cancellationToken)
     {
         try

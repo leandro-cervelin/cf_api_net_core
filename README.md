@@ -15,4 +15,4 @@ from the folder src run the below commands
 
 Swagger:
 
-http://localhost:8888/swagger/index.html
+http://localhost:8888/scalar/v1

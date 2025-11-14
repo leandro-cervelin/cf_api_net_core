@@ -3,6 +3,7 @@ using CF.Api.Filters;
 using CF.Api.Middleware;
 using CF.Customer.Application.Facades;
 using CF.Customer.Application.Facades.Interfaces;
+using CF.Customer.Application.Mappers;
 using CF.Customer.Domain.Repositories;
 using CF.Customer.Domain.Services;
 using CF.Customer.Domain.Services.Interfaces;
@@ -13,11 +14,8 @@ using CorrelationId;
 using CorrelationId.DependencyInjection;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi;
-using NLog;
-using NLog.Extensions.Logging;
 using NLog.Web;
-using Swashbuckle.AspNetCore.SwaggerGen;
+using Scalar.AspNetCore;
 using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -31,9 +29,9 @@ builder.Services.AddTransient<ICustomerFacade, CustomerFacade>();
 builder.Services.AddTransient<ICustomerService, CustomerService>();
 builder.Services.AddTransient<ICustomerRepository, CustomerRepository>();
 builder.Services.AddTransient<IPasswordHasherService, PasswordHasherService>();
-builder.Services.AddAutoMapper(x => x.AddProfile<CustomerProfile>());
+builder.Services.AddSingleton<ICustomerMapper, CustomerMapper>();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(SetupSwagger());
+builder.Services.AddOpenApi();
 builder.Services.Configure<GzipCompressionProviderOptions>(options => options.Level = CompressionLevel.Optimal);
 builder.Services.AddResponseCompression(options => { options.Providers.Add<GzipCompressionProvider>(); });
 AddDbContext();
@@ -45,7 +43,7 @@ await using var app = builder.Build();
 RunMigration();
 app.UseCorrelationId();
 AddExceptionHandler();
-AddSwagger();
+AddOpenApi();
 app.UseMiddleware<LogExceptionMiddleware>();
 app.UseMiddleware<LogRequestMiddleware>();
 app.UseMiddleware<LogResponseMiddleware>();
@@ -60,15 +58,19 @@ void AddExceptionHandler()
     app.UseExceptionHandler(ConfigureExceptionHandler());
 }
 
-void AddSwagger()
+void AddOpenApi()
 {
-    app.UseSwagger();
-    app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "CF Api"));
+    if (app.Environment.IsDevelopment())
+    {
+        app.MapOpenApi();
+        app.MapScalarApiReference();
+    }
 }
 
 void AddNLog()
 {
-    LogManager.Setup().LoadConfigurationFromSection(builder.Configuration);
+    // NLog configuration is loaded automatically via UseNLog() and appsettings.json
+    // No additional setup needed for .NET 10
 }
 
 void AddDbContext()
@@ -80,24 +82,6 @@ void AddDbContext()
         options.UseSqlServer(builder.Configuration.GetConnectionString("DbConnection"),
             a => { a.MigrationsAssembly("CF.Migrations"); });
     });
-}
-
-Action<SwaggerGenOptions> SetupSwagger()
-{
-    return c =>
-    {
-        c.SwaggerDoc("v1", new OpenApiInfo { Title = "CF API", Version = "v1" });
-
-        c.CustomSchemaIds(x => x.FullName);
-
-        c.AddSecurityDefinition("Authorization", new OpenApiSecurityScheme
-        {
-            Type = SecuritySchemeType.Http,
-            Scheme = "bearer",
-            Description = "JWT Authorization header using the Bearer scheme",
-            In = ParameterLocation.Header
-        });
-    };
 }
 
 Action<CorrelationIdOptions> ConfigureCorrelationId()

@@ -115,7 +115,8 @@ public class CustomerTest
 
     [Theory]
     [InlineData("a")]
-    [InlineData("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaawwwwwwwwwwwwwwwwwwwwwwwwwwwwwwewewe")]
+    [InlineData(
+        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaawwwwwwwwwwwwwwwwwwwwwwwwwwwwwwewewe")]
     public void InvalidFirstNameTest(string firstName)
     {
         //Arrange
@@ -170,7 +171,8 @@ public class CustomerTest
 
     [Theory]
     [InlineData("a")]
-    [InlineData("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaawwwwwwwwwwwwwwwwwwwwwwwwwwwwwwewewe")]
+    [InlineData(
+        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaawwwwwwwwwwwwwwwwwwwwwwwwwwwwwwewewe")]
     public void InvalidSurnameTest(string surname)
     {
         //Arrange

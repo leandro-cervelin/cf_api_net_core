@@ -1,6 +1,6 @@
-﻿using AutoMapper;
-using CF.Customer.Application.Dtos;
+﻿using CF.Customer.Application.Dtos;
 using CF.Customer.Application.Facades;
+using CF.Customer.Application.Mappers;
 using CF.Customer.Domain.Models;
 using CF.Customer.Domain.Services.Interfaces;
 using Moq;
@@ -11,7 +11,7 @@ namespace CF.Customer.UnitTest.Application.Facades;
 public class CustomerFacadeTest
 {
     private readonly CancellationTokenSource _cancellationTokenSource = new();
-    private readonly Mock<IMapper> _mockMapper = new();
+    private readonly Mock<ICustomerMapper> _mockMapper = new();
     private readonly Mock<ICustomerService> _mockService = new();
 
     [Fact]
@@ -22,7 +22,7 @@ public class CustomerFacadeTest
         var customerRequestDto = CreateCustomerRequestDto();
         const long id = 1;
 
-        _mockMapper.Setup(x => x.Map<Customer.Domain.Entities.Customer>(customerRequestDto)).Returns(customer);
+        _mockMapper.Setup(x => x.MapToCustomer(customerRequestDto)).Returns(customer);
         _mockService.Setup(x => x.CreateAsync(customer, _cancellationTokenSource.Token)).ReturnsAsync(id);
         var mockFacade = new CustomerFacade(_mockService.Object, _mockMapper.Object);
 
@@ -34,7 +34,7 @@ public class CustomerFacadeTest
         _mockService.Verify(
             x => x.CreateAsync(It.IsAny<Customer.Domain.Entities.Customer>(), _cancellationTokenSource.Token),
             Times.Once);
-        _mockMapper.Verify(x => x.Map<Customer.Domain.Entities.Customer>(customerRequestDto), Times.Once);
+        _mockMapper.Verify(x => x.MapToCustomer(customerRequestDto), Times.Once);
     }
 
     [Fact]
@@ -47,8 +47,8 @@ public class CustomerFacadeTest
         var filterDto = new CustomerFilterDto { Id = 1 };
         var filter = new CustomerFilter { Id = 1 };
 
-        _mockMapper.Setup(x => x.Map<CustomerResponseDto>(customer)).Returns(customerResponseDto);
-        _mockMapper.Setup(x => x.Map<CustomerFilter>(filterDto)).Returns(filter);
+        _mockMapper.Setup(x => x.MapToCustomerResponseDto(customer)).Returns(customerResponseDto);
+        _mockMapper.Setup(x => x.MapToCustomerFilter(filterDto)).Returns(filter);
         _mockService.Setup(x => x.GetByFilterAsync(filter, _cancellationTokenSource.Token)).ReturnsAsync(customer);
         var mockFacade = new CustomerFacade(_mockService.Object, _mockMapper.Object);
 
@@ -59,7 +59,7 @@ public class CustomerFacadeTest
         Assert.Equal(customer.Id, result.Id);
         _mockService.Verify(x => x.GetByFilterAsync(It.IsAny<CustomerFilter>(), _cancellationTokenSource.Token),
             Times.Once);
-        _mockMapper.Verify(x => x.Map<CustomerFilter>(filterDto), Times.Once);
+        _mockMapper.Verify(x => x.MapToCustomerFilter(filterDto), Times.Once);
     }
 
     [Fact]
@@ -83,8 +83,8 @@ public class CustomerFacadeTest
         var filterDto = new CustomerFilterDto { Id = 1 };
         var filter = new CustomerFilter { Id = 1 };
 
-        _mockMapper.Setup(x => x.Map<CustomerFilter>(filterDto)).Returns(filter);
-        _mockMapper.Setup(x => x.Map<PaginationDto<CustomerResponseDto>>(pagination)).Returns(paginationDto);
+        _mockMapper.Setup(x => x.MapToCustomerFilter(filterDto)).Returns(filter);
+        _mockMapper.Setup(x => x.MapToPaginationDto(pagination)).Returns(paginationDto);
         _mockService.Setup(x => x.GetListByFilterAsync(filter, _cancellationTokenSource.Token))
             .ReturnsAsync(pagination);
         var mockFacade = new CustomerFacade(_mockService.Object, _mockMapper.Object);
@@ -96,8 +96,8 @@ public class CustomerFacadeTest
         Assert.Equal(paginationDto.Count, result.Count);
         _mockService.Verify(x => x.GetListByFilterAsync(It.IsAny<CustomerFilter>(), _cancellationTokenSource.Token),
             Times.Once);
-        _mockMapper.Verify(x => x.Map<CustomerFilter>(filterDto), Times.Once);
-        _mockMapper.Verify(x => x.Map<PaginationDto<CustomerResponseDto>>(pagination), Times.Once);
+        _mockMapper.Verify(x => x.MapToCustomerFilter(filterDto), Times.Once);
+        _mockMapper.Verify(x => x.MapToPaginationDto(pagination), Times.Once);
     }
 
     [Fact]
@@ -108,7 +108,7 @@ public class CustomerFacadeTest
         var customer = CreateCustomer();
         const long id = 1;
 
-        _mockMapper.Setup(x => x.Map<Customer.Domain.Entities.Customer>(customerRequestDto)).Returns(customer);
+        _mockMapper.Setup(x => x.MapToCustomer(customerRequestDto)).Returns(customer);
         var mockFacade = new CustomerFacade(_mockService.Object, _mockMapper.Object);
 
         // Act
@@ -117,7 +117,7 @@ public class CustomerFacadeTest
 
         // Assert
         Assert.Null(exception);
-        _mockMapper.Verify(x => x.Map<Customer.Domain.Entities.Customer>(customerRequestDto), Times.Once);
+        _mockMapper.Verify(x => x.MapToCustomer(customerRequestDto), Times.Once);
     }
 
     [Fact]
