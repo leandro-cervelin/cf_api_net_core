@@ -15,7 +15,7 @@
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
 		</PackageReference>
 		<PackageReference Include="NLog.Web.AspNetCore" Version="6.1.0" />
-		<PackageReference Include="Scalar.AspNetCore" Version="1.2.61" />
+		<PackageReference Include="Scalar.AspNetCore" Version="2.10.3" />
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\CF.Customer.Infrastructure\CF.Customer.Infrastructure.csproj" />
