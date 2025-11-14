@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using Asp.Versioning;
 using CF.Api.Helpers;
 using CF.Customer.Application.Dtos;
 using CF.Customer.Application.Facades.Interfaces;
@@ -9,13 +10,15 @@ using Microsoft.AspNetCore.Mvc;
 namespace CF.Api.Controllers;
 
 [ApiController]
-[Route("api/v1/customer")]
+[ApiVersion("1.0")]
+[Route("api/v{version:apiVersion}/customer")]
 public class CustomerController(
     ICorrelationContextAccessor correlationContext,
     ILogger<CustomerController> logger,
     ICustomerFacade customerFacade) : ControllerBase
 {
     [HttpGet]
+    [ResponseCache(Duration = 60, Location = ResponseCacheLocation.Any, VaryByQueryKeys = ["*"])]
     [ProducesResponseType(typeof(PaginationDto<CustomerResponseDto>), (int)HttpStatusCode.OK)]
     public async Task<ActionResult<PaginationDto<CustomerResponseDto>>> Get(
         [FromQuery] CustomerFilterDto customerFilterDto, CancellationToken cancellationToken)
@@ -27,14 +30,16 @@ public class CustomerController(
         }
         catch (ValidationException e)
         {
-            logger.LogError(e, "Validation Exception Details. CorrelationId: {correlationId}",
-                correlationContext.CorrelationContext.CorrelationId);
+            if (logger.IsEnabled(LogLevel.Error))
+                logger.LogError(e, "Validation Exception Details. CorrelationId: {correlationId}",
+                    correlationContext.CorrelationContext.CorrelationId);
 
             return BadRequest(e.Message);
         }
     }
 
-    [HttpGet("{id}")]
+    [HttpGet("{id:long}")]
+    [ResponseCache(Duration = 120, Location = ResponseCacheLocation.Any, VaryByQueryKeys = ["id"])]
     [ProducesResponseType((int)HttpStatusCode.BadRequest)]
     [ProducesResponseType((int)HttpStatusCode.NotFound)]
     [ProducesResponseType(typeof(CustomerResponseDto), (int)HttpStatusCode.OK)]
@@ -53,8 +58,9 @@ public class CustomerController(
         }
         catch (ValidationException e)
         {
-            logger.LogError(e, "Validation Exception. CorrelationId: {correlationId}",
-                correlationContext.CorrelationContext.CorrelationId);
+            if (logger.IsEnabled(LogLevel.Error))
+                logger.LogError(e, "Validation Exception. CorrelationId: {correlationId}",
+                    correlationContext.CorrelationContext.CorrelationId);
 
             return BadRequest(e.Message);
         }
@@ -70,10 +76,11 @@ public class CustomerController(
 
         var id = await customerFacade.CreateAsync(customerRequestDto, cancellationToken);
 
-        return CreatedAtAction(nameof(Get), new { id }, new { id });
+        return CreatedAtAction(nameof(Get), new { id, version = HttpContext.GetRequestedApiVersion()?.ToString() },
+            new { id });
     }
 
-    [HttpPut("{id}")]
+    [HttpPut("{id:long}")]
     [ProducesResponseType((int)HttpStatusCode.BadRequest)]
     [ProducesResponseType((int)HttpStatusCode.NotFound)]
     [ProducesResponseType((int)HttpStatusCode.NoContent)]
@@ -91,21 +98,23 @@ public class CustomerController(
         }
         catch (EntityNotFoundException e)
         {
-            logger.LogError(e, "Entity Not Found Exception. CorrelationId: {correlationId}",
-                correlationContext.CorrelationContext.CorrelationId);
+            if (logger.IsEnabled(LogLevel.Error))
+                logger.LogError(e, "Entity Not Found Exception. CorrelationId: {correlationId}",
+                    correlationContext.CorrelationContext.CorrelationId);
 
             return NotFound();
         }
         catch (ValidationException e)
         {
-            logger.LogError(e, "Validation Exception. CorrelationId: {correlationId}",
-                correlationContext.CorrelationContext.CorrelationId);
+            if (logger.IsEnabled(LogLevel.Error))
+                logger.LogError(e, "Validation Exception. CorrelationId: {correlationId}",
+                    correlationContext.CorrelationContext.CorrelationId);
 
             return BadRequest(e.Message);
         }
     }
 
-    [HttpDelete("{id}")]
+    [HttpDelete("{id:long}")]
     [ProducesResponseType((int)HttpStatusCode.BadRequest)]
     [ProducesResponseType((int)HttpStatusCode.NotFound)]
     [ProducesResponseType((int)HttpStatusCode.NoContent)]
@@ -121,15 +130,17 @@ public class CustomerController(
         }
         catch (EntityNotFoundException e)
         {
-            logger.LogError(e, "Entity Not Found Exception. CorrelationId: {correlationId}",
-                correlationContext.CorrelationContext.CorrelationId);
+            if (logger.IsEnabled(LogLevel.Error))
+                logger.LogError(e, "Entity Not Found Exception. CorrelationId: {correlationId}",
+                    correlationContext.CorrelationContext.CorrelationId);
 
             return NotFound();
         }
         catch (ValidationException e)
         {
-            logger.LogError(e, "Validation Exception. CorrelationId: {correlationId}",
-                correlationContext.CorrelationContext.CorrelationId);
+            if (logger.IsEnabled(LogLevel.Error))
+                logger.LogError(e, "Validation Exception. CorrelationId: {correlationId}",
+                    correlationContext.CorrelationContext.CorrelationId);
 
             return BadRequest(e.Message);
         }

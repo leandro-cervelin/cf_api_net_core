@@ -122,6 +122,88 @@ public class CustomerServiceTest
             customerService.CreateAsync(customer, _cancellationTokenSource.Token));
     }
 
+    [Fact]
+    public async Task CreateAsync_Success_HashesPassword()
+    {
+        // Arrange
+        var customer = CreateCustomer();
+        const string hashedPassword = "$2a$11$hashedPasswordExample";
+
+        _mockRepository.Setup(x => x.GetByFilterAsync(It.IsAny<CustomerFilter>(), _cancellationTokenSource.Token))
+            .ReturnsAsync((Customer.Domain.Entities.Customer)null);
+        _mockPassword.Setup(x => x.Hash(customer.Password)).Returns(hashedPassword);
+        _mockRepository.Setup(x => x.SaveChangesAsync(_cancellationTokenSource.Token)).ReturnsAsync(1);
+
+        var customerService = new CustomerService(_mockRepository.Object, _mockPassword.Object);
+
+        // Act
+        await customerService.CreateAsync(customer, _cancellationTokenSource.Token);
+
+        // Assert
+        _mockPassword.Verify(x => x.Hash(It.IsAny<string>()), Times.Once);
+        Assert.Equal(hashedPassword, customer.Password);
+    }
+
+    [Fact]
+    public async Task UpdateAsync_PasswordChanged_HashesNewPassword()
+    {
+        // Arrange
+        var existingCustomer = CreateCustomer();
+        const string oldHashedPassword = "$2a$11$oldHashedPassword";
+        existingCustomer.Password = oldHashedPassword;
+
+        var updatedCustomer = CreateCustomer();
+        const string newPlainPassword = "NewPassword@123";
+        updatedCustomer.Password = newPlainPassword;
+
+        const string newHashedPassword = "$2a$11$newHashedPassword";
+
+        _mockRepository.Setup(x => x.GetByIdAsync(existingCustomer.Id, _cancellationTokenSource.Token))
+            .ReturnsAsync(existingCustomer);
+        _mockRepository.Setup(x => x.GetByFilterAsync(It.IsAny<CustomerFilter>(), _cancellationTokenSource.Token))
+            .ReturnsAsync((Customer.Domain.Entities.Customer)null);
+        _mockPassword.Setup(x => x.Verify(newPlainPassword, oldHashedPassword)).Returns(false);
+        _mockPassword.Setup(x => x.Hash(newPlainPassword)).Returns(newHashedPassword);
+        _mockRepository.Setup(x => x.SaveChangesAsync(_cancellationTokenSource.Token)).ReturnsAsync(1);
+
+        var customerService = new CustomerService(_mockRepository.Object, _mockPassword.Object);
+
+        // Act
+        await customerService.UpdateAsync(existingCustomer.Id, updatedCustomer, _cancellationTokenSource.Token);
+
+        // Assert
+        _mockPassword.Verify(x => x.Verify(newPlainPassword, oldHashedPassword), Times.Once);
+        _mockPassword.Verify(x => x.Hash(newPlainPassword), Times.Once);
+        Assert.Equal(newHashedPassword, existingCustomer.Password);
+    }
+
+    [Fact]
+    public async Task UpdateAsync_PasswordUnchanged_DoesNotHashPassword()
+    {
+        // Arrange
+        var existingCustomer = CreateCustomer();
+        existingCustomer.Password = "$2a$11$hashedPassword";
+
+        var updatedCustomer = CreateCustomer();
+        updatedCustomer.Password = "Password@01"; // Original password before hashing
+
+        _mockRepository.Setup(x => x.GetByIdAsync(existingCustomer.Id, _cancellationTokenSource.Token))
+            .ReturnsAsync(existingCustomer);
+        _mockRepository.Setup(x => x.GetByFilterAsync(It.IsAny<CustomerFilter>(), _cancellationTokenSource.Token))
+            .ReturnsAsync((Customer.Domain.Entities.Customer)null);
+        _mockPassword.Setup(x => x.Verify(updatedCustomer.Password, existingCustomer.Password)).Returns(true);
+        _mockRepository.Setup(x => x.SaveChangesAsync(_cancellationTokenSource.Token)).ReturnsAsync(1);
+
+        var customerService = new CustomerService(_mockRepository.Object, _mockPassword.Object);
+
+        // Act
+        await customerService.UpdateAsync(existingCustomer.Id, updatedCustomer, _cancellationTokenSource.Token);
+
+        // Assert
+        _mockPassword.Verify(x => x.Verify(updatedCustomer.Password, existingCustomer.Password), Times.Once);
+        _mockPassword.Verify(x => x.Hash(It.IsAny<string>()), Times.Never);
+        Assert.Equal("$2a$11$hashedPassword", existingCustomer.Password); // Password unchanged
+    }
 
     [Fact]
     public async Task UpdateInvalidIdTestAsync()
@@ -235,8 +317,8 @@ public class CustomerServiceTest
             Email = email,
             Surname = "Surname",
             FirstName = "FirstName",
-            Updated = DateTime.Now,
-            Created = DateTime.Now
+            Updated = DateTime.UtcNow,
+            Created = DateTime.UtcNow
         };
     }
 }

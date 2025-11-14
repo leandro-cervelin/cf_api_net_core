@@ -2,11 +2,14 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Asp.Versioning;
 using CF.Api.Controllers;
 using CF.Customer.Application.Dtos;
 using CF.Customer.Application.Facades.Interfaces;
 using CorrelationId;
 using CorrelationId.Abstractions;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
@@ -110,6 +113,19 @@ public class CustomerControllerTest
 
         var controller = new CustomerController(_correlationContext.Object, _logger.Object, _customerFacade.Object);
 
+        // Mock HttpContext for API versioning
+        var httpContext = new DefaultHttpContext();
+        var apiVersion = new ApiVersion(1, 0);
+        httpContext.Features.Set<IApiVersioningFeature>(new ApiVersioningFeature(httpContext)
+        {
+            RequestedApiVersion = apiVersion
+        });
+
+        controller.ControllerContext = new ControllerContext
+        {
+            HttpContext = httpContext
+        };
+
         var requestDto = new CustomerRequestDto
         {
             ConfirmPassword = "123DarkSouls!",
@@ -124,6 +140,13 @@ public class CustomerControllerTest
 
         //Assert
         Assert.NotNull(actionResult);
+        var createdAtActionResult = Assert.IsType<CreatedAtActionResult>(actionResult);
+        Assert.Equal(nameof(CustomerController.Get), createdAtActionResult.ActionName);
+        Assert.NotNull(createdAtActionResult.RouteValues);
+        Assert.True(createdAtActionResult.RouteValues.ContainsKey("id"));
+        Assert.Equal(1L, createdAtActionResult.RouteValues["id"]);
+        Assert.True(createdAtActionResult.RouteValues.ContainsKey("version"));
+        Assert.Equal("1.0", createdAtActionResult.RouteValues["version"]);
     }
 
     [Fact]
@@ -149,6 +172,7 @@ public class CustomerControllerTest
 
         //Assert
         Assert.NotNull(actionResult);
+        Assert.IsType<NoContentResult>(actionResult);
     }
 
     [Fact]
@@ -164,5 +188,6 @@ public class CustomerControllerTest
 
         //Assert
         Assert.NotNull(actionResult);
+        Assert.IsType<NoContentResult>(actionResult);
     }
 }

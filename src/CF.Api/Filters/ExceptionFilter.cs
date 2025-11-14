@@ -8,22 +8,27 @@ public class ExceptionFilter : IExceptionFilter
 {
     public void OnException(ExceptionContext context)
     {
-        context.ExceptionHandled = context.Exception switch
+        switch (context.Exception)
         {
-            ValidationException => HandleValidationException(context),
-            EntityNotFoundException => HandleEntityNotFoundException(context),
-            _ => HandleException(context)
-        };
+            case ValidationException:
+                HandleValidationException(context);
+                break;
+            case EntityNotFoundException:
+                HandleEntityNotFoundException(context);
+                break;
+            default:
+                HandleException(context);
+                break;
+        }
     }
 
-    private static bool HandleEntityNotFoundException(ExceptionContext context)
+    private static void HandleEntityNotFoundException(ExceptionContext context)
     {
         context.ExceptionHandled = true;
         context.Result = new NotFoundResult();
-        return true;
     }
 
-    private static bool HandleValidationException(ExceptionContext context)
+    private static void HandleValidationException(ExceptionContext context)
     {
         var error = new KeyValuePair<string, object>("Errors", new Dictionary<string, List<string>>
             {
@@ -40,13 +45,11 @@ public class ExceptionFilter : IExceptionFilter
         };
         context.ExceptionHandled = true;
         context.Result = new BadRequestObjectResult(details);
-        return true;
     }
 
-    private static bool HandleException(ExceptionContext context)
+    private static void HandleException(ExceptionContext context)
     {
         context.ExceptionHandled = true;
         context.Result = new StatusCodeResult(StatusCodes.Status500InternalServerError);
-        return true;
     }
 }

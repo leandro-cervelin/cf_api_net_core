@@ -247,7 +247,7 @@ public class CustomerTest
     {
         //Arrange
         var customer = new Customer.Domain.Entities.Customer();
-        var actualDate = DateTime.Now;
+        var actualDate = DateTime.UtcNow;
 
         //Act
         customer.SetCreatedDate();
