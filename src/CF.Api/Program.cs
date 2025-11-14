@@ -13,7 +13,7 @@ using CorrelationId;
 using CorrelationId.DependencyInjection;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 using NLog;
 using NLog.Extensions.Logging;
 using NLog.Web;
@@ -96,21 +96,6 @@ Action<SwaggerGenOptions> SetupSwagger()
             Scheme = "bearer",
             Description = "JWT Authorization header using the Bearer scheme",
             In = ParameterLocation.Header
-        });
-
-        c.AddSecurityRequirement(new OpenApiSecurityRequirement
-        {
-            {
-                new OpenApiSecurityScheme
-                {
-                    Reference = new OpenApiReference
-                    {
-                        Type = ReferenceType.SecurityScheme,
-                        Id = "Authorization"
-                    }
-                },
-                new List<string>()
-            }
         });
     };
 }
