@@ -13,6 +13,4 @@ from the folder src run the below commands
 - docker-compose -f CF.Api/docker-compose.yml build
 - docker-compose -f CF.Api/docker-compose.yml up
 
-Swagger:
-
 http://localhost:8888/scalar/v1
