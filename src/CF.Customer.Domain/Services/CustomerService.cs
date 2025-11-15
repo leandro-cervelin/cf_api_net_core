@@ -64,8 +64,8 @@ public class CustomerService(ICustomerRepository customerRepository, IPasswordHa
         entity.FirstName = customer.FirstName;
         entity.Surname = customer.Surname;
 
-        if (!await passwordHasherService.VerifyAsync(customer.Password, entity.Password))
-            entity.Password = await passwordHasherService.HashAsync(customer.Password);
+        if (!passwordHasherService.Verify(customer.Password, entity.Password))
+            entity.Password = passwordHasherService.Hash(customer.Password);
 
         entity.SetUpdatedDate();
         await customerRepository.SaveChangesAsync(cancellationToken);
@@ -81,7 +81,7 @@ public class CustomerService(ICustomerRepository customerRepository, IPasswordHa
         var isAvailableEmail = await IsAvailableEmailAsync(customer.Email, cancellationToken);
         if (!isAvailableEmail) throw new ValidationException("Email is not available.");
 
-        customer.Password = await passwordHasherService.HashAsync(customer.Password);
+        customer.Password = passwordHasherService.Hash(customer.Password);
         customer.SetCreatedDate();
         customerRepository.Add(customer);
         await customerRepository.SaveChangesAsync(cancellationToken);

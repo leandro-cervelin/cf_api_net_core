@@ -251,13 +251,9 @@ public class CustomerIntegrationTest(CustomWebApplicationFactory factory) : ICla
     public async Task GetCustomerInvalidIdValueTestAsync()
     {
         var response = await _httpClient.GetAsync($"{CustomerUrl}/l");
-        var errors = await ExtractErrorsFromResponse(response);
 
-        Assert.NotNull(errors);
-        Assert.Contains("id", errors);
-        Assert.NotEmpty(errors["id"]);
-        Assert.Equal("The value 'l' is not valid.", errors["id"][0]);
-        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        // With {id:long} route constraint, invalid values return 404 instead of reaching controller
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
 
     [Fact]

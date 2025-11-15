@@ -6,36 +6,36 @@ namespace CF.Customer.UnitTest.Domain.Services;
 public class PasswordHasherTest
 {
     [Fact]
-    public async Task HashOkTestAsync()
+    public void HashOkTest()
     {
         //Arrange
         const string password = "Blah@!1894";
         var service = new PasswordHasherService();
 
         //Act
-        var result = await service.HashAsync(password);
+        var result = service.Hash(password);
 
         //Assert
         Assert.NotEqual(password, result);
     }
 
     [Fact]
-    public async Task VerifyOkTestAsync()
+    public void VerifyOkTest()
     {
         //Arrange
         const string password = "Blah@!1894";
         var service = new PasswordHasherService();
 
         //Act
-        var hash = await service.HashAsync(password);
-        var isValid = await service.VerifyAsync(password, hash);
+        var hash = service.Hash(password);
+        var isValid = service.Verify(password, hash);
 
         //Assert
         Assert.True(isValid);
     }
 
     [Fact]
-    public async Task VerifyNotOkTestAsync()
+    public void VerifyNotOkTest()
     {
         //Arrange
         const string password = "Blah@!1894";
@@ -43,8 +43,8 @@ public class PasswordHasherTest
         var service = new PasswordHasherService();
 
         //Act
-        var hash = await service.HashAsync(password);
-        var isValid = await service.VerifyAsync(fakePassword, hash);
+        var hash = service.Hash(password);
+        var isValid = service.Verify(fakePassword, hash);
 
         //Assert
         Assert.False(isValid);
