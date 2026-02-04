@@ -17,7 +17,7 @@
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
 		</PackageReference>
 		<PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="10.0.2" />
-		<PackageReference Include="NLog.Web.AspNetCore" Version="6.1.0" />
+		<PackageReference Include="NLog.Web.AspNetCore" Version="6.1.1" />
 		<PackageReference Include="Scalar.AspNetCore" Version="2.12.32" />
 	</ItemGroup>
 	<ItemGroup>
