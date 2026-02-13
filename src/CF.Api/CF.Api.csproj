@@ -10,15 +10,15 @@
 		<PackageReference Include="Asp.Versioning.Mvc" Version="8.1.1" />
 		<PackageReference Include="Asp.Versioning.Mvc.ApiExplorer" Version="8.1.1" />
 		<PackageReference Include="CorrelationId-ForkWithLogLevelSeverityOption" Version="5.0.2" />
-		<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.2" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.2" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.2">
+		<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.3" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.3" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.3">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="10.0.2" />
+		<PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="10.0.3" />
 		<PackageReference Include="NLog.Web.AspNetCore" Version="6.1.1" />
-		<PackageReference Include="Scalar.AspNetCore" Version="2.12.35" />
+		<PackageReference Include="Scalar.AspNetCore" Version="2.12.39" />
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\CF.Customer.Infrastructure\CF.Customer.Infrastructure.csproj" />
