@@ -18,13 +18,13 @@ public class HealthCheckIntegrationTest(CustomWebApplicationFactory factory)
         var client = _factory.CreateClient();
 
         // Act
-        var response = await client.GetAsync("/health");
+        var response = await client.GetAsync("/health", TestContext.Current.CancellationToken);
 
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.Equal("application/json", response.Content.Headers.ContentType?.MediaType);
 
-        var content = await response.Content.ReadAsStringAsync();
+        var content = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
         var healthReport = JsonSerializer.Deserialize<JsonElement>(content);
 
         Assert.Equal("Healthy", healthReport.GetProperty("status").GetString());
@@ -40,7 +40,7 @@ public class HealthCheckIntegrationTest(CustomWebApplicationFactory factory)
         var client = _factory.CreateClient();
 
         // Act
-        var response = await client.GetAsync("/health/ready");
+        var response = await client.GetAsync("/health/ready", TestContext.Current.CancellationToken);
 
         // Assert - In test environment, this endpoint exists but may not have database checks
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -53,7 +53,7 @@ public class HealthCheckIntegrationTest(CustomWebApplicationFactory factory)
         var client = _factory.CreateClient();
 
         // Act
-        var response = await client.GetAsync("/health/live");
+        var response = await client.GetAsync("/health/live", TestContext.Current.CancellationToken);
 
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -66,8 +66,8 @@ public class HealthCheckIntegrationTest(CustomWebApplicationFactory factory)
         var client = _factory.CreateClient();
 
         // Act
-        var response = await client.GetAsync("/health");
-        var content = await response.Content.ReadAsStringAsync();
+        var response = await client.GetAsync("/health", TestContext.Current.CancellationToken);
+        var content = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
         var healthReport = JsonSerializer.Deserialize<JsonElement>(content);
 
         // Assert
@@ -93,8 +93,8 @@ public class HealthCheckIntegrationTest(CustomWebApplicationFactory factory)
         var client = _factory.CreateClient();
 
         // Act
-        var response = await client.GetAsync("/health");
-        var content = await response.Content.ReadAsStringAsync();
+        var response = await client.GetAsync("/health", TestContext.Current.CancellationToken);
+        var content = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
         var healthReport = JsonSerializer.Deserialize<JsonElement>(content);
 
         // Assert

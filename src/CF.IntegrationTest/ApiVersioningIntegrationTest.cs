@@ -1,81 +1,79 @@
+using CF.Customer.Application.Dtos;
+using CF.IntegrationTest.Factories;
+using Newtonsoft.Json;
 using System;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using CF.Customer.Application.Dtos;
-using CF.IntegrationTest.Factories;
-using Newtonsoft.Json;
 using Xunit;
 
 namespace CF.IntegrationTest;
 
-public class ApiVersioningIntegrationTest(CustomWebApplicationFactory factory)
-    : IClassFixture<CustomWebApplicationFactory>
+public class ApiVersioningIntegrationTest : IClassFixture<CustomWebApplicationFactory>
 {
+    private readonly CustomWebApplicationFactory factory;
+
+    public ApiVersioningIntegrationTest(CustomWebApplicationFactory factory)
+        => this.factory = factory;
+
     [Fact]
     public async Task ApiVersioning_V1Endpoint_ReturnsSuccess()
     {
-        // Arrange
-        var client = factory.CreateClient();
+        using var client = factory.CreateClient();
 
-        // Act
-        var response = await client.GetAsync("/api/v1/customer?pageSize=10");
+        var response = await client.GetAsync("/api/v1/customer?pageSize=10", TestContext.Current.CancellationToken);
 
-        // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
     }
 
     [Fact]
     public async Task ApiVersioning_ResponseHeaders_ContainVersionInfo()
     {
-        // Arrange
-        var client = factory.CreateClient();
+        using var client = factory.CreateClient();
 
-        // Act
-        var response = await client.GetAsync("/api/v1/customer?pageSize=10");
+        var url = $"/api/v1/customer?pageSize=10&_t={Guid.NewGuid()}";
+        var response = await client.GetAsync(url, TestContext.Current.CancellationToken);
 
-        // Assert
-        Assert.True(response.Headers.Contains("api-supported-versions"),
+        Assert.True(
+            response.Headers.TryGetValues("api-supported-versions", out var values),
             "Response should contain api-supported-versions header");
+
+        Assert.NotEmpty(values);
     }
+
 
     [Fact]
     public async Task ApiVersioning_PostReturnsCorrectLocation()
     {
-        // Arrange
-        var client = factory.CreateClient();
+        using var client = factory.CreateClient();
+
         var dto = new CustomerRequestDto
         {
             FirstName = "Test",
             Surname = "Versioning",
-            Email = $"versioning_{DateTime.Now:yyyyMMddHHmmss}@test.com",
+            Email = $"versioning_{DateTime.UtcNow:yyyyMMddHHmmssfff}@test.com",
             Password = "Test@1234",
             ConfirmPassword = "Test@1234"
         };
 
-        var content = new StringContent(JsonConvert.SerializeObject(dto));
+        using var content = new StringContent(JsonConvert.SerializeObject(dto));
         content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
-        // Act
-        var response = await client.PostAsync("/api/v1/customer", content);
+        var response = await client.PostAsync("/api/v1/customer", content, TestContext.Current.CancellationToken);
 
-        // Assert
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
         Assert.NotNull(response.Headers.Location);
-        Assert.Contains("/api/v1/customer/", response.Headers.Location?.ToString());
+        Assert.Contains("/api/v1/customer/", response.Headers.Location!.ToString());
     }
 
     [Fact]
     public async Task ApiVersioning_InvalidVersion_ReturnsNotFound()
     {
-        // Arrange
-        var client = factory.CreateClient();
+        using var client = factory.CreateClient();
 
-        // Act
-        var response = await client.GetAsync("/api/v2/customer");
+        var response = await client.GetAsync("/api/v2/customer", TestContext.Current.CancellationToken);
 
-        // Assert
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
 }

@@ -143,7 +143,7 @@ public class CustomerIntegrationTest(CustomWebApplicationFactory factory) : ICla
         dto.ConfirmPassword = "Password3!";
 
         var content = await CreateStringContentAsync(dto);
-        var response = await _httpClient.PostAsync(CustomerUrl, content);
+        var response = await _httpClient.PostAsync(CustomerUrl, content, TestContext.Current.CancellationToken);
 
         var errors = await ExtractErrorsFromResponse(response);
 
@@ -160,7 +160,7 @@ public class CustomerIntegrationTest(CustomWebApplicationFactory factory) : ICla
         var dto = CreateCustomerRequestDto();
 
         var content = await CreateStringContentAsync(dto);
-        var createResponse = await _httpClient.PostAsync(CustomerUrl, content);
+        var createResponse = await _httpClient.PostAsync(CustomerUrl, content, TestContext.Current.CancellationToken);
         Assert.Equal(HttpStatusCode.Created, createResponse.StatusCode);
 
         var getResponse = await _httpClient.GetAsync(createResponse.Headers.Location?.ToString());
@@ -170,7 +170,7 @@ public class CustomerIntegrationTest(CustomWebApplicationFactory factory) : ICla
 
         dto.FirstName = "New Name";
         var contentUpdate = await CreateStringContentAsync(dto);
-        var putResponse = await _httpClient.PutAsync($"{CustomerUrl}/{customer.Id}", contentUpdate);
+        var putResponse = await _httpClient.PutAsync($"{CustomerUrl}/{customer.Id}", contentUpdate, TestContext.Current.CancellationToken);
         Assert.True(putResponse.IsSuccessStatusCode);
         Assert.Equal(HttpStatusCode.NoContent, putResponse.StatusCode);
     }
@@ -181,19 +181,19 @@ public class CustomerIntegrationTest(CustomWebApplicationFactory factory) : ICla
         var dto = CreateCustomerRequestDto();
 
         var content = await CreateStringContentAsync(dto);
-        var createResponse = await _httpClient.PostAsync(CustomerUrl, content);
+        var createResponse = await _httpClient.PostAsync(CustomerUrl, content, TestContext.Current.CancellationToken);
         Assert.Equal(HttpStatusCode.Created, createResponse.StatusCode);
 
-        var getResponse = await _httpClient.GetAsync(createResponse.Headers.Location?.ToString());
+        var getResponse = await _httpClient.GetAsync(createResponse.Headers.Location?.ToString(), TestContext.Current.CancellationToken);
         Assert.Equal(HttpStatusCode.OK, getResponse.StatusCode);
         var customer =
-            JsonConvert.DeserializeObject<CustomerResponseDto>(await getResponse.Content.ReadAsStringAsync());
+            JsonConvert.DeserializeObject<CustomerResponseDto>(await getResponse.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
 
         dto.FirstName = "New Name";
         dto.Password = "NewPassword3@";
         dto.ConfirmPassword = "NewPassword3@";
         var contentUpdate = await CreateStringContentAsync(dto);
-        var putResponse = await _httpClient.PutAsync($"{CustomerUrl}/{customer.Id}", contentUpdate);
+        var putResponse = await _httpClient.PutAsync($"{CustomerUrl}/{customer.Id}", contentUpdate, TestContext.Current.CancellationToken);
         Assert.True(putResponse.IsSuccessStatusCode);
         Assert.Equal(HttpStatusCode.NoContent, putResponse.StatusCode);
     }
@@ -205,25 +205,25 @@ public class CustomerIntegrationTest(CustomWebApplicationFactory factory) : ICla
         var customerOneEmail = dto.Email;
 
         var contentCustomerOne = await CreateStringContentAsync(dto);
-        var createCustomerOneResponse = await _httpClient.PostAsync(CustomerUrl, contentCustomerOne);
+        var createCustomerOneResponse = await _httpClient.PostAsync(CustomerUrl, contentCustomerOne, TestContext.Current.CancellationToken);
         Assert.Equal(HttpStatusCode.Created, createCustomerOneResponse.StatusCode);
 
         dto.Email = $"new_{customerOneEmail}";
 
         var contentCustomerTwo = await CreateStringContentAsync(dto);
-        var createCustomerTwoResponse = await _httpClient.PostAsync(CustomerUrl, contentCustomerTwo);
+        var createCustomerTwoResponse = await _httpClient.PostAsync(CustomerUrl, contentCustomerTwo, TestContext.Current.CancellationToken);
         Assert.Equal(HttpStatusCode.Created, createCustomerTwoResponse.StatusCode);
 
         var parameters = new Dictionary<string, string> { { "email", dto.Email } };
         var requestUri = QueryHelpers.AddQueryString(CustomerUrl, parameters);
-        var getResponse = await _httpClient.GetAsync(requestUri);
+        var getResponse = await _httpClient.GetAsync(requestUri, TestContext.Current.CancellationToken);
         Assert.Equal(HttpStatusCode.OK, getResponse.StatusCode);
         var customer =
-            JsonConvert.DeserializeObject<CustomerResponseDto>(await getResponse.Content.ReadAsStringAsync());
+            JsonConvert.DeserializeObject<CustomerResponseDto>(await getResponse.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
 
         dto.Email = customerOneEmail;
         var content = await CreateStringContentAsync(dto);
-        var response = await _httpClient.PutAsync($"{CustomerUrl}/{customer.Id}", content);
+        var response = await _httpClient.PutAsync($"{CustomerUrl}/{customer.Id}", content, TestContext.Current.CancellationToken);
 
         var errors = await ExtractErrorsFromResponse(response);
 
@@ -240,17 +240,17 @@ public class CustomerIntegrationTest(CustomWebApplicationFactory factory) : ICla
         var dto = CreateCustomerRequestDto();
 
         var content = await CreateStringContentAsync(dto);
-        var response = await _httpClient.PostAsync(CustomerUrl, content);
+        var response = await _httpClient.PostAsync(CustomerUrl, content, TestContext.Current.CancellationToken);
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
 
-        var getResponse = await _httpClient.GetAsync(response.Headers.Location?.ToString());
+        var getResponse = await _httpClient.GetAsync(response.Headers.Location?.ToString(), TestContext.Current.CancellationToken);
         Assert.Equal(HttpStatusCode.OK, getResponse.StatusCode);
     }
 
     [Fact]
     public async Task GetCustomerInvalidIdValueTestAsync()
     {
-        var response = await _httpClient.GetAsync($"{CustomerUrl}/l");
+        var response = await _httpClient.GetAsync($"{CustomerUrl}/l", TestContext.Current.CancellationToken);
 
         // With {id:long} route constraint, invalid values return 404 instead of reaching controller
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
@@ -259,7 +259,7 @@ public class CustomerIntegrationTest(CustomWebApplicationFactory factory) : ICla
     [Fact]
     public async Task GetCustomerInvalidIdNegativeTestAsync()
     {
-        var response = await _httpClient.GetAsync($"{CustomerUrl}/-1");
+        var response = await _httpClient.GetAsync($"{CustomerUrl}/-1", TestContext.Current.CancellationToken);
         var errors = await ExtractErrorsFromResponse(response);
 
         Assert.NotNull(errors);
@@ -274,12 +274,12 @@ public class CustomerIntegrationTest(CustomWebApplicationFactory factory) : ICla
     {
         var dto = CreateCustomerRequestDto();
         var content = await CreateStringContentAsync(dto);
-        var response = await _httpClient.PostAsync(CustomerUrl, content);
+        var response = await _httpClient.PostAsync(CustomerUrl, content, TestContext.Current.CancellationToken);
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
 
         dto.Email = $"new_{dto.Email}";
         var contentTwo = await CreateStringContentAsync(dto);
-        var responseTwo = await _httpClient.PostAsync(CustomerUrl, contentTwo);
+        var responseTwo = await _httpClient.PostAsync(CustomerUrl, contentTwo, TestContext.Current.CancellationToken);
         Assert.Equal(HttpStatusCode.Created, responseTwo.StatusCode);
 
         var parameters = new Dictionary<string, string>
@@ -292,11 +292,11 @@ public class CustomerIntegrationTest(CustomWebApplicationFactory factory) : ICla
 
         var requestUri = QueryHelpers.AddQueryString(CustomerUrl, parameters);
 
-        var getResponse = await _httpClient.GetAsync(requestUri);
+        var getResponse = await _httpClient.GetAsync(requestUri, TestContext.Current.CancellationToken);
         Assert.Equal(HttpStatusCode.OK, getResponse.StatusCode);
         var customers =
             JsonConvert.DeserializeObject<PaginationDto<CustomerResponseDto>>(
-                await getResponse.Content.ReadAsStringAsync());
+                await getResponse.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
         Assert.True(customers.Count > 1);
         Assert.NotEmpty(customers.Result);
     }
@@ -308,15 +308,15 @@ public class CustomerIntegrationTest(CustomWebApplicationFactory factory) : ICla
 
         var content = await CreateStringContentAsync(dto);
 
-        var response = await _httpClient.PostAsync(CustomerUrl, content);
+        var response = await _httpClient.PostAsync(CustomerUrl, content, TestContext.Current.CancellationToken);
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
 
-        var getResponse = await _httpClient.GetAsync(response.Headers.Location?.ToString());
+        var getResponse = await _httpClient.GetAsync(response.Headers.Location?.ToString(), TestContext.Current.CancellationToken);
         Assert.Equal(HttpStatusCode.OK, getResponse.StatusCode);
         var customer =
-            JsonConvert.DeserializeObject<CustomerResponseDto>(await getResponse.Content.ReadAsStringAsync());
+            JsonConvert.DeserializeObject<CustomerResponseDto>(await getResponse.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
 
-        var deleteResponse = await _httpClient.DeleteAsync($"{CustomerUrl}/{customer.Id}");
+        var deleteResponse = await _httpClient.DeleteAsync($"{CustomerUrl}/{customer.Id}", TestContext.Current.CancellationToken);
         Assert.Equal(HttpStatusCode.NoContent, deleteResponse.StatusCode);
     }
 
