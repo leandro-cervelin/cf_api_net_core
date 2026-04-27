@@ -75,9 +75,9 @@ public class CustomerController(
         if (!ModelState.IsValid) return BadRequest(ModelState);
 
         var id = await customerFacade.CreateAsync(customerRequestDto, cancellationToken);
+        var version = HttpContext.Features.Get<IApiVersioningFeature>()?.RequestedApiVersion?.ToString();
 
-        return CreatedAtAction(nameof(Get), new { id, version = HttpContext.GetRequestedApiVersion()?.ToString() },
-            new { id });
+        return CreatedAtAction(nameof(Get), new { id, version }, new { id });
     }
 
     [HttpPut("{id:long}")]
