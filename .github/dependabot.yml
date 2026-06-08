@@ -28,4 +28,8 @@ updates:
   - package-ecosystem: "nuget"
     directory: "/src/CF.Customer.UnitTest/"
     schedule:
-      interval: "daily"    
+      interval: "daily"
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
