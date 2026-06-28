@@ -1,12 +1,14 @@
-﻿using System.Data.Common;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 using CF.Customer.Domain.Models;
 using CF.Customer.Infrastructure.DbContext;
 using CF.Customer.Infrastructure.Repositories;
-using Microsoft.Data.Sqlite;
+using CF.IntegrationTest.Factories;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
 
-namespace CF.Customer.UnitTest.Infrastructure.Repositories;
+namespace CF.IntegrationTest.Infrastructure.Repositories;
 
 public class CustomerRepositoryTest
 {
@@ -15,12 +17,8 @@ public class CustomerRepositoryTest
     [Fact]
     public async Task GetListTestAsync()
     {
-        await using var connection = await CreateAndOpenSqliteConnectionAsync();
-
-        var options = await SetDbContextOptionsBuilderAsync(connection);
-
-        await using var context = new CustomerContext(options);
-        Assert.True(await context.Database.EnsureCreatedAsync());
+        await using var context = await CreateContextAsync();
+        Assert.True(await context.Database.EnsureCreatedAsync(TestContext.Current.CancellationToken));
 
         //Arrange
         var customerOne = CreateCustomer();
@@ -42,11 +40,8 @@ public class CustomerRepositoryTest
     [Fact]
     public async Task GetTestAsync()
     {
-        await using var connection = await CreateAndOpenSqliteConnectionAsync();
-        var options = await SetDbContextOptionsBuilderAsync(connection);
-
-        await using var context = new CustomerContext(options);
-        Assert.True(await context.Database.EnsureCreatedAsync());
+        await using var context = await CreateContextAsync();
+        Assert.True(await context.Database.EnsureCreatedAsync(TestContext.Current.CancellationToken));
 
         //Arrange
         var customerOne = CreateCustomer();
@@ -67,11 +62,8 @@ public class CustomerRepositoryTest
     [Fact]
     public async Task CreateOkTestAsync()
     {
-        await using var connection = await CreateAndOpenSqliteConnectionAsync();
-        var options = await SetDbContextOptionsBuilderAsync(connection);
-
-        await using var context = new CustomerContext(options);
-        Assert.True(await context.Database.EnsureCreatedAsync());
+        await using var context = await CreateContextAsync();
+        Assert.True(await context.Database.EnsureCreatedAsync(TestContext.Current.CancellationToken));
 
         //Arrange
         var customer = CreateCustomer();
@@ -88,11 +80,8 @@ public class CustomerRepositoryTest
     [Fact]
     public async Task DeleteTestAsync()
     {
-        await using var connection = await CreateAndOpenSqliteConnectionAsync();
-        var options = await SetDbContextOptionsBuilderAsync(connection);
-
-        await using var context = new CustomerContext(options);
-        Assert.True(await context.Database.EnsureCreatedAsync());
+        await using var context = await CreateContextAsync();
+        Assert.True(await context.Database.EnsureCreatedAsync(TestContext.Current.CancellationToken));
 
         //Arrange
         var newCustomer = CreateCustomer();
@@ -115,11 +104,8 @@ public class CustomerRepositoryTest
     [Fact]
     public async Task DuplicatedEmailTestAsync()
     {
-        await using var connection = await CreateAndOpenSqliteConnectionAsync();
-        var options = await SetDbContextOptionsBuilderAsync(connection);
-
-        await using var context = new CustomerContext(options);
-        Assert.True(await context.Database.EnsureCreatedAsync());
+        await using var context = await CreateContextAsync();
+        Assert.True(await context.Database.EnsureCreatedAsync(TestContext.Current.CancellationToken));
 
         //Arrange
         var customerOne = CreateCustomer();
@@ -140,11 +126,8 @@ public class CustomerRepositoryTest
     [Fact]
     public async Task CreateInvalidEmailTestAsync()
     {
-        await using var connection = await CreateAndOpenSqliteConnectionAsync();
-        var options = await SetDbContextOptionsBuilderAsync(connection);
-
-        await using var context = new CustomerContext(options);
-        Assert.True(await context.Database.EnsureCreatedAsync());
+        await using var context = await CreateContextAsync();
+        Assert.True(await context.Database.EnsureCreatedAsync(TestContext.Current.CancellationToken));
 
         //Arrange
         var customer = CreateCustomer();
@@ -160,11 +143,8 @@ public class CustomerRepositoryTest
     [Fact]
     public async Task CreateInvalidPasswordTestAsync()
     {
-        await using var connection = await CreateAndOpenSqliteConnectionAsync();
-        var options = await SetDbContextOptionsBuilderAsync(connection);
-
-        await using var context = new CustomerContext(options);
-        Assert.True(await context.Database.EnsureCreatedAsync());
+        await using var context = await CreateContextAsync();
+        Assert.True(await context.Database.EnsureCreatedAsync(TestContext.Current.CancellationToken));
 
         //Arrange
         var customer = CreateCustomer();
@@ -180,11 +160,8 @@ public class CustomerRepositoryTest
     [Fact]
     public async Task CreateInvalidFirstNameTestAsync()
     {
-        await using var connection = await CreateAndOpenSqliteConnectionAsync();
-        var options = await SetDbContextOptionsBuilderAsync(connection);
-
-        await using var context = new CustomerContext(options);
-        Assert.True(await context.Database.EnsureCreatedAsync());
+        await using var context = await CreateContextAsync();
+        Assert.True(await context.Database.EnsureCreatedAsync(TestContext.Current.CancellationToken));
 
         //Arrange
         var customer = CreateCustomer();
@@ -200,11 +177,8 @@ public class CustomerRepositoryTest
     [Fact]
     public async Task CreateInvalidSurnameTestAsync()
     {
-        await using var connection = await CreateAndOpenSqliteConnectionAsync();
-        var options = await SetDbContextOptionsBuilderAsync(connection);
-
-        await using var context = new CustomerContext(options);
-        Assert.True(await context.Database.EnsureCreatedAsync());
+        await using var context = await CreateContextAsync();
+        Assert.True(await context.Database.EnsureCreatedAsync(TestContext.Current.CancellationToken));
 
         //Arrange
         var customer = CreateCustomer();
@@ -230,23 +204,14 @@ public class CustomerRepositoryTest
         };
     }
 
-    private static async Task<DbContextOptions<CustomerContext>> SetDbContextOptionsBuilderAsync(
-        DbConnection connection)
+    private static async Task<CustomerContext> CreateContextAsync()
     {
-        return await Task.FromResult(new DbContextOptionsBuilder<CustomerContext>()
-            .UseSqlite(connection)
-            .Options);
-    }
+        var connectionString = await SqlServerContainer.GetConnectionStringAsync($"RepoTest_{Guid.NewGuid():N}");
 
-    private static async Task<SqliteConnection> CreateAndOpenSqliteConnectionAsync()
-    {
-        var connection = await CreateSqLiteConnectionAsync();
-        await connection.OpenAsync();
-        return connection;
-    }
+        var options = new DbContextOptionsBuilder<CustomerContext>()
+            .UseSqlServer(connectionString)
+            .Options;
 
-    private static async Task<SqliteConnection> CreateSqLiteConnectionAsync()
-    {
-        return await Task.FromResult(new SqliteConnection("DataSource=:memory:"));
+        return new CustomerContext(options);
     }
 }

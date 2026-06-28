@@ -1,21 +1,31 @@
-﻿using CF.Customer.Infrastructure.DbContext;
+using CF.Customer.Infrastructure.DbContext;
 using CF.IntegrationTest.Seeds;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Xunit;
 
 namespace CF.IntegrationTest.Factories;
 
-public class CustomWebApplicationFactory : WebApplicationFactory<Program>
+public class CustomWebApplicationFactory : WebApplicationFactory<Program>, IAsyncLifetime
 {
-    private readonly string _connectionString = $"DataSource={Guid.NewGuid()}.db";
+    private readonly string _databaseName = $"Test_{Guid.NewGuid():N}";
+    private string _connectionString = string.Empty;
+
+    public async ValueTask InitializeAsync()
+    {
+        _connectionString = await SqlServerContainer.GetConnectionStringAsync(_databaseName);
+
+        using var scope = Services.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<CustomerContext>();
+        await dbContext.Database.MigrateAsync();
+        await CustomerSeed.PopulateAsync(dbContext);
+    }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
@@ -29,30 +39,9 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
 
             RemoveRegistrations(services, registrationsTypeToRemove);
 
-            var serviceProvider = new ServiceCollection()
-                .AddEntityFrameworkSqlite()
-                .BuildServiceProvider();
-
             services.AddDbContext<CustomerContext>(options =>
-            {
-                options.UseSqlite(_connectionString);
-                options.UseInternalServiceProvider(serviceProvider);
-            });
-
-            var sp = services.BuildServiceProvider();
-            using var scope = sp.CreateScope();
-            using var dbContext = scope.ServiceProvider.GetRequiredService<CustomerContext>();
-            dbContext.Database.EnsureCreated();
-            var logger = scope.ServiceProvider.GetRequiredService<ILogger<CustomWebApplicationFactory>>();
-
-            try
-            {
-                Task.FromResult(CustomerSeed.PopulateAsync(dbContext));
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, "An error occurred while seeding the database with test data.");
-            }
+                options.UseSqlServer(_connectionString,
+                    sql => sql.MigrationsAssembly("CF.Migrations")));
         });
 
         builder.UseEnvironment("IntegrationTest");

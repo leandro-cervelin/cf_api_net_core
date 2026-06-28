@@ -6,14 +6,13 @@ using Xunit;
 namespace CF.IntegrationTest;
 
 [Collection("RateLimiting")]
-public class RateLimitingIntegrationTest
+public class RateLimitingIntegrationTest : IAsyncLifetime
 {
-    private readonly CustomWebApplicationFactory factory;
+    private readonly CustomWebApplicationFactory factory = new();
 
-    public RateLimitingIntegrationTest()
-    {
-        factory = new CustomWebApplicationFactory();
-    }
+    public ValueTask InitializeAsync() => factory.InitializeAsync();
+
+    public async ValueTask DisposeAsync() => await factory.DisposeAsync();
 
     [Fact]
     public async Task RateLimiting_ExceedsLimit_Returns429()
