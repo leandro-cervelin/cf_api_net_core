@@ -4,15 +4,8 @@ using System.Threading.RateLimiting;
 using Asp.Versioning;
 using CF.Api.Filters;
 using CF.Api.Middleware;
-using CF.Customer.Application.Facades;
-using CF.Customer.Application.Facades.Interfaces;
-using CF.Customer.Application.Mappers;
-using CF.Customer.Domain.Repositories;
-using CF.Customer.Domain.Services;
-using CF.Customer.Domain.Services.Interfaces;
 using CF.Customer.Infrastructure.DbContext;
-using CF.Customer.Infrastructure.Mappers;
-using CF.Customer.Infrastructure.Repositories;
+using CF.Customer.Infrastructure.DependencyInjection;
 using CorrelationId;
 using CorrelationId.DependencyInjection;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
@@ -30,11 +23,7 @@ builder.Host.UseNLog();
 builder.Services.AddControllers(x => x.Filters.Add<ExceptionFilter>());
 builder.Services.AddProblemDetails();
 builder.Services.AddDefaultCorrelationId(ConfigureCorrelationId());
-builder.Services.AddTransient<ICustomerFacade, CustomerFacade>();
-builder.Services.AddTransient<ICustomerService, CustomerService>();
-builder.Services.AddTransient<ICustomerRepository, CustomerRepository>();
-builder.Services.AddTransient<IPasswordHasherService, PasswordHasherService>();
-builder.Services.AddSingleton<ICustomerMapper, CustomerMapper>();
+builder.Services.AddCustomerCore(builder.Configuration.GetConnectionString("DbConnection")!);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddOpenApi();
 builder.Services.Configure<GzipCompressionProviderOptions>(options => options.Level = CompressionLevel.Optimal);
@@ -43,7 +32,6 @@ builder.Services.AddResponseCaching();
 builder.Services.AddMemoryCache();
 AddRateLimiting();
 AddApiVersioning();
-AddDbContext();
 AddHealthChecks();
 await using var app = builder.Build();
 
@@ -128,17 +116,6 @@ void AddApiVersioning()
     {
         options.GroupNameFormat = "'v'VVV";
         options.SubstituteApiVersionInUrl = true;
-    });
-}
-
-void AddDbContext()
-{
-    if (builder.Environment.EnvironmentName.Contains("Test")) return;
-
-    builder.Services.AddDbContext<CustomerContext>(options =>
-    {
-        options.UseSqlServer(builder.Configuration.GetConnectionString("DbConnection"),
-            a => { a.MigrationsAssembly("CF.Migrations"); });
     });
 }
 

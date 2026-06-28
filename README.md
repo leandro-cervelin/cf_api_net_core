@@ -25,3 +25,21 @@ The committed `appsettings.json` intentionally omits the database password.
 Provide a full connection string via user-secrets so no credential is committed:
 
 - dotnet user-secrets --project CF.Api set "ConnectionStrings:DbConnection" "Data Source=localhost;Initial Catalog=CF;User ID=sa;Password=<your-password>;TrustServerCertificate=True;"
+
+## Reusable application core
+
+The Domain / Application / Infrastructure layers are host-agnostic: the whole service
+graph (facade, domain services, repository, EF Core `DbContext`) is registered with a
+single call, `IServiceCollection.AddCustomerCore(connectionString)`
+(`CF.Customer.Infrastructure/DependencyInjection`). Both hosts consume the same core:
+
+- **CF.Api** — the Web API.
+- **CF.ConsoleApp** — a minimal console host that resolves `ICustomerFacade` and runs a
+  create / read / list demo, showing the core can be reused outside the API.
+
+Run the console demo. Its `launchSettings.json` sets `DOTNET_ENVIRONMENT=Development`,
+so `dotnet run` loads the API's shared user-secrets store (same `UserSecretsId`) for the
+connection string. Alternatively, override it with the `ConnectionStrings__DbConnection`
+environment variable:
+
+- dotnet run --project CF.ConsoleApp
