@@ -19,16 +19,14 @@ public class CustomerFacade(ICustomerService customerService, ICustomerMapper ma
         return paginationDto;
     }
 
-    public async Task<CustomerResponseDto> GetByFilterAsync(CustomerFilterDto filterDto,
+    public async Task<CustomerResponseDto?> GetByFilterAsync(CustomerFilterDto filterDto,
         CancellationToken cancellationToken)
     {
         var filter = mapper.MapToCustomerFilter(filterDto);
 
         var result = await customerService.GetByFilterAsync(filter, cancellationToken);
 
-        var resultDto = mapper.MapToCustomerResponseDto(result);
-
-        return resultDto;
+        return result is null ? null : mapper.MapToCustomerResponseDto(result);
     }
 
     public async Task UpdateAsync(long id, CustomerRequestDto customerRequestDto, CancellationToken cancellationToken)

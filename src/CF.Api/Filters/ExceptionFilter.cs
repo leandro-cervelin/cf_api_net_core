@@ -30,7 +30,7 @@ public class ExceptionFilter : IExceptionFilter
 
     private static void HandleValidationException(ExceptionContext context)
     {
-        var error = new KeyValuePair<string, object>("Errors", new Dictionary<string, List<string>>
+        var error = new KeyValuePair<string, object?>("Errors", new Dictionary<string, List<string>>
             {
                 { "Validation", [context.Exception.Message] }
             }

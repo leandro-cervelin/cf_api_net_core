@@ -32,7 +32,7 @@ public class CustomerController(
         {
             if (logger.IsEnabled(LogLevel.Error))
                 logger.LogError(e, "Validation Exception Details. CorrelationId: {correlationId}",
-                    correlationContext.CorrelationContext.CorrelationId);
+                    correlationContext.CorrelationContext?.CorrelationId);
 
             return BadRequest(e.Message);
         }
@@ -60,7 +60,7 @@ public class CustomerController(
         {
             if (logger.IsEnabled(LogLevel.Error))
                 logger.LogError(e, "Validation Exception. CorrelationId: {correlationId}",
-                    correlationContext.CorrelationContext.CorrelationId);
+                    correlationContext.CorrelationContext?.CorrelationId);
 
             return BadRequest(e.Message);
         }
@@ -100,7 +100,7 @@ public class CustomerController(
         {
             if (logger.IsEnabled(LogLevel.Error))
                 logger.LogError(e, "Entity Not Found Exception. CorrelationId: {correlationId}",
-                    correlationContext.CorrelationContext.CorrelationId);
+                    correlationContext.CorrelationContext?.CorrelationId);
 
             return NotFound();
         }
@@ -108,7 +108,7 @@ public class CustomerController(
         {
             if (logger.IsEnabled(LogLevel.Error))
                 logger.LogError(e, "Validation Exception. CorrelationId: {correlationId}",
-                    correlationContext.CorrelationContext.CorrelationId);
+                    correlationContext.CorrelationContext?.CorrelationId);
 
             return BadRequest(e.Message);
         }
@@ -132,7 +132,7 @@ public class CustomerController(
         {
             if (logger.IsEnabled(LogLevel.Error))
                 logger.LogError(e, "Entity Not Found Exception. CorrelationId: {correlationId}",
-                    correlationContext.CorrelationContext.CorrelationId);
+                    correlationContext.CorrelationContext?.CorrelationId);
 
             return NotFound();
         }
@@ -140,7 +140,7 @@ public class CustomerController(
         {
             if (logger.IsEnabled(LogLevel.Error))
                 logger.LogError(e, "Validation Exception. CorrelationId: {correlationId}",
-                    correlationContext.CorrelationContext.CorrelationId);
+                    correlationContext.CorrelationContext?.CorrelationId);
 
             return BadRequest(e.Message);
         }

@@ -12,7 +12,7 @@ public class LogRequestMiddleware(
     {
         var url = context.Request.GetDisplayUrl();
 
-        var correlationId = correlationContext.CorrelationContext.CorrelationId;
+        var correlationId = correlationContext.CorrelationContext?.CorrelationId;
 
         logger.LogInformation(
             "Scheme: {scheme}, Host: {host}, Path: {path}, Method: {method}, url: {url}, correlationId: {correlationId}",

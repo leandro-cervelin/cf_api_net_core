@@ -17,7 +17,7 @@ public class CustomerRepository(CustomerContext context)
         return await query.CountAsync(cancellationToken);
     }
 
-    public async Task<Domain.Entities.Customer> GetByFilterAsync(CustomerFilter filter,
+    public async Task<Domain.Entities.Customer?> GetByFilterAsync(CustomerFilter filter,
         CancellationToken cancellationToken)
     {
         var query = DbContext.Customers.AsQueryable();

@@ -32,7 +32,7 @@ public class RepositoryBase<TEntity> : IRepositoryBase<TEntity>
         await DbSet.AddAsync(entity, cancellationToken);
     }
 
-    public virtual async Task<TEntity> GetByIdAsync(long id, CancellationToken cancellationToken)
+    public virtual async Task<TEntity?> GetByIdAsync(long id, CancellationToken cancellationToken)
     {
         return await DbSet.FindAsync([id, cancellationToken], cancellationToken);
     }
