@@ -6,7 +6,7 @@ internal static class ControllerHelper
 {
     public static ProblemDetails CreateProblemDetails(string property, string errorMessage)
     {
-        var error = new KeyValuePair<string, object>("Errors", new Dictionary<string, List<string>>
+        var error = new KeyValuePair<string, object?>("Errors", new Dictionary<string, List<string>>
             {
                 { property, [errorMessage] }
             }

@@ -4,7 +4,7 @@ namespace CF.Customer.Application.Facades.Interfaces;
 
 public interface ICustomerFacade
 {
-    Task<CustomerResponseDto> GetByFilterAsync(CustomerFilterDto filterDto, CancellationToken cancellationToken);
+    Task<CustomerResponseDto?> GetByFilterAsync(CustomerFilterDto filterDto, CancellationToken cancellationToken);
 
     Task<PaginationDto<CustomerResponseDto>> GetListByFilterAsync(CustomerFilterDto filterDto,
         CancellationToken cancellationToken);

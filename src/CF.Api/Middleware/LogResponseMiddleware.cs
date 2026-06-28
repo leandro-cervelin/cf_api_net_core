@@ -9,7 +9,7 @@ public class LogResponseMiddleware(
 {
     public async Task Invoke(HttpContext context)
     {
-        var correlationId = correlationContext.CorrelationContext.CorrelationId;
+        var correlationId = correlationContext.CorrelationContext?.CorrelationId;
 
         logger.LogInformation("StatusCode: {statusCode}. (CorrelationId: {correlationId})",
             context.Response.StatusCode, correlationId);
