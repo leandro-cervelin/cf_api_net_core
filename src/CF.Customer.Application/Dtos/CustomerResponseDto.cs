@@ -3,8 +3,8 @@
 public record CustomerResponseDto
 {
     public long Id { get; set; }
-    public string Email { get; set; } = null!;
-    public string FirstName { get; set; } = null!;
-    public string Surname { get; set; } = null!;
-    public string FullName { get; set; } = null!;
+    public required string Email { get; set; }
+    public required string FirstName { get; set; }
+    public required string Surname { get; set; }
+    public required string FullName { get; set; }
 }
