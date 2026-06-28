@@ -1,4 +1,5 @@
 using CF.IntegrationTest.Factories;
+using System;
 using System.Net;
 using System.Threading.Tasks;
 using Xunit;
@@ -12,7 +13,11 @@ public class RateLimitingIntegrationTest : IAsyncLifetime
 
     public ValueTask InitializeAsync() => factory.InitializeAsync();
 
-    public async ValueTask DisposeAsync() => await factory.DisposeAsync();
+    public async ValueTask DisposeAsync()
+    {
+        await factory.DisposeAsync();
+        GC.SuppressFinalize(this);
+    }
 
     [Fact]
     public async Task RateLimiting_ExceedsLimit_Returns429()

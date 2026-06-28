@@ -58,7 +58,7 @@ public class HealthCheckIntegrationTest(CustomWebApplicationFactory factory)
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
     }
 
-    [Fact(Skip = "Database checks are disabled in test environment")]
+    [Fact]
     public async Task HealthCheck_Full_ContainsDatabaseCheck()
     {
         // Arrange

@@ -144,10 +144,6 @@ void AddDbContext()
 
 void AddHealthChecks()
 {
-    builder.Services.AddHealthChecks();
-
-    if (builder.Environment.EnvironmentName.Contains("Test")) return;
-
     builder.Services.AddHealthChecks()
         .AddDbContextCheck<CustomerContext>("database", HealthStatus.Unhealthy, ["db", "sql"])
         .AddCheck("self", () => HealthCheckResult.Healthy("API is running"), ["api"]);

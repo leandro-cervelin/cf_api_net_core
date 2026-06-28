@@ -10,13 +10,8 @@ using Xunit;
 
 namespace CF.IntegrationTest;
 
-public class ApiVersioningIntegrationTest : IClassFixture<CustomWebApplicationFactory>
+public class ApiVersioningIntegrationTest(CustomWebApplicationFactory factory) : IClassFixture<CustomWebApplicationFactory>
 {
-    private readonly CustomWebApplicationFactory factory;
-
-    public ApiVersioningIntegrationTest(CustomWebApplicationFactory factory)
-        => this.factory = factory;
-
     [Fact]
     public async Task ApiVersioning_V1Endpoint_ReturnsSuccess()
     {
