@@ -34,7 +34,7 @@ public class RepositoryBase<TEntity> : IRepositoryBase<TEntity>
 
     public virtual async Task<TEntity?> GetByIdAsync(long id, CancellationToken cancellationToken)
     {
-        return await DbSet.FindAsync([id, cancellationToken], cancellationToken);
+        return await DbSet.FindAsync([id], cancellationToken);
     }
 
     public virtual async Task<IList<TEntity>> GetAllAsync(CancellationToken cancellationToken)
@@ -55,12 +55,6 @@ public class RepositoryBase<TEntity> : IRepositoryBase<TEntity>
     public async Task<int> SaveChangesAsync(CancellationToken cancellationToken)
     {
         return await DbContext.SaveChangesAsync(cancellationToken);
-    }
-
-    public void Dispose()
-    {
-        DbContext.Dispose();
-        GC.SuppressFinalize(this);
     }
 
     public virtual async Task AddRangeAsync(IList<TEntity> entities)

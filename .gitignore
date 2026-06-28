@@ -350,3 +350,5 @@ MigrationBackup/
 
 #Rider
 .idea
+# Local secrets (docker-compose, etc.)
+.env

@@ -16,7 +16,7 @@ public class LogExceptionMiddleware(
         catch (Exception e)
         {
             var correlationId = correlationContext.CorrelationContext?.CorrelationId;
-            logger.LogError(e, "Unexpected exception. CorrelationId: {correlationId}", correlationId);
+            logger.LogError(e, "Unexpected exception. CorrelationId: {CorrelationId}", correlationId);
             throw;
         }
     }

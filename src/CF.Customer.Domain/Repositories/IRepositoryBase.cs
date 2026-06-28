@@ -1,6 +1,6 @@
 ﻿namespace CF.Customer.Domain.Repositories;
 
-public interface IRepositoryBase<TEntity> : IDisposable where TEntity : class
+public interface IRepositoryBase<TEntity> where TEntity : class
 {
     /// <summary>
     ///     This method is async only to allow special value generators, such as the one used by

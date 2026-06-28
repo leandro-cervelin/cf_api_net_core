@@ -9,7 +9,7 @@ services:
       - "8888:80"
     environment:
       - ASPNETCORE_URLS=http://+:80
-      - ConnectionStrings__DefaultConnection=Server=db;Database=CF;User Id=sa;Password=CF@!1234FC6549;Trusted_Connection=False;TrustServerCertificate=True;
+      - ConnectionStrings__DbConnection=Data Source=db;Initial Catalog=CF;User ID=sa;Password=${SA_PASSWORD};Trusted_Connection=False;TrustServerCertificate=True;
     depends_on:
       - db
     networks:
@@ -18,7 +18,7 @@ services:
   db:
     image: "mcr.microsoft.com/mssql/server:2022-latest"
     environment:
-      SA_PASSWORD: "CF@!1234FC6549"
+      SA_PASSWORD: "${SA_PASSWORD}"
       ACCEPT_EULA: "Y"
     networks:
       - app-network

@@ -28,7 +28,6 @@ public class HealthCheckIntegrationTest(CustomWebApplicationFactory factory)
         var healthReport = JsonSerializer.Deserialize<JsonElement>(content);
 
         Assert.Equal("Healthy", healthReport.GetProperty("status").GetString());
-        // In test environment, we only have basic health checks (no database)
         Assert.True(healthReport.GetProperty("checks").GetArrayLength() >= 0);
         Assert.True(healthReport.GetProperty("totalDuration").GetDouble() >= 0);
     }

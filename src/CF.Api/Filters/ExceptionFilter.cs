@@ -1,10 +1,13 @@
-﻿using CF.Customer.Domain.Exceptions;
+using CF.Customer.Domain.Exceptions;
+using CorrelationId.Abstractions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace CF.Api.Filters;
 
-public class ExceptionFilter : IExceptionFilter
+public class ExceptionFilter(
+    ILogger<ExceptionFilter> logger,
+    ICorrelationContextAccessor correlationContext) : IExceptionFilter
 {
     public void OnException(ExceptionContext context)
     {
@@ -22,14 +25,17 @@ public class ExceptionFilter : IExceptionFilter
         }
     }
 
-    private static void HandleEntityNotFoundException(ExceptionContext context)
+    private void HandleEntityNotFoundException(ExceptionContext context)
     {
+        Log(context.Exception, "Entity Not Found Exception.");
         context.ExceptionHandled = true;
         context.Result = new NotFoundResult();
     }
 
-    private static void HandleValidationException(ExceptionContext context)
+    private void HandleValidationException(ExceptionContext context)
     {
+        Log(context.Exception, "Validation Exception.");
+
         var error = new KeyValuePair<string, object?>("Errors", new Dictionary<string, List<string>>
             {
                 { "Validation", [context.Exception.Message] }
@@ -47,9 +53,17 @@ public class ExceptionFilter : IExceptionFilter
         context.Result = new BadRequestObjectResult(details);
     }
 
-    private static void HandleException(ExceptionContext context)
+    private void HandleException(ExceptionContext context)
     {
+        Log(context.Exception, "Unexpected exception.");
         context.ExceptionHandled = true;
         context.Result = new StatusCodeResult(StatusCodes.Status500InternalServerError);
+    }
+
+    private void Log(Exception exception, string message)
+    {
+        if (logger.IsEnabled(LogLevel.Error))
+            logger.LogError(exception, "{Message} CorrelationId: {CorrelationId}", message,
+                correlationContext.CorrelationContext?.CorrelationId);
     }
 }

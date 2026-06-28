@@ -295,8 +295,7 @@ public class CustomerServiceTest
         // Arrange
         var customer = CreateCustomer();
 
-        var filter = new CustomerFilter { Email = customer.Email };
-        _mockRepository.Setup(x => x.GetByFilterAsync(filter, _cancellationTokenSource.Token))
+        _mockRepository.Setup(x => x.GetByFilterAsync(It.IsAny<CustomerFilter>(), _cancellationTokenSource.Token))
             .ReturnsAsync(customer);
 
         var customerService = new CustomerService(_mockRepository.Object, _mockPassword.Object);
@@ -305,7 +304,7 @@ public class CustomerServiceTest
         var existingEmail = await customerService.IsAvailableEmailAsync(customer.Email, _cancellationTokenSource.Token);
 
         // Assert
-        Assert.True(existingEmail);
+        Assert.False(existingEmail);
     }
 
     private static Customer.Domain.Entities.Customer CreateCustomer(int id = 1, string email = "test1@test.com")

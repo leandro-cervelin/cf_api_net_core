@@ -18,6 +18,8 @@ public class CustomerService(ICustomerRepository customerRepository, IPasswordHa
         if (filter.PageSize > 100)
             throw new ValidationException("Maximum allowed page size is 100.");
 
+        if (filter.PageSize <= 0) filter.PageSize = 10;
+
         if (filter.CurrentPage <= 0) filter.CurrentPage = 1;
 
         var total = await customerRepository.CountByFilterAsync(filter, cancellationToken);
@@ -102,8 +104,8 @@ public class CustomerService(ICustomerRepository customerRepository, IPasswordHa
     public async Task<bool> IsAvailableEmailAsync(string email, CancellationToken cancellationToken)
     {
         var filter = new CustomerFilter { Email = email };
-        var existingEmail = await customerRepository.GetByFilterAsync(filter, cancellationToken);
-        return existingEmail is null;
+        var existingCustomer = await customerRepository.GetByFilterAsync(filter, cancellationToken);
+        return existingCustomer is null;
     }
 
     private static void Validate(Entities.Customer customer)

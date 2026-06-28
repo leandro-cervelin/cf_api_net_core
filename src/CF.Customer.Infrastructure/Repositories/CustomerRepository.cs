@@ -69,14 +69,32 @@ public class CustomerRepository(CustomerContext context)
             query = query.Where(x => x.Id == filter.Id);
 
         if (!string.IsNullOrWhiteSpace(filter.FirstName))
-            query = query.Where(x => EF.Functions.Like(x.FirstName, $"%{filter.FirstName}%"));
+        {
+            var firstName = $"%{EscapeLike(filter.FirstName)}%";
+            query = query.Where(x => EF.Functions.Like(x.FirstName, firstName, LikeEscapeChar));
+        }
 
         if (!string.IsNullOrWhiteSpace(filter.Surname))
-            query = query.Where(x => EF.Functions.Like(x.Surname, $"%{filter.Surname}%"));
+        {
+            var surname = $"%{EscapeLike(filter.Surname)}%";
+            query = query.Where(x => EF.Functions.Like(x.Surname, surname, LikeEscapeChar));
+        }
 
         if (!string.IsNullOrWhiteSpace(filter.Email))
             query = query.Where(x => x.Email == filter.Email);
 
         return query;
+    }
+
+    private const string LikeEscapeChar = "\\";
+
+    // Escape LIKE wildcards so user input is matched literally (contains semantics).
+    private static string EscapeLike(string value)
+    {
+        return value
+            .Replace("\\", "\\\\")
+            .Replace("%", "\\%")
+            .Replace("_", "\\_")
+            .Replace("[", "\\[");
     }
 }

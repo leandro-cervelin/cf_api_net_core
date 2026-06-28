@@ -15,7 +15,7 @@ public class LogRequestMiddleware(
         var correlationId = correlationContext.CorrelationContext?.CorrelationId;
 
         logger.LogInformation(
-            "Scheme: {scheme}, Host: {host}, Path: {path}, Method: {method}, url: {url}, correlationId: {correlationId}",
+            "Scheme: {Scheme}, Host: {Host}, Path: {Path}, Method: {Method}, Url: {Url}, CorrelationId: {CorrelationId}",
             context.Request.Scheme, context.Request.Host, context.Request.Path, context.Request.Method, url,
             correlationId);
 

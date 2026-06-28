@@ -220,10 +220,9 @@ void RunMigration()
 {
     using var serviceScope = app.Services.GetRequiredService<IServiceScopeFactory>().CreateScope();
 
-    if (!serviceScope.ServiceProvider.GetRequiredService<CustomerContext>().Database.GetPendingMigrations()
-            .Any()) return;
+    var context = serviceScope.ServiceProvider.GetRequiredService<CustomerContext>();
 
-    serviceScope.ServiceProvider.GetRequiredService<CustomerContext>().Database.Migrate();
+    context.Database.Migrate();
 }
 
 public partial class Program;

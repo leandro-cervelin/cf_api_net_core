@@ -6,11 +6,8 @@ using Asp.Versioning;
 using CF.Api.Controllers;
 using CF.Customer.Application.Dtos;
 using CF.Customer.Application.Facades.Interfaces;
-using CorrelationId;
-using CorrelationId.Abstractions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 
@@ -19,15 +16,7 @@ namespace CF.Api.UnitTest;
 public class CustomerControllerTest
 {
     private readonly CancellationTokenSource _cancellationTokenSource = new();
-    private readonly Mock<ICorrelationContextAccessor> _correlationContext = new();
     private readonly Mock<ICustomerFacade> _customerFacade = new();
-    private readonly Mock<ILogger<CustomerController>> _logger = new();
-
-    public CustomerControllerTest()
-    {
-        _correlationContext.Setup(x => x.CorrelationContext)
-            .Returns(new CorrelationContext(Guid.NewGuid().ToString(), "HeaderValue"));
-    }
 
     [Fact]
     public async Task GetListTestAsync()
@@ -61,7 +50,7 @@ public class CustomerControllerTest
             .Setup(x => x.GetListByFilterAsync(It.IsAny<CustomerFilterDto>(), _cancellationTokenSource.Token))
             .ReturnsAsync(facadeResult);
 
-        var controller = new CustomerController(_correlationContext.Object, _logger.Object, _customerFacade.Object);
+        var controller = new CustomerController(_customerFacade.Object);
 
         var requestDto = new CustomerFilterDto
         {
@@ -93,7 +82,7 @@ public class CustomerControllerTest
         _customerFacade.Setup(x => x.GetByFilterAsync(It.IsAny<CustomerFilterDto>(), _cancellationTokenSource.Token))
             .ReturnsAsync(facadeResult);
 
-        var controller = new CustomerController(_correlationContext.Object, _logger.Object, _customerFacade.Object);
+        var controller = new CustomerController(_customerFacade.Object);
 
         //Act
         var actionResult = await controller.Get(1, _cancellationTokenSource.Token);
@@ -111,7 +100,7 @@ public class CustomerControllerTest
         _customerFacade.Setup(x => x.CreateAsync(It.IsAny<CustomerRequestDto>(), _cancellationTokenSource.Token))
             .ReturnsAsync(1);
 
-        var controller = new CustomerController(_correlationContext.Object, _logger.Object, _customerFacade.Object);
+        var controller = new CustomerController(_customerFacade.Object);
 
         // Mock HttpContext for API versioning
         var httpContext = new DefaultHttpContext();
@@ -156,7 +145,7 @@ public class CustomerControllerTest
         _customerFacade.Setup(x =>
             x.UpdateAsync(It.IsAny<long>(), It.IsAny<CustomerRequestDto>(), _cancellationTokenSource.Token));
 
-        var controller = new CustomerController(_correlationContext.Object, _logger.Object, _customerFacade.Object);
+        var controller = new CustomerController(_customerFacade.Object);
 
         var requestDto = new CustomerRequestDto
         {
@@ -181,7 +170,7 @@ public class CustomerControllerTest
         //Arrange
         _customerFacade.Setup(x => x.DeleteAsync(It.IsAny<long>(), _cancellationTokenSource.Token));
 
-        var controller = new CustomerController(_correlationContext.Object, _logger.Object, _customerFacade.Object);
+        var controller = new CustomerController(_customerFacade.Object);
 
         //Act
         var actionResult = await controller.Delete(1, _cancellationTokenSource.Token);

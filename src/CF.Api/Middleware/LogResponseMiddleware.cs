@@ -11,7 +11,7 @@ public class LogResponseMiddleware(
     {
         var correlationId = correlationContext.CorrelationContext?.CorrelationId;
 
-        logger.LogInformation("StatusCode: {statusCode}. (CorrelationId: {correlationId})",
+        logger.LogInformation("StatusCode: {StatusCode}. (CorrelationId: {CorrelationId})",
             context.Response.StatusCode, correlationId);
 
         await next(context);
