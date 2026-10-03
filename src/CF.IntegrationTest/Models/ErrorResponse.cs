@@ -1,4 +1,6 @@
-﻿namespace CF.IntegrationTest.Models;
+﻿using System.Collections.Generic;
+
+namespace CF.IntegrationTest.Models;
 
 internal class ErrorResponse
 {
@@ -6,5 +8,5 @@ internal class ErrorResponse
     public string Title { get; set; }
     public int Status { get; set; }
     public string TraceId { get; set; }
-    public dynamic Errors { get; set; }
+    public Dictionary<string, string[]> Errors { get; set; }
 }

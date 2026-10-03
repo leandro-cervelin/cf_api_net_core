@@ -24,8 +24,6 @@ builder.Services.AddControllers(x => x.Filters.Add<ExceptionFilter>());
 builder.Services.AddProblemDetails();
 builder.Services.AddDefaultCorrelationId(ConfigureCorrelationId());
 builder.Services.AddCustomerCore(builder.Configuration.GetConnectionString("DbConnection")!);
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddOpenApi();
 builder.Services.Configure<GzipCompressionProviderOptions>(options => options.Level = CompressionLevel.Optimal);
 builder.Services.AddResponseCompression(options => { options.Providers.Add<GzipCompressionProvider>(); });
 builder.Services.AddResponseCaching();
@@ -59,7 +57,7 @@ void AddExceptionHandler()
 void AddOpenApi()
 {
     if (!app.Environment.IsDevelopment()) return;
-    app.MapOpenApi();
+    app.MapOpenApi().WithDocumentPerVersion();
     app.MapScalarApiReference();
 }
 
@@ -108,15 +106,13 @@ void AddApiVersioning()
 {
     builder.Services.AddApiVersioning(options =>
     {
-        options.DefaultApiVersion = new ApiVersion(1, 0);
-        options.AssumeDefaultVersionWhenUnspecified = true;
         options.ReportApiVersions = true;
         options.ApiVersionReader = new UrlSegmentApiVersionReader();
     }).AddMvc().AddApiExplorer(options =>
     {
         options.GroupNameFormat = "'v'VVV";
         options.SubstituteApiVersionInUrl = true;
-    });
+    }).AddOpenApi();
 }
 
 void AddHealthChecks()
@@ -197,5 +193,3 @@ void RunMigration()
 
     context.Database.Migrate();
 }
-
-public partial class Program;

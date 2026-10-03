@@ -4,12 +4,14 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<LangVersion>latest</LangVersion>
+		<Description>Customer management REST API.</Description>
 		<UserSecretsId>4be108ac-b37e-4a34-9d37-b22846d0bdf1</UserSecretsId>
 		<DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
 	</PropertyGroup>
 	<ItemGroup>
 		<PackageReference Include="Asp.Versioning.Mvc" Version="10.2.1" />
 		<PackageReference Include="Asp.Versioning.Mvc.ApiExplorer" Version="10.2.1" />
+		<PackageReference Include="Asp.Versioning.OpenApi" Version="10.2.1" />
 		<PackageReference Include="CorrelationId-ForkWithLogLevelSeverityOption" Version="5.0.2" />
 		<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.12" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.12" />

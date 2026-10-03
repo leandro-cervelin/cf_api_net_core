@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Net.Http.Json;
+using System.Text.Json;
 using System.Threading.Tasks;
 using CF.Customer.Application.Dtos;
 using CF.IntegrationTest.Factories;
 using CF.IntegrationTest.Models;
 using Microsoft.AspNetCore.WebUtilities;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
 using Xunit;
 
 namespace CF.IntegrationTest;
@@ -45,8 +45,8 @@ public class CustomerIntegrationTest(CustomWebApplicationFactory factory) : ICla
 
         Assert.NotNull(errors);
         Assert.Contains("Validation", errors);
-        Assert.Single(errors["Validation"]);
-        Assert.Equal("Email is not available.", errors["Validation"][0]);
+        var validationError = Assert.Single(errors["Validation"]);
+        Assert.Equal("Email is not available.", validationError);
         Assert.Equal(HttpStatusCode.BadRequest, responseNotOk.StatusCode);
     }
 
@@ -166,7 +166,7 @@ public class CustomerIntegrationTest(CustomWebApplicationFactory factory) : ICla
         var getResponse = await _httpClient.GetAsync(createResponse.Headers.Location?.ToString(), TestContext.Current.CancellationToken);
         Assert.Equal(HttpStatusCode.OK, getResponse.StatusCode);
         var customer =
-            JsonConvert.DeserializeObject<CustomerResponseDto>(await getResponse.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
+            await getResponse.Content.ReadFromJsonAsync<CustomerResponseDto>(TestContext.Current.CancellationToken);
 
         dto.FirstName = "New Name";
         var contentUpdate = CreateStringContent(dto);
@@ -187,7 +187,7 @@ public class CustomerIntegrationTest(CustomWebApplicationFactory factory) : ICla
         var getResponse = await _httpClient.GetAsync(createResponse.Headers.Location?.ToString(), TestContext.Current.CancellationToken);
         Assert.Equal(HttpStatusCode.OK, getResponse.StatusCode);
         var customer =
-            JsonConvert.DeserializeObject<CustomerResponseDto>(await getResponse.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
+            await getResponse.Content.ReadFromJsonAsync<CustomerResponseDto>(TestContext.Current.CancellationToken);
 
         dto.FirstName = "New Name";
         dto.Password = "NewPassword3@";
@@ -220,8 +220,8 @@ public class CustomerIntegrationTest(CustomWebApplicationFactory factory) : ICla
         var getResponse = await _httpClient.GetAsync(requestUri, TestContext.Current.CancellationToken);
         Assert.Equal(HttpStatusCode.OK, getResponse.StatusCode);
         var customers =
-            JsonConvert.DeserializeObject<PaginationDto<CustomerResponseDto>>(
-                await getResponse.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
+            await getResponse.Content.ReadFromJsonAsync<PaginationDto<CustomerResponseDto>>(
+                TestContext.Current.CancellationToken);
         Assert.NotNull(customers);
         Assert.NotEmpty(customers.Result);
         var customerTwoId = customers.Result[0].Id;
@@ -235,8 +235,8 @@ public class CustomerIntegrationTest(CustomWebApplicationFactory factory) : ICla
 
         Assert.NotNull(errors);
         Assert.Contains("Validation", errors);
-        Assert.Single(errors["Validation"]);
-        Assert.Equal("Email is not available.", errors["Validation"][0]);
+        var validationError = Assert.Single(errors["Validation"]);
+        Assert.Equal("Email is not available.", validationError);
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
 
@@ -301,8 +301,8 @@ public class CustomerIntegrationTest(CustomWebApplicationFactory factory) : ICla
         var getResponse = await _httpClient.GetAsync(requestUri, TestContext.Current.CancellationToken);
         Assert.Equal(HttpStatusCode.OK, getResponse.StatusCode);
         var customers =
-            JsonConvert.DeserializeObject<PaginationDto<CustomerResponseDto>>(
-                await getResponse.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
+            await getResponse.Content.ReadFromJsonAsync<PaginationDto<CustomerResponseDto>>(
+                TestContext.Current.CancellationToken);
         Assert.True(customers.Count > 1);
         Assert.NotEmpty(customers.Result);
     }
@@ -320,7 +320,7 @@ public class CustomerIntegrationTest(CustomWebApplicationFactory factory) : ICla
         var getResponse = await _httpClient.GetAsync(response.Headers.Location?.ToString(), TestContext.Current.CancellationToken);
         Assert.Equal(HttpStatusCode.OK, getResponse.StatusCode);
         var customer =
-            JsonConvert.DeserializeObject<CustomerResponseDto>(await getResponse.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
+            await getResponse.Content.ReadFromJsonAsync<CustomerResponseDto>(TestContext.Current.CancellationToken);
 
         var deleteResponse = await _httpClient.DeleteAsync($"{CustomerUrl}/{customer.Id}", TestContext.Current.CancellationToken);
         Assert.Equal(HttpStatusCode.NoContent, deleteResponse.StatusCode);
@@ -328,7 +328,7 @@ public class CustomerIntegrationTest(CustomWebApplicationFactory factory) : ICla
 
     private static StringContent CreateStringContent(CustomerRequestDto dto)
     {
-        var content = new StringContent(JsonConvert.SerializeObject(dto));
+        var content = new StringContent(JsonSerializer.Serialize(dto));
         content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
         return content;
     }
@@ -347,12 +347,7 @@ public class CustomerIntegrationTest(CustomWebApplicationFactory factory) : ICla
 
     private static async Task<IDictionary<string, string[]>> ExtractErrorsFromResponse(HttpResponseMessage response)
     {
-        var responseContent =
-            JsonConvert.DeserializeObject<ErrorResponse>(await response.Content.ReadAsStringAsync(),
-                new ExpandoObjectConverter());
-        var errors =
-            (IDictionary<string, string[]>)JsonConvert.DeserializeObject<Dictionary<string, string[]>>(
-                responseContent.Errors.ToString());
-        return errors;
+        var responseContent = await response.Content.ReadFromJsonAsync<ErrorResponse>();
+        return responseContent?.Errors;
     }
 }

@@ -1,10 +1,10 @@
 using CF.Customer.Application.Dtos;
 using CF.IntegrationTest.Factories;
-using Newtonsoft.Json;
 using System;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -52,7 +52,7 @@ public class ApiVersioningIntegrationTest(CustomWebApplicationFactory factory) :
             ConfirmPassword = "Test@1234"
         };
 
-        using var content = new StringContent(JsonConvert.SerializeObject(dto));
+        using var content = new StringContent(JsonSerializer.Serialize(dto));
         content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
         var response = await client.PostAsync("/api/v1/customer", content, TestContext.Current.CancellationToken);
