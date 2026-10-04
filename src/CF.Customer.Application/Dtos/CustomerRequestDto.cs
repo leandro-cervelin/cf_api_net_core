@@ -18,6 +18,7 @@ public record CustomerRequestDto
     [Required(ErrorMessage = "The Password field is required.")]
     [DataType(DataType.Password)]
     [Display(Name = "Password")]
+    [MaxLength(72, ErrorMessage = "The Password field must not exceed 72 characters.")]
     [RegularExpression(
         "^((?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])|(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[^a-zA-Z0-9])|(?=.*?[A-Z])(?=.*?[0-9])(?=.*?[^a-zA-Z0-9])|(?=.*?[a-z])(?=.*?[0-9])(?=.*?[^a-zA-Z0-9])).{8,}$",
         ErrorMessage =
@@ -28,6 +29,11 @@ public record CustomerRequestDto
     [Display(Name = "Confirm password")]
     [Compare("Password", ErrorMessage = "The passwords do not match.")]
     public string? ConfirmPassword { get; set; }
+
+    /// <summary>Updates only: the existing password, required when changing it. Ignored on create.</summary>
+    [DataType(DataType.Password)]
+    [Display(Name = "Current password")]
+    public string? CurrentPassword { get; set; }
 
     [Required(ErrorMessage = "The Surname field is required.")]
     [StringLength(100, MinimumLength = 2, ErrorMessage = "The Surname field must be between 2 and 100 characters.")]

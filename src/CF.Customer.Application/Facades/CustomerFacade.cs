@@ -29,11 +29,13 @@ public class CustomerFacade(ICustomerService customerService, ICustomerMapper ma
         return result is null ? null : mapper.MapToCustomerResponseDto(result);
     }
 
-    public async Task UpdateAsync(long id, CustomerRequestDto customerRequestDto, CancellationToken cancellationToken)
+    public async Task UpdateAsync(long id, CustomerRequestDto customerRequestDto, bool verifyCurrentPassword,
+        CancellationToken cancellationToken)
     {
         var customer = mapper.MapToCustomer(customerRequestDto);
 
-        await customerService.UpdateAsync(id, customer, cancellationToken);
+        await customerService.UpdateAsync(id, customer, customerRequestDto.CurrentPassword, verifyCurrentPassword,
+            cancellationToken);
     }
 
     public async Task<long> CreateAsync(CustomerRequestDto customerRequestDto, CancellationToken cancellationToken)

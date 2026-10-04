@@ -143,12 +143,38 @@ public class CustomerControllerTest
         Assert.Equal("1.0", createdAtActionResult.RouteValues["version"]);
     }
 
+    [Theory]
+    [InlineData(1, false, true)] // customer editing themselves
+    [InlineData(1, true, true)] // admin editing their own account
+    [InlineData(2, true, false)] // admin editing someone else: can't know their password
+    public async Task Put_RequiresCurrentPasswordUnlessAdminEditsAnotherCustomer(long callerId, bool isAdmin,
+        bool expectVerification)
+    {
+        //Arrange
+        var controller = CreateController(customerId: callerId, isAdmin: isAdmin);
+        var requestDto = new CustomerRequestDto
+        {
+            ConfirmPassword = "123DarkSouls!",
+            Password = "123DarkSouls!",
+            Email = "chosen_one@test.com",
+            FirstName = "Dark",
+            Surname = "Souls"
+        };
+
+        //Act
+        await controller.Put(1, requestDto, _cancellationTokenSource.Token);
+
+        //Assert
+        _customerFacade.Verify(x => x.UpdateAsync(1, requestDto, expectVerification, _cancellationTokenSource.Token),
+            Times.Once);
+    }
+
     [Fact]
     public async Task PutTestAsync()
     {
         //Arrange
         _customerFacade.Setup(x =>
-            x.UpdateAsync(It.IsAny<long>(), It.IsAny<CustomerRequestDto>(), _cancellationTokenSource.Token));
+            x.UpdateAsync(It.IsAny<long>(), It.IsAny<CustomerRequestDto>(), It.IsAny<bool>(), _cancellationTokenSource.Token));
 
         var controller = CreateController(customerId: 1);
 
@@ -221,7 +247,7 @@ public class CustomerControllerTest
         //Assert
         Assert.IsType<ForbidResult>(actionResult);
         _customerFacade.Verify(
-            x => x.UpdateAsync(It.IsAny<long>(), It.IsAny<CustomerRequestDto>(), It.IsAny<CancellationToken>()),
+            x => x.UpdateAsync(It.IsAny<long>(), It.IsAny<CustomerRequestDto>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()),
             Times.Never);
     }
 

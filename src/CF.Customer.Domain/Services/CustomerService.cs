@@ -18,6 +18,13 @@ public class CustomerService(ICustomerRepository customerRepository, IPasswordHa
         if (filter.PageSize > 100)
             throw new ValidationException("Maximum allowed page size is 100.");
 
+        if (!CustomerFilter.SortableFields.Contains(filter.OrderBy, StringComparer.OrdinalIgnoreCase))
+            throw new ValidationException(
+                $"OrderBy must be one of: {string.Join(", ", CustomerFilter.SortableFields)}.");
+
+        if (!CustomerFilter.SortDirections.Contains(filter.SortBy, StringComparer.OrdinalIgnoreCase))
+            throw new ValidationException($"SortBy must be one of: {string.Join(", ", CustomerFilter.SortDirections)}.");
+
         if (filter.PageSize <= 0) filter.PageSize = 10;
 
         if (filter.CurrentPage <= 0) filter.CurrentPage = 1;
@@ -47,7 +54,8 @@ public class CustomerService(ICustomerRepository customerRepository, IPasswordHa
         return await customerRepository.GetByFilterAsync(filter, cancellationToken);
     }
 
-    public async Task UpdateAsync(long id, Entities.Customer customer, CancellationToken cancellationToken)
+    public async Task UpdateAsync(long id, Entities.Customer customer, string? currentPassword,
+        bool verifyCurrentPassword, CancellationToken cancellationToken)
     {
         if (id <= 0) throw new ValidationException("Id is invalid.");
 
@@ -71,7 +79,14 @@ public class CustomerService(ICustomerRepository customerRepository, IPasswordHa
 
         var passwordChanged = !passwordHasherService.Verify(customer.Password, entity.Password);
         if (passwordChanged)
+        {
+            // An update that keeps the password has already proven the caller knows it (it was sent and matched).
+            // Changing it is the only way to edit without knowing it, so that is where proof is required. This also
+            // covers email changes: without the current password, a token holder can't keep the password unchanged.
+            if (verifyCurrentPassword) VerifyCurrentPassword(currentPassword, entity.Password);
+
             entity.Password = passwordHasherService.Hash(customer.Password);
+        }
 
         // Credentials changed: revoke every token issued so far.
         if (emailChanged || passwordChanged)
@@ -140,6 +155,15 @@ public class CustomerService(ICustomerRepository customerRepository, IPasswordHa
         var filter = new CustomerFilter { Email = email };
         var existingCustomer = await customerRepository.GetByFilterAsync(filter, cancellationToken);
         return existingCustomer is null;
+    }
+
+    private void VerifyCurrentPassword(string? currentPassword, string passwordHash)
+    {
+        if (string.IsNullOrEmpty(currentPassword))
+            throw new ValidationException("The current password is required to change the password.");
+
+        if (!passwordHasherService.Verify(currentPassword, passwordHash))
+            throw new ValidationException("The current password is incorrect.");
     }
 
     private static void Validate(Entities.Customer customer)

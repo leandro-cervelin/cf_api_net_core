@@ -9,11 +9,12 @@ public class LogResponseMiddleware(
 {
     public async Task Invoke(HttpContext context)
     {
+        await next(context);
+
+        // Logged after the pipeline has run; before it, the status code is always the default 200.
         var correlationId = correlationContext.CorrelationContext?.CorrelationId;
 
         logger.LogInformation("StatusCode: {StatusCode}. (CorrelationId: {CorrelationId})",
             context.Response.StatusCode, correlationId);
-
-        await next(context);
     }
 }

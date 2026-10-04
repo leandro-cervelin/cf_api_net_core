@@ -120,6 +120,8 @@ public class CustomerIntegrationTest(CustomWebApplicationFactory factory) : ICla
         "Passwords must be at least 8 characters and contain at least 3 of the following: upper case (A-Z), lower case (a-z), number (0-9), and special character (e.g. !@#$%^&*).")]
     [InlineData("01234567901234",
         "Passwords must be at least 8 characters and contain at least 3 of the following: upper case (A-Z), lower case (a-z), number (0-9), and special character (e.g. !@#$%^&*).")]
+    [InlineData("Aa1@xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "The Password field must not exceed 72 characters.")]
     public async Task CreateCustomerAsync_Password_Validation_Test(string password, string errorMessage)
     {
         var dto = CreateCustomerRequestDto();
@@ -292,7 +294,7 @@ public class CustomerIntegrationTest(CustomWebApplicationFactory factory) : ICla
         {
             { "currentPage", "1" },
             { "pageSize", "1" },
-            { "orderBy", dto.FirstName },
+            { "orderBy", "firstName" },
             { "sortBy", "asc" }
         };
 
@@ -305,6 +307,22 @@ public class CustomerIntegrationTest(CustomWebApplicationFactory factory) : ICla
                 TestContext.Current.CancellationToken);
         Assert.True(customers.Count > 1);
         Assert.NotEmpty(customers.Result);
+    }
+
+    [Theory]
+    [InlineData("password", "asc", "OrderBy must be one of: firstName, surname, email.")]
+    [InlineData("email", "random", "SortBy must be one of: asc, desc.")]
+    public async Task GetCustomerList_InvalidSorting_ReturnsBadRequest(string orderBy, string sortBy,
+        string expectedError)
+    {
+        var parameters = new Dictionary<string, string> { { "orderBy", orderBy }, { "sortBy", sortBy } };
+        var requestUri = QueryHelpers.AddQueryString(CustomerUrl, parameters);
+
+        var response = await _httpClient.GetAsync(requestUri, TestContext.Current.CancellationToken);
+        var errors = await ExtractErrorsFromResponse(response);
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        Assert.Equal(expectedError, Assert.Single(errors["Validation"]));
     }
 
     [Fact]

@@ -8,7 +8,10 @@ public interface ICustomerService
         GetListByFilterAsync(CustomerFilter filter, CancellationToken cancellationToken);
 
     Task<Entities.Customer?> GetByFilterAsync(CustomerFilter filter, CancellationToken cancellationToken);
-    Task UpdateAsync(long id, Entities.Customer customer, CancellationToken cancellationToken);
+    /// <param name="currentPassword">The customer's existing password; required to change it.</param>
+    /// <param name="verifyCurrentPassword">False only for admins editing another customer.</param>
+    Task UpdateAsync(long id, Entities.Customer customer, string? currentPassword, bool verifyCurrentPassword,
+        CancellationToken cancellationToken);
     Task<long> CreateAsync(Entities.Customer customer, CancellationToken cancellationToken);
     Task DeleteAsync(long id, CancellationToken cancellationToken);
 
