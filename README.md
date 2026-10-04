@@ -1,4 +1,4 @@
-[![Buil & Test .NET 10.0](https://github.com/leandro-cervelin/cf_api_net_core/actions/workflows/dotnet-core.yml/badge.svg)](https://github.com/leandro-cervelin/cf_api_net_core/actions/workflows/dotnet-core.yml) [![CodeQL .NET 10.0](https://github.com/leandro-cervelin/cf_api_net_core/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/leandro-cervelin/cf_api_net_core/actions/workflows/codeql-analysis.yml)
+[![Build & Test .NET 10.0](https://github.com/leandro-cervelin/cf_api_net_core/actions/workflows/dotnet-core.yml/badge.svg)](https://github.com/leandro-cervelin/cf_api_net_core/actions/workflows/dotnet-core.yml) [![CodeQL .NET 10.0](https://github.com/leandro-cervelin/cf_api_net_core/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/leandro-cervelin/cf_api_net_core/actions/workflows/codeql-analysis.yml)
 # .NET 10.0 Example App / API
 ## .Net 10.0 API using SQL Server with Entity Framework Core
 ## Unit Tests and Integration Tests
@@ -19,27 +19,34 @@ Tests: `CF.Customer.UnitTest` and `CF.Api.UnitTest` run without a database. `CF.
 
 ## Docker with Compose
 
-Docker steps:
+1. Switch Docker to Linux containers.
+2. Copy `CF.Api/.env.example` to `CF.Api/.env` and set a strong `SA_PASSWORD` and a random `JWT_SIGNING_KEY`.
+   The file is gitignored; it supplies the SQL Server password and the token signing key.
+3. From the `src` folder:
 
-- switch to Linux containers
+   - docker compose -f CF.Api/docker-compose.yml up --build
 
-- copy `CF.Api/.env.example` to `CF.Api/.env` and set a strong `SA_PASSWORD`
-  (this file is gitignored and supplies the SQL Server SA password to both the
-  database container and the API connection string)
+Compose starts three services, in order:
 
-from the folder src run the below commands
+| Service | What it does |
+| --- | --- |
+| `db` | SQL Server, with data in the `mssql-data` volume. Reports healthy once it accepts connections. |
+| `migrate` | Runs the EF Core migration bundle against `db`, then exits. |
+| `api` | Starts only after `migrate` has finished successfully. Listens on http://localhost:8888. |
 
-- docker-compose -f CF.Api/docker-compose.yml build
-- docker-compose -f CF.Api/docker-compose.yml up
-
-http://localhost:8888/scalar/v1
+Compose runs the API in the Production environment, so the Scalar docs page isn't served there; use local
+development for that.
 
 ## Local development (without Docker)
 
-The committed `appsettings.json` intentionally omits the database password.
-Provide a full connection string via user-secrets so no credential is committed:
+The committed `appsettings.json` intentionally omits the database password and the signing key.
+Provide them with user-secrets so no credential is committed:
 
 - dotnet user-secrets --project CF.Api set "ConnectionStrings:DbConnection" "Data Source=localhost;Initial Catalog=CF;User ID=sa;Password=<your-password>;TrustServerCertificate=True;"
+- dotnet user-secrets --project CF.Api set "Jwt:SigningKey" "<random value, e.g. from: openssl rand -base64 48>"
+
+In Development the API applies pending migrations on startup (`Database:MigrateOnStartup` is `true` in
+`appsettings.Development.json`), and the API docs are at https://localhost:7242/scalar/v1.
 
 ## Authentication
 
@@ -53,9 +60,8 @@ The customer endpoints require a JWT bearer token:
 | `GET /api/v1/customer` (list) | admin only |
 
 Tokens are signed with `Jwt:SigningKey` (HMAC-SHA256, at least 32 bytes). The app refuses to start without it.
-The key is never committed: use user-secrets locally, and `JWT_SIGNING_KEY` in `CF.Api/.env` with Docker Compose.
-
-- dotnet user-secrets --project CF.Api set "Jwt:SigningKey" "<random value, e.g. from: openssl rand -base64 48>"
+The key is never committed: use user-secrets locally (see above), and `JWT_SIGNING_KEY` in `CF.Api/.env` with
+Docker Compose.
 
 Admins are listed by customer id in `Jwt:AdminCustomerIds` (e.g. `Jwt__AdminCustomerIds__0=1`). Ids rather than
 emails, because emails aren't verified and anyone could register an admin address that isn't taken yet.
@@ -83,6 +89,60 @@ the database on every request.
 
 In Development, open `/scalar/v1`, call `POST /api/v1/auth/token`, paste the `accessToken` into the
 authentication panel (Bearer), and the protected endpoints (marked with a lock) send it automatically.
+
+## Deployment
+
+### Database migrations
+
+Outside Development the API does **not** migrate on startup (`Database:MigrateOnStartup` defaults to `false`).
+With several instances, startup migrations race each other, and they force the app's database login to have
+schema-change (DDL) rights. Apply migrations as a separate step before rolling out the new version instead:
+
+- Docker image: build the `migrator` target and run it once with `ConnectionStrings__DbConnection` set. That's
+  what the `migrate` service in Compose does; in Kubernetes it fits a Job or an init container.
+
+  - docker build -f CF.Api/Dockerfile --target migrator -t cf-api-migrator .
+
+- Without Docker: build a bundle and run it from your pipeline.
+
+  - dotnet ef migrations bundle --project CF.Migrations --startup-project CF.Api -o efbundle
+  - ./efbundle --connection "<connection string>"
+
+The bundle only applies migrations that are still pending, so running it on every deploy is safe.
+
+### Behind a reverse proxy or load balancer
+
+Rate limiting is per client IP, and HTTPS redirection and HSTS depend on the request scheme. Behind a proxy, both
+come from `X-Forwarded-For` / `X-Forwarded-Proto`, which are trusted **only** from the proxies you list. Trusting
+them from anyone would let clients choose their own IP and get around the rate limit.
+
+```json
+"ForwardedHeaders": {
+  "KnownProxies": [ "10.0.0.5" ],
+  "KnownNetworks": [ "10.0.0.0/8" ]
+}
+```
+
+Or with environment variables: `ForwardedHeaders__KnownProxies__0=10.0.0.5`. Loopback is always trusted.
+
+### Health checks
+
+| Endpoint | Checks | Access | Rate limited |
+| --- | --- | --- | --- |
+| `/health/live` | the process is up | anonymous | no |
+| `/health/ready` | the database is reachable | anonymous | no |
+| `/health` | everything, as a detailed JSON report | admin token | yes |
+
+Point liveness and readiness probes at `/health/live` and `/health/ready`. The detailed report names the
+checks and their timings, so it's limited to admins.
+
+### Security headers
+
+Every response carries `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: no-referrer`
+and `Content-Security-Policy: default-src 'none'; frame-ancestors 'none'` (the Development-only Scalar page is
+exempt from the CSP). API responses are also marked `Cache-Control: no-store`, so customer data isn't kept by
+browsers or proxies. Outside Development the API sends HSTS on HTTPS responses, and Kestrel's `Server` header is
+turned off.
 
 ## Console demo
 

@@ -15,7 +15,7 @@ public class HealthCheckIntegrationTest(CustomWebApplicationFactory factory)
     public async Task HealthCheck_Full_ReturnsHealthyStatus()
     {
         // Arrange
-        var client = _factory.CreateClient();
+        var client = _factory.CreateAdminClient();
 
         // Act
         var response = await client.GetAsync("/health", TestContext.Current.CancellationToken);
@@ -30,6 +30,24 @@ public class HealthCheckIntegrationTest(CustomWebApplicationFactory factory)
         Assert.Equal("Healthy", healthReport.GetProperty("status").GetString());
         Assert.True(healthReport.GetProperty("checks").GetArrayLength() >= 0);
         Assert.True(healthReport.GetProperty("totalDuration").GetDouble() >= 0);
+    }
+
+    [Theory]
+    [InlineData(false, HttpStatusCode.Unauthorized)]
+    [InlineData(true, HttpStatusCode.Forbidden)]
+    public async Task HealthCheck_Full_RequiresAdmin(bool authenticatedAsCustomer, HttpStatusCode expected)
+    {
+        // Arrange: anonymous, or a regular (non-admin) customer.
+        using var client = authenticatedAsCustomer
+            ? _factory.CreateClientFor(CustomWebApplicationFactory.AdminCustomerId, "seed.record@test.com",
+                Seeds.CustomerSeed.SecurityStamp, [])
+            : _factory.CreateClient();
+
+        // Act
+        var response = await client.GetAsync("/health", TestContext.Current.CancellationToken);
+
+        // Assert
+        Assert.Equal(expected, response.StatusCode);
     }
 
     [Fact]
@@ -62,7 +80,7 @@ public class HealthCheckIntegrationTest(CustomWebApplicationFactory factory)
     public async Task HealthCheck_Full_ContainsDatabaseCheck()
     {
         // Arrange
-        var client = _factory.CreateClient();
+        var client = _factory.CreateAdminClient();
 
         // Act
         var response = await client.GetAsync("/health", TestContext.Current.CancellationToken);
@@ -89,7 +107,7 @@ public class HealthCheckIntegrationTest(CustomWebApplicationFactory factory)
     public async Task HealthCheck_Full_IncludesDurationMetrics()
     {
         // Arrange
-        var client = _factory.CreateClient();
+        var client = _factory.CreateAdminClient();
 
         // Act
         var response = await client.GetAsync("/health", TestContext.Current.CancellationToken);

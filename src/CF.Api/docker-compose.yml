@@ -3,6 +3,7 @@
     build:
       context: ..
       dockerfile: CF.Api/Dockerfile
+      target: final
     ports:
       - "8888:80"
     environment:
@@ -10,10 +11,24 @@
       - ConnectionStrings__DbConnection=Data Source=db;Initial Catalog=CF;User ID=sa;Password=${SA_PASSWORD};Trusted_Connection=False;TrustServerCertificate=True;
       - Jwt__SigningKey=${JWT_SIGNING_KEY}
     depends_on:
-      db:
-        # The API migrates the schema on startup, so wait until SQL Server accepts connections.
-        condition: service_healthy
+      # Start only once the schema is up to date.
+      migrate:
+        condition: service_completed_successfully
     restart: unless-stopped
+    networks:
+      - app-network
+
+  # One-shot: applies pending EF Core migrations with the bundle, then exits.
+  migrate:
+    build:
+      context: ..
+      dockerfile: CF.Api/Dockerfile
+      target: migrator
+    environment:
+      - ConnectionStrings__DbConnection=Data Source=db;Initial Catalog=CF;User ID=sa;Password=${SA_PASSWORD};Trusted_Connection=False;TrustServerCertificate=True;
+    depends_on:
+      db:
+        condition: service_healthy
     networks:
       - app-network
 
