@@ -59,7 +59,10 @@ public class CustomerService(ICustomerRepository customerRepository, IPasswordHa
 
         Validate(customer);
 
-        if (entity.Email != customer.Email && !await IsAvailableEmailAsync(customer.Email, cancellationToken))
+        // Case-insensitive to match the database collation: a case-only change of the customer's own
+        // email would otherwise find their own row and be rejected as unavailable.
+        if (!string.Equals(entity.Email, customer.Email, StringComparison.OrdinalIgnoreCase) &&
+            !await IsAvailableEmailAsync(customer.Email, cancellationToken))
             throw new ValidationException("Email is not available.");
 
         entity.Email = customer.Email;
@@ -99,6 +102,24 @@ public class CustomerService(ICustomerRepository customerRepository, IPasswordHa
                      throw new EntityNotFoundException(id);
         customerRepository.Remove(entity);
         await customerRepository.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task<Entities.Customer?> AuthenticateAsync(string email, string password,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password)) return null;
+
+        var customer = await customerRepository.GetByFilterAsync(new CustomerFilter { Email = email },
+            cancellationToken);
+
+        if (customer is null)
+        {
+            // Spend the same bcrypt work as a real check so response time doesn't reveal whether the email exists.
+            passwordHasherService.Hash(password);
+            return null;
+        }
+
+        return passwordHasherService.Verify(password, customer.Password) ? customer : null;
     }
 
     public async Task<bool> IsAvailableEmailAsync(string email, CancellationToken cancellationToken)

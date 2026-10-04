@@ -206,6 +206,90 @@ public class CustomerServiceTest
     }
 
     [Fact]
+    public async Task UpdateAsync_EmailCaseOnlyChange_SkipsAvailabilityCheckAndUpdates()
+    {
+        // Arrange
+        var existingCustomer = CreateCustomer(email: "test1@test.com");
+        var updatedCustomer = CreateCustomer(email: "Test1@Test.com");
+
+        _mockRepository.Setup(x => x.GetByIdAsync(existingCustomer.Id, _cancellationTokenSource.Token))
+            .ReturnsAsync(existingCustomer);
+        // The database collation is case-insensitive, so a lookup would find the customer's own row.
+        _mockRepository.Setup(x => x.GetByFilterAsync(It.IsAny<CustomerFilter>(), _cancellationTokenSource.Token))
+            .ReturnsAsync(existingCustomer);
+        _mockPassword.Setup(x => x.Verify(It.IsAny<string>(), It.IsAny<string>())).Returns(true);
+
+        var customerService = new CustomerService(_mockRepository.Object, _mockPassword.Object);
+
+        // Act
+        await customerService.UpdateAsync(existingCustomer.Id, updatedCustomer, _cancellationTokenSource.Token);
+
+        // Assert
+        Assert.Equal("Test1@Test.com", existingCustomer.Email);
+        _mockRepository.Verify(
+            x => x.GetByFilterAsync(It.IsAny<CustomerFilter>(), _cancellationTokenSource.Token), Times.Never);
+    }
+
+    [Fact]
+    public async Task AuthenticateAsync_ValidCredentials_ReturnsCustomer()
+    {
+        // Arrange
+        var customer = CreateCustomer();
+        customer.Password = "$2a$11$hashedPassword";
+
+        _mockRepository.Setup(x => x.GetByFilterAsync(It.IsAny<CustomerFilter>(), _cancellationTokenSource.Token))
+            .ReturnsAsync(customer);
+        _mockPassword.Setup(x => x.Verify("Password@01", customer.Password)).Returns(true);
+
+        var customerService = new CustomerService(_mockRepository.Object, _mockPassword.Object);
+
+        // Act
+        var result = await customerService.AuthenticateAsync(customer.Email, "Password@01",
+            _cancellationTokenSource.Token);
+
+        // Assert
+        Assert.Same(customer, result);
+    }
+
+    [Fact]
+    public async Task AuthenticateAsync_WrongPassword_ReturnsNull()
+    {
+        // Arrange
+        var customer = CreateCustomer();
+
+        _mockRepository.Setup(x => x.GetByFilterAsync(It.IsAny<CustomerFilter>(), _cancellationTokenSource.Token))
+            .ReturnsAsync(customer);
+        _mockPassword.Setup(x => x.Verify(It.IsAny<string>(), It.IsAny<string>())).Returns(false);
+
+        var customerService = new CustomerService(_mockRepository.Object, _mockPassword.Object);
+
+        // Act
+        var result = await customerService.AuthenticateAsync(customer.Email, "Wrong@Password1",
+            _cancellationTokenSource.Token);
+
+        // Assert
+        Assert.Null(result);
+    }
+
+    [Fact]
+    public async Task AuthenticateAsync_UnknownEmail_ReturnsNullAfterEquivalentHashWork()
+    {
+        // Arrange
+        _mockRepository.Setup(x => x.GetByFilterAsync(It.IsAny<CustomerFilter>(), _cancellationTokenSource.Token))
+            .ReturnsAsync((Customer.Domain.Entities.Customer)null);
+
+        var customerService = new CustomerService(_mockRepository.Object, _mockPassword.Object);
+
+        // Act
+        var result = await customerService.AuthenticateAsync("nobody@test.com", "Password@01",
+            _cancellationTokenSource.Token);
+
+        // Assert
+        Assert.Null(result);
+        _mockPassword.Verify(x => x.Hash("Password@01"), Times.Once);
+    }
+
+    [Fact]
     public async Task UpdateInvalidIdTestAsync()
     {
         // Arrange

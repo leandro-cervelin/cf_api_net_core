@@ -11,4 +11,7 @@ public interface ICustomerService
     Task UpdateAsync(long id, Entities.Customer customer, CancellationToken cancellationToken);
     Task<long> CreateAsync(Entities.Customer customer, CancellationToken cancellationToken);
     Task DeleteAsync(long id, CancellationToken cancellationToken);
+
+    /// <summary>Returns the customer when the email and password match, otherwise null.</summary>
+    Task<Entities.Customer?> AuthenticateAsync(string email, string password, CancellationToken cancellationToken);
 }

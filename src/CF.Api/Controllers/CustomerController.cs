@@ -1,19 +1,26 @@
+using System.Globalization;
 using System.Net;
 using Asp.Versioning;
+using CF.Api.Authentication;
 using CF.Api.Helpers;
 using CF.Customer.Application.Dtos;
 using CF.Customer.Application.Facades.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.JsonWebTokens;
 
 namespace CF.Api.Controllers;
 
 [ApiController]
+[Authorize]
 [ApiVersion("1.0")]
 [Route("api/v{version:apiVersion}/customer")]
+[ProducesResponseType((int)HttpStatusCode.Unauthorized)]
 public class CustomerController(ICustomerFacade customerFacade) : ControllerBase
 {
     [HttpGet]
-    [ResponseCache(Duration = 60, Location = ResponseCacheLocation.Any, VaryByQueryKeys = ["*"])]
+    [Authorize(Roles = Roles.Admin)]
+    [ProducesResponseType((int)HttpStatusCode.Forbidden)]
     [ProducesResponseType(typeof(PaginationDto<CustomerResponseDto>), (int)HttpStatusCode.OK)]
     public async Task<ActionResult<PaginationDto<CustomerResponseDto>>> Get(
         [FromQuery] CustomerFilterDto customerFilterDto, CancellationToken cancellationToken)
@@ -22,13 +29,15 @@ public class CustomerController(ICustomerFacade customerFacade) : ControllerBase
     }
 
     [HttpGet("{id:long}")]
-    [ResponseCache(Duration = 120, Location = ResponseCacheLocation.Any, VaryByQueryKeys = ["id"])]
     [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+    [ProducesResponseType((int)HttpStatusCode.Forbidden)]
     [ProducesResponseType((int)HttpStatusCode.NotFound)]
     [ProducesResponseType(typeof(CustomerResponseDto), (int)HttpStatusCode.OK)]
     public async Task<ActionResult<CustomerResponseDto>> Get(long id, CancellationToken cancellationToken)
     {
         if (id <= 0) return BadRequest(ControllerHelper.CreateProblemDetails("Id", "Invalid Id."));
+
+        if (!IsOwnerOrAdmin(id)) return Forbid();
 
         var filter = new CustomerFilterDto { Id = id };
         var result = await customerFacade.GetByFilterAsync(filter, cancellationToken);
@@ -38,7 +47,9 @@ public class CustomerController(ICustomerFacade customerFacade) : ControllerBase
         return result;
     }
 
+    // Sign-up: anyone may create an account.
     [HttpPost]
+    [AllowAnonymous]
     [ProducesResponseType((int)HttpStatusCode.BadRequest)]
     [ProducesResponseType((int)HttpStatusCode.Created)]
     public async Task<IActionResult> Post([FromBody] CustomerRequestDto customerRequestDto,
@@ -54,6 +65,7 @@ public class CustomerController(ICustomerFacade customerFacade) : ControllerBase
 
     [HttpPut("{id:long}")]
     [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+    [ProducesResponseType((int)HttpStatusCode.Forbidden)]
     [ProducesResponseType((int)HttpStatusCode.NotFound)]
     [ProducesResponseType((int)HttpStatusCode.NoContent)]
     public async Task<IActionResult> Put(long id, [FromBody] CustomerRequestDto customerRequestDto,
@@ -63,20 +75,31 @@ public class CustomerController(ICustomerFacade customerFacade) : ControllerBase
 
         if (id <= 0) return BadRequest(ControllerHelper.CreateProblemDetails("Id", "Invalid Id."));
 
+        if (!IsOwnerOrAdmin(id)) return Forbid();
+
         await customerFacade.UpdateAsync(id, customerRequestDto, cancellationToken);
         return NoContent();
     }
 
     [HttpDelete("{id:long}")]
     [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+    [ProducesResponseType((int)HttpStatusCode.Forbidden)]
     [ProducesResponseType((int)HttpStatusCode.NotFound)]
     [ProducesResponseType((int)HttpStatusCode.NoContent)]
     public async Task<IActionResult> Delete(long id, CancellationToken cancellationToken)
     {
         if (id <= 0) return BadRequest(ControllerHelper.CreateProblemDetails("Id", "Invalid Id."));
 
+        if (!IsOwnerOrAdmin(id)) return Forbid();
+
         await customerFacade.DeleteAsync(id, cancellationToken);
 
         return NoContent();
+    }
+
+    private bool IsOwnerOrAdmin(long id)
+    {
+        return User.IsInRole(Roles.Admin) ||
+               User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value == id.ToString(CultureInfo.InvariantCulture);
     }
 }

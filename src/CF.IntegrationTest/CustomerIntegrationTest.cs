@@ -17,7 +17,7 @@ namespace CF.IntegrationTest;
 public class CustomerIntegrationTest(CustomWebApplicationFactory factory) : IClassFixture<CustomWebApplicationFactory>
 {
     private const string CustomerUrl = "api/v1/customer";
-    private readonly HttpClient _httpClient = factory.CreateClient();
+    private readonly HttpClient _httpClient = factory.CreateAdminClient();
 
     [Fact]
     public async Task CreateCustomerOkTestAsync()
