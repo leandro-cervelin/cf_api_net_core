@@ -12,6 +12,21 @@ RUN dotnet build "CF.Api.csproj" -c Release -o /app/build
 FROM build AS publish
 RUN dotnet publish "CF.Api.csproj" -c Release -o /app/publish
 
+# EF Core migration bundle: a single executable that applies pending migrations, run as its own deploy step
+# (the API doesn't migrate on startup outside Development). It reads ConnectionStrings__DbConnection.
+FROM build AS migrations
+RUN dotnet tool install --global dotnet-ef --version 10.0.12
+ENV PATH="$PATH:/root/.dotnet/tools"
+WORKDIR /src
+RUN dotnet ef migrations bundle --project CF.Migrations/CF.Migrations.csproj --startup-project CF.Api/CF.Api.csproj \
+    --configuration Release --output /app/efbundle
+
+FROM base AS migrator
+WORKDIR /app
+COPY --from=migrations /app/efbundle .
+ENTRYPOINT ["./efbundle"]
+
+# Last stage, so a plain `docker build` still produces the API image.
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
