@@ -60,6 +60,15 @@ The key is never committed: use user-secrets locally, and `JWT_SIGNING_KEY` in `
 Admins are listed by customer id in `Jwt:AdminCustomerIds` (e.g. `Jwt__AdminCustomerIds__0=1`). Ids rather than
 emails, because emails aren't verified and anyone could register an admin address that isn't taken yet.
 
+### Changing the password
+
+`PUT /api/v1/customer/{id}` always carries the full record, including `password`. Sending the existing password
+proves the caller knows it, so name and email edits need nothing else. To set a **new** password, also send
+`currentPassword`; without it (or if it's wrong) the request fails with 400. This way a stolen token alone can't
+take over an account. Admins editing another customer's account are exempt, as they can't know that password.
+
+Passwords are limited to 72 bytes (UTF-8), because bcrypt ignores anything beyond that.
+
 ### Token revocation
 
 Each customer has a security stamp, embedded in every token they get. Changing the password or email rotates it,

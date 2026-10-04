@@ -55,6 +55,44 @@ public class CustomerTest
     }
 
     [Theory]
+    [InlineData(72, true)] // exactly bcrypt's limit
+    [InlineData(73, false)]
+    public void PasswordLengthIsLimitedToBcryptBytes(int length, bool valid)
+    {
+        //Arrange
+        var customer = new Customer.Domain.Entities.Customer
+        {
+            Password = "Aa1@" + new string('x', length - 4)
+        };
+
+        //Act
+        var exception = Record.Exception(customer.ValidatePassword);
+
+        //Assert
+        if (valid)
+            Assert.Null(exception);
+        else
+            Assert.Equal("The Password must not exceed 72 bytes.",
+                Assert.IsType<ValidationException>(exception).Message);
+    }
+
+    [Fact]
+    public void PasswordLengthIsMeasuredInBytesNotCharacters()
+    {
+        //Arrange: 27 characters, but each "€" is 3 bytes in UTF-8 (3 + 24 * 3 = 75 bytes).
+        var customer = new Customer.Domain.Entities.Customer
+        {
+            Password = "Aa1" + new string('€', 24)
+        };
+
+        //Act
+        var exception = Assert.Throws<ValidationException>(customer.ValidatePassword);
+
+        //Assert
+        Assert.Equal("The Password must not exceed 72 bytes.", exception.Message);
+    }
+
+    [Theory]
     [InlineData("1894@")]
     [InlineData("aaa@com.   ")]
     [InlineData("aaa@@.com   ")]

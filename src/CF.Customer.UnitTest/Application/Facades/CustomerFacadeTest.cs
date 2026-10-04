@@ -113,7 +113,7 @@ public class CustomerFacadeTest
 
         // Act
         var exception = await Record.ExceptionAsync(() =>
-            mockFacade.UpdateAsync(id, customerRequestDto, _cancellationTokenSource.Token));
+            mockFacade.UpdateAsync(id, customerRequestDto, true, _cancellationTokenSource.Token));
 
         // Assert
         Assert.Null(exception);
