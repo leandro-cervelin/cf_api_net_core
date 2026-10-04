@@ -9,4 +9,10 @@ public class Customer
     public string Password { get; set; } = null!;
     public string Surname { get; set; } = null!;
     public DateTime? Updated { get; set; }
+
+    /// <summary>
+    ///     Random value embedded in access tokens. Rotating it (on password or email change) invalidates every
+    ///     token issued before.
+    /// </summary>
+    public string SecurityStamp { get; set; } = null!;
 }

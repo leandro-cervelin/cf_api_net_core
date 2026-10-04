@@ -36,5 +36,9 @@ public class CustomerContext(DbContextOptions<CustomerContext> options)
         model.Property(x => x.Surname)
             .HasMaxLength(100)
             .IsRequired();
+
+        model.Property(x => x.SecurityStamp)
+            .HasMaxLength(64)
+            .IsRequired();
     }
 }

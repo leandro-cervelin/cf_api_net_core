@@ -49,6 +49,7 @@ public class AuthControllerTest
         Assert.True(validation.IsValid);
         Assert.Equal("7", validation.Claims[JwtRegisteredClaimNames.Sub]);
         Assert.Equal(login.Email, validation.Claims[JwtRegisteredClaimNames.Email]);
+        Assert.Equal("stamp-7", validation.Claims[AuthenticationExtensions.SecurityStampClaimType]);
         Assert.False(validation.Claims.ContainsKey(AuthenticationExtensions.RoleClaimType));
     }
 
@@ -96,7 +97,7 @@ public class AuthControllerTest
             Audience = _jwtOptions.Audience,
             SigningKey = "a-completely-different-key-also-32-bytes-long"
         };
-        var forged = new TokenService(Options.Create(otherOptions)).CreateToken(1, "x@test.com", [Roles.Admin]);
+        var forged = new TokenService(Options.Create(otherOptions)).CreateToken(1, "x@test.com", "stamp-1", [Roles.Admin]);
 
         //Act
         var validation = await ValidateAsync(forged.Token);
@@ -121,11 +122,11 @@ public class AuthControllerTest
         });
     }
 
-    private static CustomerResponseDto CreateCustomer(long id, string email)
+    private static AuthenticatedCustomerDto CreateCustomer(long id, string email)
     {
-        return new CustomerResponseDto
+        return new AuthenticatedCustomerDto
         {
-            Id = id, Email = email, FirstName = "Elden", Surname = "Ring", FullName = "Elden Ring"
+            Id = id, Email = email, SecurityStamp = "stamp-" + id
         };
     }
 }

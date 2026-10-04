@@ -16,7 +16,8 @@ namespace CF.Api.Controllers;
 [ApiVersion("1.0")]
 [Route("api/v{version:apiVersion}/customer")]
 [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
-public class CustomerController(ICustomerFacade customerFacade) : ControllerBase
+public class CustomerController(ICustomerFacade customerFacade, ISecurityStampValidator securityStampValidator)
+    : ControllerBase
 {
     [HttpGet]
     [Authorize(Roles = Roles.Admin)]
@@ -77,7 +78,15 @@ public class CustomerController(ICustomerFacade customerFacade) : ControllerBase
 
         if (!IsOwnerOrAdmin(id)) return Forbid();
 
-        await customerFacade.UpdateAsync(id, customerRequestDto, cancellationToken);
+        // Customers must prove they know their current password to change it. Admins managing someone else's
+        // account can't know it, so they're exempt (but an admin editing their own account is not).
+        var verifyCurrentPassword = IsOwner(id) || !User.IsInRole(Roles.Admin);
+
+        await customerFacade.UpdateAsync(id, customerRequestDto, verifyCurrentPassword, cancellationToken);
+
+        // The update may have rotated the security stamp; drop the cached one so old tokens stop working now.
+        securityStampValidator.Invalidate(id);
+
         return NoContent();
     }
 
@@ -93,13 +102,18 @@ public class CustomerController(ICustomerFacade customerFacade) : ControllerBase
         if (!IsOwnerOrAdmin(id)) return Forbid();
 
         await customerFacade.DeleteAsync(id, cancellationToken);
+        securityStampValidator.Invalidate(id);
 
         return NoContent();
     }
 
     private bool IsOwnerOrAdmin(long id)
     {
-        return User.IsInRole(Roles.Admin) ||
-               User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value == id.ToString(CultureInfo.InvariantCulture);
+        return User.IsInRole(Roles.Admin) || IsOwner(id);
+    }
+
+    private bool IsOwner(long id)
+    {
+        return User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value == id.ToString(CultureInfo.InvariantCulture);
     }
 }

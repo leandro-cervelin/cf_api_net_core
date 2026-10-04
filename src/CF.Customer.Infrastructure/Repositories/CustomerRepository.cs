@@ -42,24 +42,31 @@ public class CustomerRepository(CustomerContext context)
         return await query.ToListAsync(cancellationToken);
     }
 
+    // Runs on every authenticated request (behind a short cache), so read only the one column.
+    public async Task<string?> GetSecurityStampAsync(long id, CancellationToken cancellationToken)
+    {
+        return await DbContext.Customers
+            .AsNoTracking()
+            .Where(x => x.Id == id)
+            .Select(x => x.SecurityStamp)
+            .FirstOrDefaultAsync(cancellationToken);
+    }
+
     private static IQueryable<Domain.Entities.Customer> ApplySorting(CustomerFilter filter,
         IQueryable<Domain.Entities.Customer> query)
     {
-        query = filter?.OrderBy.ToLower() switch
+        var ascending = !filter.SortBy.Equals("desc", StringComparison.OrdinalIgnoreCase);
+
+        var ordered = filter.OrderBy.ToLowerInvariant() switch
         {
-            "firstname" => filter.SortBy.Equals("asc", StringComparison.CurrentCultureIgnoreCase)
-                ? query.OrderBy(x => x.FirstName)
-                : query.OrderByDescending(x => x.FirstName),
-            "surname" => filter.SortBy.Equals("asc", StringComparison.CurrentCultureIgnoreCase)
-                ? query.OrderBy(x => x.Surname)
-                : query.OrderByDescending(x => x.Surname),
-            "email" => filter.SortBy.Equals("asc", StringComparison.CurrentCultureIgnoreCase)
-                ? query.OrderBy(x => x.Email)
-                : query.OrderByDescending(x => x.Email),
-            _ => query
+            "firstname" => ascending ? query.OrderBy(x => x.FirstName) : query.OrderByDescending(x => x.FirstName),
+            "surname" => ascending ? query.OrderBy(x => x.Surname) : query.OrderByDescending(x => x.Surname),
+            "email" => ascending ? query.OrderBy(x => x.Email) : query.OrderByDescending(x => x.Email),
+            _ => query.OrderBy(x => x.Id)
         };
 
-        return query;
+        // Names aren't unique; the Id tie-breaker keeps Skip/Take pages stable between requests.
+        return ordered.ThenBy(x => x.Id);
     }
 
     private static IQueryable<Domain.Entities.Customer> ApplyFilter(CustomerFilter filter,

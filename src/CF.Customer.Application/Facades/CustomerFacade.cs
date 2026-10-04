@@ -29,11 +29,13 @@ public class CustomerFacade(ICustomerService customerService, ICustomerMapper ma
         return result is null ? null : mapper.MapToCustomerResponseDto(result);
     }
 
-    public async Task UpdateAsync(long id, CustomerRequestDto customerRequestDto, CancellationToken cancellationToken)
+    public async Task UpdateAsync(long id, CustomerRequestDto customerRequestDto, bool verifyCurrentPassword,
+        CancellationToken cancellationToken)
     {
         var customer = mapper.MapToCustomer(customerRequestDto);
 
-        await customerService.UpdateAsync(id, customer, cancellationToken);
+        await customerService.UpdateAsync(id, customer, customerRequestDto.CurrentPassword, verifyCurrentPassword,
+            cancellationToken);
     }
 
     public async Task<long> CreateAsync(CustomerRequestDto customerRequestDto, CancellationToken cancellationToken)
@@ -50,12 +52,17 @@ public class CustomerFacade(ICustomerService customerService, ICustomerMapper ma
         await customerService.DeleteAsync(id, cancellationToken);
     }
 
-    public async Task<CustomerResponseDto?> AuthenticateAsync(LoginRequestDto loginRequestDto,
+    public async Task<AuthenticatedCustomerDto?> AuthenticateAsync(LoginRequestDto loginRequestDto,
         CancellationToken cancellationToken)
     {
         var customer = await customerService.AuthenticateAsync(loginRequestDto.Email, loginRequestDto.Password,
             cancellationToken);
 
-        return customer is null ? null : mapper.MapToCustomerResponseDto(customer);
+        return customer is null ? null : mapper.MapToAuthenticatedCustomerDto(customer);
+    }
+
+    public async Task<string?> GetSecurityStampAsync(long id, CancellationToken cancellationToken)
+    {
+        return await customerService.GetSecurityStampAsync(id, cancellationToken);
     }
 }

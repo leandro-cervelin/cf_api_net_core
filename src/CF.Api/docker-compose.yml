@@ -3,17 +3,50 @@
     build:
       context: ..
       dockerfile: CF.Api/Dockerfile
+      target: final
     ports:
-      - "8888:80"
+      - "8888:8080"
     environment:
-      - ASPNETCORE_URLS=http://+:80
-      - ConnectionStrings__DbConnection=Data Source=db;Initial Catalog=CF;User ID=sa;Password=${SA_PASSWORD};Trusted_Connection=False;TrustServerCertificate=True;
+      # Least privilege: the API reads and writes data but can't change the schema or touch other databases.
+      - ConnectionStrings__DbConnection=Data Source=db;Initial Catalog=CF;User ID=cf_app;Password=${APP_DB_PASSWORD};Trusted_Connection=False;TrustServerCertificate=True;
       - Jwt__SigningKey=${JWT_SIGNING_KEY}
     depends_on:
-      db:
-        # The API migrates the schema on startup, so wait until SQL Server accepts connections.
-        condition: service_healthy
+      # Start only once the schema is up to date.
+      migrate:
+        condition: service_completed_successfully
     restart: unless-stopped
+    networks:
+      - app-network
+
+  # One-shot: applies pending EF Core migrations with the bundle, then exits. Uses sa, as it changes the schema.
+  migrate:
+    build:
+      context: ..
+      dockerfile: CF.Api/Dockerfile
+      target: migrator
+    environment:
+      - ConnectionStrings__DbConnection=Data Source=db;Initial Catalog=CF;User ID=sa;Password=${SA_PASSWORD};Trusted_Connection=False;TrustServerCertificate=True;
+    depends_on:
+      db-init:
+        condition: service_completed_successfully
+    networks:
+      - app-network
+
+  # One-shot: creates the CF database and the API's cf_app login (data read/write only), then exits.
+  # Idempotent; re-running it also resets the cf_app password to APP_DB_PASSWORD.
+  db-init:
+    image: "mcr.microsoft.com/mssql/server:2022-latest"
+    entrypoint: ["/opt/mssql-tools18/bin/sqlcmd", "-S", "db", "-U", "sa", "-C", "-b", "-i", "/scripts/init-app-login.sql"]
+    environment:
+      # Read by sqlcmd from the environment, so neither password appears in the process arguments.
+      SQLCMDPASSWORD: "${SA_PASSWORD}"
+      AppLogin: "cf_app"
+      AppPassword: "${APP_DB_PASSWORD}"
+    volumes:
+      - ./db:/scripts:ro
+    depends_on:
+      db:
+        condition: service_healthy
     networks:
       - app-network
 

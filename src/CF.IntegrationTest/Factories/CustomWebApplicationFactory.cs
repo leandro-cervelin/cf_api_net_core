@@ -43,13 +43,13 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>, IAsyn
     /// <summary>A client authenticated as the seed customer, who is configured as an admin.</summary>
     public HttpClient CreateAdminClient()
     {
-        return CreateClientFor(AdminCustomerId, CustomerSeed.Email, [Roles.Admin]);
+        return CreateClientFor(AdminCustomerId, CustomerSeed.Email, CustomerSeed.SecurityStamp, [Roles.Admin]);
     }
 
     /// <summary>A client carrying a token minted by the app's own token service, for the given customer.</summary>
-    public HttpClient CreateClientFor(long customerId, string email, string[] roles)
+    public HttpClient CreateClientFor(long customerId, string email, string securityStamp, string[] roles)
     {
-        var token = Services.GetRequiredService<ITokenService>().CreateToken(customerId, email, roles);
+        var token = Services.GetRequiredService<ITokenService>().CreateToken(customerId, email, securityStamp, roles);
         return CreateClientWithToken(token.Token);
     }
 

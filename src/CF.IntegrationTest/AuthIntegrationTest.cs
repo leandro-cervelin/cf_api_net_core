@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using CF.Api.Dtos;
 using CF.Customer.Application.Dtos;
 using CF.IntegrationTest.Factories;
+using CF.IntegrationTest.Models;
 using CF.IntegrationTest.Seeds;
 using Xunit;
 
@@ -122,6 +123,118 @@ public class AuthIntegrationTest(CustomWebApplicationFactory factory) : IClassFi
         var list = await admin.GetAsync(CustomerUrl, TestContext.Current.CancellationToken);
 
         Assert.Equal(HttpStatusCode.OK, list.StatusCode);
+    }
+
+    [Fact]
+    public async Task PasswordChange_RevokesExistingTokens()
+    {
+        using var anonymous = factory.CreateClient();
+        var (id, email) = await SignUpAsync(anonymous);
+        using var client = factory.CreateClientWithToken(await LoginAsync(anonymous, email, Password));
+
+        var update = CreateCustomerRequestDto();
+        update.Email = email;
+        update.Password = "NewPassword2@";
+        update.ConfirmPassword = "NewPassword2@";
+        update.CurrentPassword = Password;
+        var put = await client.PutAsJsonAsync($"{CustomerUrl}/{id}", update, TestContext.Current.CancellationToken);
+        Assert.Equal(HttpStatusCode.NoContent, put.StatusCode);
+
+        // The token used for the change is now revoked...
+        var withOldToken = await client.GetAsync($"{CustomerUrl}/{id}", TestContext.Current.CancellationToken);
+        Assert.Equal(HttpStatusCode.Unauthorized, withOldToken.StatusCode);
+
+        // ...and a fresh login with the new password works.
+        using var relogged = factory.CreateClientWithToken(await LoginAsync(anonymous, email, "NewPassword2@"));
+        var withNewToken = await relogged.GetAsync($"{CustomerUrl}/{id}", TestContext.Current.CancellationToken);
+        Assert.Equal(HttpStatusCode.OK, withNewToken.StatusCode);
+    }
+
+    [Theory]
+    [InlineData(null, "The current password is required to change the password.")]
+    [InlineData("Wrong@Password1", "The current password is incorrect.")]
+    public async Task PasswordChange_WithoutValidCurrentPassword_IsRejected(string currentPassword,
+        string expectedError)
+    {
+        using var anonymous = factory.CreateClient();
+        var (id, email) = await SignUpAsync(anonymous);
+        using var client = factory.CreateClientWithToken(await LoginAsync(anonymous, email, Password));
+
+        // A stolen token alone must not be enough to take over the account.
+        var update = CreateCustomerRequestDto();
+        update.Email = email;
+        update.Password = "Hijacked2@";
+        update.ConfirmPassword = "Hijacked2@";
+        update.CurrentPassword = currentPassword;
+        var put = await client.PutAsJsonAsync($"{CustomerUrl}/{id}", update, TestContext.Current.CancellationToken);
+
+        Assert.Equal(HttpStatusCode.BadRequest, put.StatusCode);
+        var problem = await put.Content.ReadFromJsonAsync<ErrorResponse>(TestContext.Current.CancellationToken);
+        Assert.Equal(expectedError, Assert.Single(problem!.Errors["Validation"]));
+
+        // The original password still works.
+        await LoginAsync(anonymous, email, Password);
+    }
+
+    [Fact]
+    public async Task EmailChange_WithUnchangedPassword_DoesNotNeedCurrentPassword()
+    {
+        using var anonymous = factory.CreateClient();
+        var (id, email) = await SignUpAsync(anonymous);
+        using var client = factory.CreateClientWithToken(await LoginAsync(anonymous, email, Password));
+
+        var update = CreateCustomerRequestDto(); // same Password as at sign-up, so it proves knowledge
+        var put = await client.PutAsJsonAsync($"{CustomerUrl}/{id}", update, TestContext.Current.CancellationToken);
+        Assert.Equal(HttpStatusCode.NoContent, put.StatusCode);
+
+        await LoginAsync(anonymous, update.Email, Password);
+    }
+
+    [Fact]
+    public async Task NameOnlyChange_KeepsExistingTokensValid()
+    {
+        using var anonymous = factory.CreateClient();
+        var (id, email) = await SignUpAsync(anonymous);
+        using var client = factory.CreateClientWithToken(await LoginAsync(anonymous, email, Password));
+
+        var update = CreateCustomerRequestDto();
+        update.Email = email;
+        update.FirstName = "Renamed";
+        var put = await client.PutAsJsonAsync($"{CustomerUrl}/{id}", update, TestContext.Current.CancellationToken);
+        Assert.Equal(HttpStatusCode.NoContent, put.StatusCode);
+
+        var get = await client.GetAsync($"{CustomerUrl}/{id}", TestContext.Current.CancellationToken);
+        Assert.Equal(HttpStatusCode.OK, get.StatusCode);
+    }
+
+    [Fact]
+    public async Task DeletedCustomer_TokenIsRevoked()
+    {
+        using var anonymous = factory.CreateClient();
+        var (id, email) = await SignUpAsync(anonymous);
+        using var client = factory.CreateClientWithToken(await LoginAsync(anonymous, email, Password));
+
+        // Warm the stamp cache, then have an admin delete the account.
+        Assert.Equal(HttpStatusCode.OK,
+            (await client.GetAsync($"{CustomerUrl}/{id}", TestContext.Current.CancellationToken)).StatusCode);
+        using var admin = factory.CreateAdminClient();
+        var delete = await admin.DeleteAsync($"{CustomerUrl}/{id}", TestContext.Current.CancellationToken);
+        Assert.Equal(HttpStatusCode.NoContent, delete.StatusCode);
+
+        var afterDelete = await client.GetAsync($"{CustomerUrl}/{id}", TestContext.Current.CancellationToken);
+        Assert.Equal(HttpStatusCode.Unauthorized, afterDelete.StatusCode);
+    }
+
+    [Fact]
+    public async Task TokenWithoutSecurityStamp_IsRejected()
+    {
+        // Simulates a token issued before security stamps existed.
+        using var client = factory.CreateClientFor(CustomWebApplicationFactory.AdminCustomerId, CustomerSeed.Email,
+            securityStamp: "", ["admin"]);
+
+        var response = await client.GetAsync(CustomerUrl, TestContext.Current.CancellationToken);
+
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
 
     private static async Task<(long Id, string Email)> SignUpAsync(HttpClient client)

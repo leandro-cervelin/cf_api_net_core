@@ -169,7 +169,7 @@ public class CustomerServiceTest
         var customerService = new CustomerService(_mockRepository.Object, _mockPassword.Object);
 
         // Act
-        await customerService.UpdateAsync(existingCustomer.Id, updatedCustomer, _cancellationTokenSource.Token);
+        await customerService.UpdateAsync(existingCustomer.Id, updatedCustomer, null, false, _cancellationTokenSource.Token);
 
         // Assert
         _mockPassword.Verify(x => x.Verify(newPlainPassword, oldHashedPassword), Times.Once);
@@ -197,7 +197,7 @@ public class CustomerServiceTest
         var customerService = new CustomerService(_mockRepository.Object, _mockPassword.Object);
 
         // Act
-        await customerService.UpdateAsync(existingCustomer.Id, updatedCustomer, _cancellationTokenSource.Token);
+        await customerService.UpdateAsync(existingCustomer.Id, updatedCustomer, null, false, _cancellationTokenSource.Token);
 
         // Assert
         _mockPassword.Verify(x => x.Verify(updatedCustomer.Password, existingCustomer.Password), Times.Once);
@@ -222,12 +222,195 @@ public class CustomerServiceTest
         var customerService = new CustomerService(_mockRepository.Object, _mockPassword.Object);
 
         // Act
-        await customerService.UpdateAsync(existingCustomer.Id, updatedCustomer, _cancellationTokenSource.Token);
+        await customerService.UpdateAsync(existingCustomer.Id, updatedCustomer, null, false, _cancellationTokenSource.Token);
 
         // Assert
         Assert.Equal("Test1@Test.com", existingCustomer.Email);
         _mockRepository.Verify(
             x => x.GetByFilterAsync(It.IsAny<CustomerFilter>(), _cancellationTokenSource.Token), Times.Never);
+    }
+
+    [Theory]
+    [InlineData(false, "test1@test.com", false)] // name-only change
+    [InlineData(false, "Test1@Test.com", false)] // email case-only change
+    [InlineData(true, "test1@test.com", true)] // password change
+    [InlineData(false, "other@test.com", true)] // email change
+    public async Task UpdateAsync_RotatesSecurityStampOnlyWhenCredentialsChange(bool passwordChanged, string newEmail,
+        bool expectRotation)
+    {
+        // Arrange
+        var existingCustomer = CreateCustomer(email: "test1@test.com");
+        existingCustomer.SecurityStamp = "original-stamp";
+
+        var updatedCustomer = CreateCustomer(email: newEmail);
+        updatedCustomer.FirstName = "Renamed";
+
+        _mockRepository.Setup(x => x.GetByIdAsync(existingCustomer.Id, _cancellationTokenSource.Token))
+            .ReturnsAsync(existingCustomer);
+        _mockRepository.Setup(x => x.GetByFilterAsync(It.IsAny<CustomerFilter>(), _cancellationTokenSource.Token))
+            .ReturnsAsync((Customer.Domain.Entities.Customer)null);
+        _mockPassword.Setup(x => x.Verify(It.IsAny<string>(), It.IsAny<string>())).Returns(!passwordChanged);
+        _mockPassword.Setup(x => x.Hash(It.IsAny<string>())).Returns("$2a$11$newHash");
+
+        var customerService = new CustomerService(_mockRepository.Object, _mockPassword.Object);
+
+        // Act
+        await customerService.UpdateAsync(existingCustomer.Id, updatedCustomer, null, false, _cancellationTokenSource.Token);
+
+        // Assert
+        Assert.Equal(expectRotation, existingCustomer.SecurityStamp != "original-stamp");
+        Assert.False(string.IsNullOrEmpty(existingCustomer.SecurityStamp));
+    }
+
+    [Theory]
+    [InlineData(null, "The current password is required to change the password.")]
+    [InlineData("", "The current password is required to change the password.")]
+    [InlineData("Wrong@Pass1", "The current password is incorrect.")]
+    public async Task UpdateAsync_PasswordChangeWithoutValidCurrentPassword_Throws(string currentPassword,
+        string expectedMessage)
+    {
+        // Arrange
+        var (existingCustomer, updatedCustomer) = SetupPasswordChange();
+        _mockPassword.Setup(x => x.Verify("Wrong@Pass1", "$2a$11$oldHash")).Returns(false);
+
+        var customerService = new CustomerService(_mockRepository.Object, _mockPassword.Object);
+
+        // Act
+        var exception = await Assert.ThrowsAsync<ValidationException>(() =>
+            customerService.UpdateAsync(existingCustomer.Id, updatedCustomer, currentPassword, true,
+                _cancellationTokenSource.Token));
+
+        // Assert
+        Assert.Equal(expectedMessage, exception.Message);
+        Assert.Equal("$2a$11$oldHash", existingCustomer.Password);
+        _mockRepository.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task UpdateAsync_PasswordChangeWithCorrectCurrentPassword_ChangesPassword()
+    {
+        // Arrange
+        var (existingCustomer, updatedCustomer) = SetupPasswordChange();
+        _mockPassword.Setup(x => x.Verify("Old@Password1", "$2a$11$oldHash")).Returns(true);
+
+        var customerService = new CustomerService(_mockRepository.Object, _mockPassword.Object);
+
+        // Act
+        await customerService.UpdateAsync(existingCustomer.Id, updatedCustomer, "Old@Password1", true,
+            _cancellationTokenSource.Token);
+
+        // Assert
+        Assert.Equal("$2a$11$newHash", existingCustomer.Password);
+    }
+
+    [Fact]
+    public async Task UpdateAsync_PasswordChangeWithoutVerification_ChangesPassword()
+    {
+        // Arrange: an admin editing another customer's account.
+        var (existingCustomer, updatedCustomer) = SetupPasswordChange();
+
+        var customerService = new CustomerService(_mockRepository.Object, _mockPassword.Object);
+
+        // Act
+        await customerService.UpdateAsync(existingCustomer.Id, updatedCustomer, null, false,
+            _cancellationTokenSource.Token);
+
+        // Assert
+        Assert.Equal("$2a$11$newHash", existingCustomer.Password);
+    }
+
+    [Fact]
+    public async Task UpdateAsync_UnchangedPassword_DoesNotRequireCurrentPassword()
+    {
+        // Arrange: sending the existing password already proves the caller knows it.
+        var existingCustomer = CreateCustomer();
+        existingCustomer.Password = "$2a$11$oldHash";
+        var updatedCustomer = CreateCustomer(email: "changed@test.com");
+
+        _mockRepository.Setup(x => x.GetByIdAsync(existingCustomer.Id, _cancellationTokenSource.Token))
+            .ReturnsAsync(existingCustomer);
+        _mockRepository.Setup(x => x.GetByFilterAsync(It.IsAny<CustomerFilter>(), _cancellationTokenSource.Token))
+            .ReturnsAsync((Customer.Domain.Entities.Customer)null);
+        _mockPassword.Setup(x => x.Verify(updatedCustomer.Password, "$2a$11$oldHash")).Returns(true);
+
+        var customerService = new CustomerService(_mockRepository.Object, _mockPassword.Object);
+
+        // Act
+        await customerService.UpdateAsync(existingCustomer.Id, updatedCustomer, null, true,
+            _cancellationTokenSource.Token);
+
+        // Assert
+        Assert.Equal("changed@test.com", existingCustomer.Email);
+    }
+
+    [Theory]
+    [InlineData("password", "asc", "OrderBy must be one of: firstName, surname, email.")]
+    [InlineData("firstName", "sideways", "SortBy must be one of: asc, desc.")]
+    public async Task GetListByFilterAsync_InvalidSorting_Throws(string orderBy, string sortBy, string expectedMessage)
+    {
+        // Arrange
+        var customerService = new CustomerService(_mockRepository.Object, _mockPassword.Object);
+        var filter = new CustomerFilter { OrderBy = orderBy, SortBy = sortBy };
+
+        // Act
+        var exception = await Assert.ThrowsAsync<ValidationException>(() =>
+            customerService.GetListByFilterAsync(filter, _cancellationTokenSource.Token));
+
+        // Assert
+        Assert.Equal(expectedMessage, exception.Message);
+    }
+
+    [Theory]
+    [InlineData("FIRSTNAME", "ASC")]
+    [InlineData("email", "desc")]
+    public async Task GetListByFilterAsync_SortingIsCaseInsensitive(string orderBy, string sortBy)
+    {
+        // Arrange
+        var customerService = new CustomerService(_mockRepository.Object, _mockPassword.Object);
+        var filter = new CustomerFilter { OrderBy = orderBy, SortBy = sortBy };
+
+        // Act
+        var exception = await Record.ExceptionAsync(() =>
+            customerService.GetListByFilterAsync(filter, _cancellationTokenSource.Token));
+
+        // Assert
+        Assert.Null(exception);
+    }
+
+    private (Customer.Domain.Entities.Customer Existing, Customer.Domain.Entities.Customer Updated)
+        SetupPasswordChange()
+    {
+        var existingCustomer = CreateCustomer();
+        existingCustomer.Password = "$2a$11$oldHash";
+        var updatedCustomer = CreateCustomer();
+        updatedCustomer.Password = "New@Password1";
+
+        _mockRepository.Setup(x => x.GetByIdAsync(existingCustomer.Id, _cancellationTokenSource.Token))
+            .ReturnsAsync(existingCustomer);
+        _mockPassword.Setup(x => x.Verify("New@Password1", "$2a$11$oldHash")).Returns(false);
+        _mockPassword.Setup(x => x.Hash("New@Password1")).Returns("$2a$11$newHash");
+
+        return (existingCustomer, updatedCustomer);
+    }
+
+    [Fact]
+    public async Task CreateAsync_AssignsSecurityStamp()
+    {
+        // Arrange
+        var customer = CreateCustomer();
+        customer.SecurityStamp = null!;
+
+        _mockRepository.Setup(x => x.GetByFilterAsync(It.IsAny<CustomerFilter>(), _cancellationTokenSource.Token))
+            .ReturnsAsync((Customer.Domain.Entities.Customer)null);
+        _mockPassword.Setup(x => x.Hash(It.IsAny<string>())).Returns("$2a$11$hash");
+
+        var customerService = new CustomerService(_mockRepository.Object, _mockPassword.Object);
+
+        // Act
+        await customerService.CreateAsync(customer, _cancellationTokenSource.Token);
+
+        // Assert
+        Assert.Equal(32, customer.SecurityStamp.Length);
     }
 
     [Fact]
@@ -300,7 +483,7 @@ public class CustomerServiceTest
 
         // Act & Assert
         await Assert.ThrowsAsync<ValidationException>(() =>
-            customerService.UpdateAsync(customer.Id, customer, _cancellationTokenSource.Token));
+            customerService.UpdateAsync(customer.Id, customer, null, false, _cancellationTokenSource.Token));
     }
 
     [Fact]
@@ -313,7 +496,7 @@ public class CustomerServiceTest
 
         // Act & Assert
         await Assert.ThrowsAsync<ValidationException>(() =>
-            customerService.UpdateAsync(id, null, _cancellationTokenSource.Token));
+            customerService.UpdateAsync(id, null, null, false, _cancellationTokenSource.Token));
     }
 
     [Fact]
@@ -326,7 +509,7 @@ public class CustomerServiceTest
 
         // Act & Assert
         await Assert.ThrowsAsync<EntityNotFoundException>(() =>
-            customerService.UpdateAsync(customer.Id, customer, _cancellationTokenSource.Token));
+            customerService.UpdateAsync(customer.Id, customer, null, false, _cancellationTokenSource.Token));
     }
 
     [Fact]

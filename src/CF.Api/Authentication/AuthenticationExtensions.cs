@@ -9,6 +9,7 @@ namespace CF.Api.Authentication;
 public static class AuthenticationExtensions
 {
     public const string RoleClaimType = "role";
+    public const string SecurityStampClaimType = "stamp";
 
     public static IServiceCollection AddJwtAuthentication(this IServiceCollection services,
         IConfiguration configuration)
@@ -18,9 +19,11 @@ public static class AuthenticationExtensions
             .Validate(o => Encoding.UTF8.GetByteCount(o.SigningKey) >= 32,
                 "Jwt:SigningKey must be at least 32 bytes. Set it with user-secrets or the Jwt__SigningKey environment variable.")
             .Validate(o => o.ExpiryMinutes > 0, "Jwt:ExpiryMinutes must be greater than zero.")
+            .Validate(o => o.SecurityStampCacheSeconds >= 0, "Jwt:SecurityStampCacheSeconds must not be negative.")
             .ValidateOnStart();
 
         services.AddSingleton<ITokenService, TokenService>();
+        services.AddScoped<ISecurityStampValidator, SecurityStampValidator>();
 
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer();
 
@@ -46,6 +49,19 @@ public static class AuthenticationExtensions
                     ClockSkew = TimeSpan.FromSeconds(30),
                     NameClaimType = JwtRegisteredClaimNames.Sub,
                     RoleClaimType = RoleClaimType
+                };
+
+                // Signature and lifetime are valid; now make sure the token hasn't been revoked.
+                options.Events = new JwtBearerEvents
+                {
+                    OnTokenValidated = async context =>
+                    {
+                        var validator = context.HttpContext.RequestServices
+                            .GetRequiredService<ISecurityStampValidator>();
+
+                        if (!await validator.IsCurrentAsync(context.Principal!, context.HttpContext.RequestAborted))
+                            context.Fail("The access token has been revoked.");
+                    }
                 };
             });
 

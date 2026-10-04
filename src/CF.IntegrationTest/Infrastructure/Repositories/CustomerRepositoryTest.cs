@@ -199,6 +199,7 @@ public class CustomerRepositoryTest
             Email = "test1@test.com",
             Surname = "Surname1",
             FirstName = "FirstName1",
+            SecurityStamp = Guid.NewGuid().ToString("N"),
             Updated = DateTime.Now,
             Created = DateTime.Now
         };

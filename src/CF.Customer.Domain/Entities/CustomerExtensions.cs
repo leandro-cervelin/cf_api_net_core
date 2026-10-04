@@ -1,10 +1,13 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Text;
+using System.Text.RegularExpressions;
 using CF.Customer.Domain.Exceptions;
 
 namespace CF.Customer.Domain.Entities;
 
 public static partial class CustomerExtensions
 {
+    public const int MaxPasswordBytes = 72;
+
     [GeneratedRegex(
         @"\A(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)\Z",
         RegexOptions.IgnoreCase, "en-US")]
@@ -27,10 +30,19 @@ public static partial class CustomerExtensions
             customer.Updated = DateTime.UtcNow;
         }
 
+        public void RotateSecurityStamp()
+        {
+            customer.SecurityStamp = Guid.NewGuid().ToString("N");
+        }
+
         public void ValidatePassword()
         {
             if (string.IsNullOrEmpty(customer.Password))
                 throw new ValidationException("The Password is required.");
+
+            // bcrypt ignores everything past 72 bytes, so longer passwords would match any value sharing that prefix.
+            if (Encoding.UTF8.GetByteCount(customer.Password) > MaxPasswordBytes)
+                throw new ValidationException($"The Password must not exceed {MaxPasswordBytes} bytes.");
 
             const string regex =
                 @"^((?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])|(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[^a-zA-Z0-9])|(?=.*?[A-Z])(?=.*?[0-9])(?=.*?[^a-zA-Z0-9])|(?=.*?[a-z])(?=.*?[0-9])(?=.*?[^a-zA-Z0-9])).{8,}$";
