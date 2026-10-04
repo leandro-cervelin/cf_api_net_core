@@ -5,6 +5,7 @@ using Asp.Versioning;
 using CF.Api.Authentication;
 using CF.Api.Filters;
 using CF.Api.Middleware;
+using CF.Api.OpenApi;
 using CF.Customer.Infrastructure.DbContext;
 using CF.Customer.Infrastructure.DependencyInjection;
 using CorrelationId;
@@ -60,7 +61,7 @@ void AddOpenApi()
 {
     if (!app.Environment.IsDevelopment()) return;
     app.MapOpenApi().WithDocumentPerVersion();
-    app.MapScalarApiReference();
+    app.MapScalarApiReference(options => options.AddPreferredSecuritySchemes(BearerSecurityTransformer.SchemeName));
 }
 
 void AddRateLimiting()
@@ -114,7 +115,11 @@ void AddApiVersioning()
     {
         options.GroupNameFormat = "'v'VVV";
         options.SubstituteApiVersionInUrl = true;
-    }).AddOpenApi();
+    }).AddOpenApi(options =>
+    {
+        options.Document.AddDocumentTransformer<BearerSecurityTransformer>();
+        options.Document.AddOperationTransformer<BearerSecurityTransformer>();
+    });
 }
 
 void AddHealthChecks()

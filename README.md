@@ -60,6 +60,21 @@ The key is never committed: use user-secrets locally, and `JWT_SIGNING_KEY` in `
 Admins are listed by customer id in `Jwt:AdminCustomerIds` (e.g. `Jwt__AdminCustomerIds__0=1`). Ids rather than
 emails, because emails aren't verified and anyone could register an admin address that isn't taken yet.
 
+### Token revocation
+
+Each customer has a security stamp, embedded in every token they get. Changing the password or email rotates it,
+and deleting the customer removes it; either way, all previously issued tokens are rejected (401) and the client has
+to log in again. Changing only the name keeps tokens valid.
+
+Stamps are cached per instance for `Jwt:SecurityStampCacheSeconds` (default 30). A change made through an instance
+takes effect there immediately; other instances pick it up when their cache entry expires. Set it to `0` to check
+the database on every request.
+
+### Trying it in the API docs
+
+In Development, open `/scalar/v1`, call `POST /api/v1/auth/token`, paste the `accessToken` into the
+authentication panel (Bearer), and the protected endpoints (marked with a lock) send it automatically.
+
 ## Console demo
 
 `CF.ConsoleApp` resolves `ICustomerFacade` from the shared core and runs a small

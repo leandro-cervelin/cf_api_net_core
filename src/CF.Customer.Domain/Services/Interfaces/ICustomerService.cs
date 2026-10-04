@@ -14,4 +14,7 @@ public interface ICustomerService
 
     /// <summary>Returns the customer when the email and password match, otherwise null.</summary>
     Task<Entities.Customer?> AuthenticateAsync(string email, string password, CancellationToken cancellationToken);
+
+    /// <summary>Returns the customer's current security stamp, or null when the customer doesn't exist.</summary>
+    Task<string?> GetSecurityStampAsync(long id, CancellationToken cancellationToken);
 }

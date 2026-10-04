@@ -61,16 +61,21 @@ public class CustomerService(ICustomerRepository customerRepository, IPasswordHa
 
         // Case-insensitive to match the database collation: a case-only change of the customer's own
         // email would otherwise find their own row and be rejected as unavailable.
-        if (!string.Equals(entity.Email, customer.Email, StringComparison.OrdinalIgnoreCase) &&
-            !await IsAvailableEmailAsync(customer.Email, cancellationToken))
+        var emailChanged = !string.Equals(entity.Email, customer.Email, StringComparison.OrdinalIgnoreCase);
+        if (emailChanged && !await IsAvailableEmailAsync(customer.Email, cancellationToken))
             throw new ValidationException("Email is not available.");
 
         entity.Email = customer.Email;
         entity.FirstName = customer.FirstName;
         entity.Surname = customer.Surname;
 
-        if (!passwordHasherService.Verify(customer.Password, entity.Password))
+        var passwordChanged = !passwordHasherService.Verify(customer.Password, entity.Password);
+        if (passwordChanged)
             entity.Password = passwordHasherService.Hash(customer.Password);
+
+        // Credentials changed: revoke every token issued so far.
+        if (emailChanged || passwordChanged)
+            entity.RotateSecurityStamp();
 
         entity.SetUpdatedDate();
         await customerRepository.SaveChangesAsync(cancellationToken);
@@ -87,6 +92,7 @@ public class CustomerService(ICustomerRepository customerRepository, IPasswordHa
         if (!isAvailableEmail) throw new ValidationException("Email is not available.");
 
         customer.Password = passwordHasherService.Hash(customer.Password);
+        customer.RotateSecurityStamp();
         customer.SetCreatedDate();
         customerRepository.Add(customer);
         await customerRepository.SaveChangesAsync(cancellationToken);
@@ -120,6 +126,13 @@ public class CustomerService(ICustomerRepository customerRepository, IPasswordHa
         }
 
         return passwordHasherService.Verify(password, customer.Password) ? customer : null;
+    }
+
+    public async Task<string?> GetSecurityStampAsync(long id, CancellationToken cancellationToken)
+    {
+        if (id <= 0) return null;
+
+        return await customerRepository.GetSecurityStampAsync(id, cancellationToken);
     }
 
     public async Task<bool> IsAvailableEmailAsync(string email, CancellationToken cancellationToken)

@@ -11,7 +11,7 @@ public class TokenService(IOptions<JwtOptions> options) : ITokenService
 {
     private readonly JsonWebTokenHandler _handler = new();
 
-    public AccessToken CreateToken(long customerId, string email, IEnumerable<string> roles)
+    public AccessToken CreateToken(long customerId, string email, string securityStamp, IEnumerable<string> roles)
     {
         var jwt = options.Value;
         var now = DateTime.UtcNow;
@@ -21,7 +21,8 @@ public class TokenService(IOptions<JwtOptions> options) : ITokenService
         [
             new(JwtRegisteredClaimNames.Sub, customerId.ToString(CultureInfo.InvariantCulture)),
             new(JwtRegisteredClaimNames.Email, email),
-            new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+            new(AuthenticationExtensions.SecurityStampClaimType, securityStamp)
         ];
         claims.AddRange(roles.Select(role => new Claim(AuthenticationExtensions.RoleClaimType, role)));
 

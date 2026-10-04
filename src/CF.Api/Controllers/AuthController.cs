@@ -35,7 +35,7 @@ public class AuthController(
             return Problem(statusCode: StatusCodes.Status401Unauthorized, title: "Invalid email or password.");
 
         string[] roles = jwtOptions.Value.AdminCustomerIds.Contains(customer.Id) ? [Roles.Admin] : [];
-        var token = tokenService.CreateToken(customer.Id, customer.Email, roles);
+        var token = tokenService.CreateToken(customer.Id, customer.Email, customer.SecurityStamp, roles);
 
         return new TokenResponseDto { AccessToken = token.Token, ExpiresAt = token.ExpiresAt };
     }

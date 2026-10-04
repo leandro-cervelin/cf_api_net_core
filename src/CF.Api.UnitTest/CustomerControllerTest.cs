@@ -21,6 +21,7 @@ public class CustomerControllerTest
 {
     private readonly CancellationTokenSource _cancellationTokenSource = new();
     private readonly Mock<ICustomerFacade> _customerFacade = new();
+    private readonly Mock<ISecurityStampValidator> _securityStampValidator = new();
 
     [Fact]
     public async Task GetListTestAsync()
@@ -54,7 +55,7 @@ public class CustomerControllerTest
             .Setup(x => x.GetListByFilterAsync(It.IsAny<CustomerFilterDto>(), _cancellationTokenSource.Token))
             .ReturnsAsync(facadeResult);
 
-        var controller = new CustomerController(_customerFacade.Object);
+        var controller = new CustomerController(_customerFacade.Object, _securityStampValidator.Object);
 
         var requestDto = new CustomerFilterDto
         {
@@ -104,7 +105,7 @@ public class CustomerControllerTest
         _customerFacade.Setup(x => x.CreateAsync(It.IsAny<CustomerRequestDto>(), _cancellationTokenSource.Token))
             .ReturnsAsync(1);
 
-        var controller = new CustomerController(_customerFacade.Object);
+        var controller = new CustomerController(_customerFacade.Object, _securityStampValidator.Object);
 
         // Mock HttpContext for API versioning
         var httpContext = new DefaultHttpContext();
@@ -166,6 +167,7 @@ public class CustomerControllerTest
         //Assert
         Assert.NotNull(actionResult);
         Assert.IsType<NoContentResult>(actionResult);
+        _securityStampValidator.Verify(x => x.Invalidate(1), Times.Once);
     }
 
     [Fact]
@@ -249,6 +251,7 @@ public class CustomerControllerTest
         //Assert
         Assert.IsType<NoContentResult>(actionResult);
         _customerFacade.Verify(x => x.DeleteAsync(1, _cancellationTokenSource.Token), Times.Once);
+        _securityStampValidator.Verify(x => x.Invalidate(1), Times.Once);
     }
 
     private CustomerController CreateController(long customerId, bool isAdmin = false)
@@ -259,7 +262,7 @@ public class CustomerControllerTest
         var identity = new ClaimsIdentity(claims, "Test", JwtRegisteredClaimNames.Sub,
             AuthenticationExtensions.RoleClaimType);
 
-        return new CustomerController(_customerFacade.Object)
+        return new CustomerController(_customerFacade.Object, _securityStampValidator.Object)
         {
             ControllerContext = new ControllerContext
             {

@@ -7,6 +7,7 @@ public interface ICustomerMapper
 {
     Domain.Entities.Customer MapToCustomer(CustomerRequestDto dto);
     CustomerResponseDto MapToCustomerResponseDto(Domain.Entities.Customer customer);
+    AuthenticatedCustomerDto MapToAuthenticatedCustomerDto(Domain.Entities.Customer customer);
     CustomerFilter MapToCustomerFilter(CustomerFilterDto dto);
     PaginationDto<CustomerResponseDto> MapToPaginationDto(Pagination<Domain.Entities.Customer> pagination);
 }
