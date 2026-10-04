@@ -12,7 +12,7 @@ RUN dotnet build "CF.Api.csproj" -c Release -o /app/build
 FROM build AS publish
 RUN dotnet publish "CF.Api.csproj" -c Release -o /app/publish
 
-SFROM base AS final
+FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "CF.Api.dll"]

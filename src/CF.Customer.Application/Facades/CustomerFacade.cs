@@ -49,4 +49,13 @@ public class CustomerFacade(ICustomerService customerService, ICustomerMapper ma
     {
         await customerService.DeleteAsync(id, cancellationToken);
     }
+
+    public async Task<CustomerResponseDto?> AuthenticateAsync(LoginRequestDto loginRequestDto,
+        CancellationToken cancellationToken)
+    {
+        var customer = await customerService.AuthenticateAsync(loginRequestDto.Email, loginRequestDto.Password,
+            cancellationToken);
+
+        return customer is null ? null : mapper.MapToCustomerResponseDto(customer);
+    }
 }

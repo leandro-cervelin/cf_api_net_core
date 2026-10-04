@@ -41,6 +41,25 @@ Provide a full connection string via user-secrets so no credential is committed:
 
 - dotnet user-secrets --project CF.Api set "ConnectionStrings:DbConnection" "Data Source=localhost;Initial Catalog=CF;User ID=sa;Password=<your-password>;TrustServerCertificate=True;"
 
+## Authentication
+
+The customer endpoints require a JWT bearer token:
+
+| Endpoint | Access |
+| --- | --- |
+| `POST /api/v1/customer` (sign-up) | anonymous |
+| `POST /api/v1/auth/token` (login: `{ "email", "password" }`) | anonymous |
+| `GET/PUT/DELETE /api/v1/customer/{id}` | that customer, or an admin |
+| `GET /api/v1/customer` (list) | admin only |
+
+Tokens are signed with `Jwt:SigningKey` (HMAC-SHA256, at least 32 bytes). The app refuses to start without it.
+The key is never committed: use user-secrets locally, and `JWT_SIGNING_KEY` in `CF.Api/.env` with Docker Compose.
+
+- dotnet user-secrets --project CF.Api set "Jwt:SigningKey" "<random value, e.g. from: openssl rand -base64 48>"
+
+Admins are listed by customer id in `Jwt:AdminCustomerIds` (e.g. `Jwt__AdminCustomerIds__0=1`). Ids rather than
+emails, because emails aren't verified and anyone could register an admin address that isn't taken yet.
+
 ## Console demo
 
 `CF.ConsoleApp` resolves `ICustomerFacade` from the shared core and runs a small

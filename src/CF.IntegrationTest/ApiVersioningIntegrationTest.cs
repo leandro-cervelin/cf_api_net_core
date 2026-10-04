@@ -15,7 +15,7 @@ public class ApiVersioningIntegrationTest(CustomWebApplicationFactory factory) :
     [Fact]
     public async Task ApiVersioning_V1Endpoint_ReturnsSuccess()
     {
-        using var client = factory.CreateClient();
+        using var client = factory.CreateAdminClient();
 
         var response = await client.GetAsync("/api/v1/customer?pageSize=10", TestContext.Current.CancellationToken);
 
@@ -25,7 +25,7 @@ public class ApiVersioningIntegrationTest(CustomWebApplicationFactory factory) :
     [Fact]
     public async Task ApiVersioning_ResponseHeaders_ContainVersionInfo()
     {
-        using var client = factory.CreateClient();
+        using var client = factory.CreateAdminClient();
 
         var url = $"/api/v1/customer?pageSize=10&_t={Guid.NewGuid()}";
         var response = await client.GetAsync(url, TestContext.Current.CancellationToken);

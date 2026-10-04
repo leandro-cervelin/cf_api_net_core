@@ -134,6 +134,46 @@ public class CustomerFacadeTest
         Assert.Null(exception);
     }
 
+    [Fact]
+    public async Task AuthenticateAsync_ValidCredentials_ReturnsMappedCustomer()
+    {
+        // Arrange
+        var customer = CreateCustomer();
+        var responseDto = new CustomerResponseDto
+        {
+            Id = customer.Id, Email = customer.Email, FirstName = customer.FirstName, Surname = customer.Surname,
+            FullName = $"{customer.FirstName} {customer.Surname}"
+        };
+        var loginRequestDto = new LoginRequestDto { Email = customer.Email, Password = "P@013333343" };
+
+        _mockService.Setup(x => x.AuthenticateAsync(loginRequestDto.Email, loginRequestDto.Password,
+            _cancellationTokenSource.Token)).ReturnsAsync(customer);
+        _mockMapper.Setup(x => x.MapToCustomerResponseDto(customer)).Returns(responseDto);
+        var mockFacade = new CustomerFacade(_mockService.Object, _mockMapper.Object);
+
+        // Act
+        var result = await mockFacade.AuthenticateAsync(loginRequestDto, _cancellationTokenSource.Token);
+
+        // Assert
+        Assert.Same(responseDto, result);
+    }
+
+    [Fact]
+    public async Task AuthenticateAsync_InvalidCredentials_ReturnsNull()
+    {
+        // Arrange
+        var loginRequestDto = new LoginRequestDto { Email = "test1@test.com", Password = "Wrong@Password1" };
+        var mockFacade = new CustomerFacade(_mockService.Object, _mockMapper.Object);
+
+        // Act
+        var result = await mockFacade.AuthenticateAsync(loginRequestDto, _cancellationTokenSource.Token);
+
+        // Assert
+        Assert.Null(result);
+        _mockMapper.Verify(x => x.MapToCustomerResponseDto(It.IsAny<Customer.Domain.Entities.Customer>()),
+            Times.Never);
+    }
+
     private static PaginationDto<CustomerResponseDto> CreatePaginationDto(List<CustomerResponseDto> customersDto)
     {
         return new PaginationDto<CustomerResponseDto>
