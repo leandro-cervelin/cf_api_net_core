@@ -20,19 +20,20 @@ Tests: `CF.Customer.UnitTest` and `CF.Api.UnitTest` run without a database. `CF.
 ## Docker with Compose
 
 1. Switch Docker to Linux containers.
-2. Copy `CF.Api/.env.example` to `CF.Api/.env` and set a strong `SA_PASSWORD` and a random `JWT_SIGNING_KEY`.
-   The file is gitignored; it supplies the SQL Server password and the token signing key.
+2. Copy `CF.Api/.env.example` to `CF.Api/.env` and set strong `SA_PASSWORD` and `APP_DB_PASSWORD` values and a
+   random `JWT_SIGNING_KEY`. The file is gitignored; it supplies the two database passwords and the signing key.
 3. From the `src` folder:
 
    - docker compose -f CF.Api/docker-compose.yml up --build
 
-Compose starts three services, in order:
+Compose starts four services, in order:
 
-| Service | What it does |
-| --- | --- |
-| `db` | SQL Server, with data in the `mssql-data` volume. Reports healthy once it accepts connections. |
-| `migrate` | Runs the EF Core migration bundle against `db`, then exits. |
-| `api` | Starts only after `migrate` has finished successfully. Listens on http://localhost:8888. |
+| Service | What it does | Database login |
+| --- | --- | --- |
+| `db` | SQL Server, with data in the `mssql-data` volume. Reports healthy once it accepts connections. | |
+| `db-init` | Creates the `CF` database and the API's `cf_app` login ([`CF.Api/db/init-app-login.sql`](src/CF.Api/db/init-app-login.sql)), then exits. | `sa` |
+| `migrate` | Runs the EF Core migration bundle against `db`, then exits. | `sa` |
+| `api` | Starts only after `migrate` has finished successfully. Listens on http://localhost:8888. | `cf_app` |
 
 Compose runs the API in the Production environment, so the Scalar docs page isn't served there; use local
 development for that.
@@ -135,6 +136,16 @@ Or with environment variables: `ForwardedHeaders__KnownProxies__0=10.0.0.5`. Loo
 
 Point liveness and readiness probes at `/health/live` and `/health/ready`. The detailed report names the
 checks and their timings, so it's limited to admins.
+
+### Least privilege
+
+- **Database:** the API connects as `cf_app`, a login that can only read and write data (`db_datareader` and
+  `db_datawriter` in `CF`). It can't change the schema or reach other databases, which limits the damage if the
+  app is ever compromised. Only the migration step uses a privileged login. Outside Compose, create an equivalent
+  login with the same script (run it as an admin with `sqlcmd -v AppLogin=... AppPassword=...`). Keep
+  `Database:MigrateOnStartup` off with such a login, since it can't apply migrations.
+- **Container:** the API and migrator images run as the unprivileged `app` user (UID 1654) from the .NET base
+  image and listen on port 8080. They log to stdout only, so the app folder doesn't need to be writable.
 
 ### Security headers
 

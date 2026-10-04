@@ -1,5 +1,9 @@
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base
 WORKDIR /app
+# Containers log to stdout; the non-root user can't (and shouldn't) write log files into the app folder.
+ENV NLog__rules__0__writeTo=console
+# Run as the image's built-in unprivileged "app" user. It listens on 8080 (ASPNETCORE_HTTP_PORTS), not 80.
+USER $APP_UID
 
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
