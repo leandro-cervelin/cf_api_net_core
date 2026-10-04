@@ -230,6 +230,58 @@ public class CustomerServiceTest
             x => x.GetByFilterAsync(It.IsAny<CustomerFilter>(), _cancellationTokenSource.Token), Times.Never);
     }
 
+    [Theory]
+    [InlineData(false, "test1@test.com", false)] // name-only change
+    [InlineData(false, "Test1@Test.com", false)] // email case-only change
+    [InlineData(true, "test1@test.com", true)] // password change
+    [InlineData(false, "other@test.com", true)] // email change
+    public async Task UpdateAsync_RotatesSecurityStampOnlyWhenCredentialsChange(bool passwordChanged, string newEmail,
+        bool expectRotation)
+    {
+        // Arrange
+        var existingCustomer = CreateCustomer(email: "test1@test.com");
+        existingCustomer.SecurityStamp = "original-stamp";
+
+        var updatedCustomer = CreateCustomer(email: newEmail);
+        updatedCustomer.FirstName = "Renamed";
+
+        _mockRepository.Setup(x => x.GetByIdAsync(existingCustomer.Id, _cancellationTokenSource.Token))
+            .ReturnsAsync(existingCustomer);
+        _mockRepository.Setup(x => x.GetByFilterAsync(It.IsAny<CustomerFilter>(), _cancellationTokenSource.Token))
+            .ReturnsAsync((Customer.Domain.Entities.Customer)null);
+        _mockPassword.Setup(x => x.Verify(It.IsAny<string>(), It.IsAny<string>())).Returns(!passwordChanged);
+        _mockPassword.Setup(x => x.Hash(It.IsAny<string>())).Returns("$2a$11$newHash");
+
+        var customerService = new CustomerService(_mockRepository.Object, _mockPassword.Object);
+
+        // Act
+        await customerService.UpdateAsync(existingCustomer.Id, updatedCustomer, _cancellationTokenSource.Token);
+
+        // Assert
+        Assert.Equal(expectRotation, existingCustomer.SecurityStamp != "original-stamp");
+        Assert.False(string.IsNullOrEmpty(existingCustomer.SecurityStamp));
+    }
+
+    [Fact]
+    public async Task CreateAsync_AssignsSecurityStamp()
+    {
+        // Arrange
+        var customer = CreateCustomer();
+        customer.SecurityStamp = null!;
+
+        _mockRepository.Setup(x => x.GetByFilterAsync(It.IsAny<CustomerFilter>(), _cancellationTokenSource.Token))
+            .ReturnsAsync((Customer.Domain.Entities.Customer)null);
+        _mockPassword.Setup(x => x.Hash(It.IsAny<string>())).Returns("$2a$11$hash");
+
+        var customerService = new CustomerService(_mockRepository.Object, _mockPassword.Object);
+
+        // Act
+        await customerService.CreateAsync(customer, _cancellationTokenSource.Token);
+
+        // Assert
+        Assert.Equal(32, customer.SecurityStamp.Length);
+    }
+
     [Fact]
     public async Task AuthenticateAsync_ValidCredentials_ReturnsCustomer()
     {

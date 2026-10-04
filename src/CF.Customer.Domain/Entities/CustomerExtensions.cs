@@ -27,6 +27,11 @@ public static partial class CustomerExtensions
             customer.Updated = DateTime.UtcNow;
         }
 
+        public void RotateSecurityStamp()
+        {
+            customer.SecurityStamp = Guid.NewGuid().ToString("N");
+        }
+
         public void ValidatePassword()
         {
             if (string.IsNullOrEmpty(customer.Password))

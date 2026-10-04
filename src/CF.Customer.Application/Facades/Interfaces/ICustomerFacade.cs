@@ -13,5 +13,8 @@ public interface ICustomerFacade
     Task UpdateAsync(long id, CustomerRequestDto customerRequestDto, CancellationToken cancellationToken);
     Task DeleteAsync(long id, CancellationToken cancellationToken);
 
-    Task<CustomerResponseDto?> AuthenticateAsync(LoginRequestDto loginRequestDto, CancellationToken cancellationToken);
+    Task<AuthenticatedCustomerDto?> AuthenticateAsync(LoginRequestDto loginRequestDto,
+        CancellationToken cancellationToken);
+
+    Task<string?> GetSecurityStampAsync(long id, CancellationToken cancellationToken);
 }

@@ -139,16 +139,15 @@ public class CustomerFacadeTest
     {
         // Arrange
         var customer = CreateCustomer();
-        var responseDto = new CustomerResponseDto
+        var responseDto = new AuthenticatedCustomerDto
         {
-            Id = customer.Id, Email = customer.Email, FirstName = customer.FirstName, Surname = customer.Surname,
-            FullName = $"{customer.FirstName} {customer.Surname}"
+            Id = customer.Id, Email = customer.Email, SecurityStamp = "stamp"
         };
         var loginRequestDto = new LoginRequestDto { Email = customer.Email, Password = "P@013333343" };
 
         _mockService.Setup(x => x.AuthenticateAsync(loginRequestDto.Email, loginRequestDto.Password,
             _cancellationTokenSource.Token)).ReturnsAsync(customer);
-        _mockMapper.Setup(x => x.MapToCustomerResponseDto(customer)).Returns(responseDto);
+        _mockMapper.Setup(x => x.MapToAuthenticatedCustomerDto(customer)).Returns(responseDto);
         var mockFacade = new CustomerFacade(_mockService.Object, _mockMapper.Object);
 
         // Act
@@ -170,7 +169,7 @@ public class CustomerFacadeTest
 
         // Assert
         Assert.Null(result);
-        _mockMapper.Verify(x => x.MapToCustomerResponseDto(It.IsAny<Customer.Domain.Entities.Customer>()),
+        _mockMapper.Verify(x => x.MapToAuthenticatedCustomerDto(It.IsAny<Customer.Domain.Entities.Customer>()),
             Times.Never);
     }
 

@@ -42,6 +42,16 @@ public class CustomerRepository(CustomerContext context)
         return await query.ToListAsync(cancellationToken);
     }
 
+    // Runs on every authenticated request (behind a short cache), so read only the one column.
+    public async Task<string?> GetSecurityStampAsync(long id, CancellationToken cancellationToken)
+    {
+        return await DbContext.Customers
+            .AsNoTracking()
+            .Where(x => x.Id == id)
+            .Select(x => x.SecurityStamp)
+            .FirstOrDefaultAsync(cancellationToken);
+    }
+
     private static IQueryable<Domain.Entities.Customer> ApplySorting(CustomerFilter filter,
         IQueryable<Domain.Entities.Customer> query)
     {

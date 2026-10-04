@@ -30,6 +30,16 @@ public class CustomerMapper : ICustomerMapper
         };
     }
 
+    public AuthenticatedCustomerDto MapToAuthenticatedCustomerDto(Domain.Entities.Customer customer)
+    {
+        return new AuthenticatedCustomerDto
+        {
+            Id = customer.Id,
+            Email = customer.Email,
+            SecurityStamp = customer.SecurityStamp
+        };
+    }
+
     public CustomerFilter MapToCustomerFilter(CustomerFilterDto dto)
     {
         return new CustomerFilter

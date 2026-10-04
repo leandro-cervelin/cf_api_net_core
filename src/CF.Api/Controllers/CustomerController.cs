@@ -16,7 +16,8 @@ namespace CF.Api.Controllers;
 [ApiVersion("1.0")]
 [Route("api/v{version:apiVersion}/customer")]
 [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
-public class CustomerController(ICustomerFacade customerFacade) : ControllerBase
+public class CustomerController(ICustomerFacade customerFacade, ISecurityStampValidator securityStampValidator)
+    : ControllerBase
 {
     [HttpGet]
     [Authorize(Roles = Roles.Admin)]
@@ -78,6 +79,10 @@ public class CustomerController(ICustomerFacade customerFacade) : ControllerBase
         if (!IsOwnerOrAdmin(id)) return Forbid();
 
         await customerFacade.UpdateAsync(id, customerRequestDto, cancellationToken);
+
+        // The update may have rotated the security stamp; drop the cached one so old tokens stop working now.
+        securityStampValidator.Invalidate(id);
+
         return NoContent();
     }
 
@@ -93,6 +98,7 @@ public class CustomerController(ICustomerFacade customerFacade) : ControllerBase
         if (!IsOwnerOrAdmin(id)) return Forbid();
 
         await customerFacade.DeleteAsync(id, cancellationToken);
+        securityStampValidator.Invalidate(id);
 
         return NoContent();
     }
