@@ -22,7 +22,7 @@
 		</PackageReference>
 		<PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="10.0.13" />
 		<PackageReference Include="NLog.Web.AspNetCore" Version="6.2.2" />
-		<PackageReference Include="Scalar.AspNetCore" Version="2.18.0" />
+		<PackageReference Include="Scalar.AspNetCore" Version="2.18.3" />
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\CF.Customer.Infrastructure\CF.Customer.Infrastructure.csproj" />
