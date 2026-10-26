@@ -29,7 +29,7 @@ public class CustomerTest
         };
 
         const string invalidPasswordErrorMessage =
-            "Password must be at least 8 characters and contain at 3 of the following: upper case (A-Z), lower case (a-z), number (0-9) and special character (e.g. !@#$%^&*).";
+            "Password must be at least 8 characters and contain at least 3 of the following: upper case (A-Z), lower case (a-z), number (0-9) and special character (e.g. !@#$%^&*).";
 
         // Act
         var exception = Assert.Throws<ValidationException>(customer.ValidatePassword);

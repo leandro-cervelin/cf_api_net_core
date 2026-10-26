@@ -60,7 +60,7 @@ public partial class Customer
 
         if (!Regex.IsMatch(Password, regex))
             throw new ValidationException(
-                "Password must be at least 8 characters and contain at 3 of the following: upper case (A-Z), lower case (a-z), number (0-9) and special character (e.g. !@#$%^&*).");
+                "Password must be at least 8 characters and contain at least 3 of the following: upper case (A-Z), lower case (a-z), number (0-9) and special character (e.g. !@#$%^&*).");
     }
 
     public void ValidateEmail()
