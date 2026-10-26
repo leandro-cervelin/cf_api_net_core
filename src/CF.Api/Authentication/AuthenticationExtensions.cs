@@ -24,6 +24,7 @@ public static class AuthenticationExtensions
 
         services.AddSingleton<ITokenService, TokenService>();
         services.AddScoped<ISecurityStampValidator, SecurityStampValidator>();
+        services.AddMemoryCache(); // SecurityStampValidator caches stamps here
 
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer();
 
