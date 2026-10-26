@@ -315,6 +315,22 @@ Stamps are cached per instance for `Jwt:SecurityStampCacheSeconds` (default 30).
 takes effect there immediately; other instances pick it up when their cache entry expires. Set it to `0` to check
 the database on every request.
 
+### Logging
+
+The API logs with [Serilog](https://serilog.net/), configured in the `Serilog` section of `appsettings.json` and
+`appsettings.Development.json`. Logs go to the console only, which is what containers expect.
+
+- Each request gets one line, such as `HTTP GET /api/v1/customer/1 responded 200 in 12.3 ms`. The query string is
+  left out, because filters such as `?email=` contain personal data.
+- Client mistakes (a `400`, `404` or `409`) are logged as one-line warnings. Unexpected exceptions are logged as
+  errors with their stack trace.
+- To change how much is logged, edit `MinimumLevel`. For example, Development shows the SQL that EF Core runs,
+  because `Microsoft` is set to `Information` there.
+
+Serilog keeps each message's values as named properties, such as `StatusCode` or `Elapsed`. To send logs to a
+tool that reads JSON, replace `outputTemplate` with
+`"formatter": "Serilog.Formatting.Compact.CompactJsonFormatter, Serilog.Formatting.Compact"`.
+
 ### Deployment
 
 #### Database migrations
