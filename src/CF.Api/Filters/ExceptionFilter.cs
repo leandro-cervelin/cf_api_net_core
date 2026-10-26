@@ -9,6 +9,8 @@ namespace CF.Api.Filters;
 /// <summary>
 ///     The one place that turns exceptions thrown by controllers (and the layers below them) into HTTP responses:
 ///     ValidationException → 400, EntityNotFoundException → 404, a unique-index violation → 409, anything else → 500.
+///     The first three are the client's mistake, so they're logged as one-line warnings; only the last is logged as an
+///     error with its stack trace.
 /// </summary>
 public class ExceptionFilter(ILogger<ExceptionFilter> logger) : IExceptionFilter
 {
@@ -37,14 +39,14 @@ public class ExceptionFilter(ILogger<ExceptionFilter> logger) : IExceptionFilter
 
     private void HandleEntityNotFoundException(ExceptionContext context)
     {
-        Log(context.Exception, "Entity Not Found Exception.");
+        logger.LogWarning("Entity not found: {Message}", context.Exception.Message);
         context.ExceptionHandled = true;
         context.Result = new NotFoundResult();
     }
 
     private void HandleValidationException(ExceptionContext context)
     {
-        Log(context.Exception, "Validation Exception.");
+        logger.LogWarning("Validation failed: {Message}", context.Exception.Message);
 
         var error = new KeyValuePair<string, object?>("Errors", new Dictionary<string, List<string>>
             {
@@ -67,7 +69,7 @@ public class ExceptionFilter(ILogger<ExceptionFilter> logger) : IExceptionFilter
     // with the same email); the unique index rejected the second write.
     private void HandleUniqueViolationException(ExceptionContext context)
     {
-        Log(context.Exception, "Unique constraint violation.");
+        logger.LogWarning("Unique constraint violation.");
 
         var details = new ProblemDetails
         {
@@ -82,13 +84,9 @@ public class ExceptionFilter(ILogger<ExceptionFilter> logger) : IExceptionFilter
 
     private void HandleException(ExceptionContext context)
     {
-        Log(context.Exception, "Unexpected exception.");
+        // A real bug: log the whole exception, stack trace included, so it can be fixed.
+        logger.LogError(context.Exception, "Unexpected exception.");
         context.ExceptionHandled = true;
         context.Result = new StatusCodeResult(StatusCodes.Status500InternalServerError);
-    }
-
-    private void Log(Exception exception, string message)
-    {
-        logger.LogError(exception, "{Message}", message);
     }
 }
