@@ -133,15 +133,22 @@ Here's what happens when someone calls `GET /api/v1/customer/1`:
 
 1. **[`CustomerController`](src/CF.Api/Controllers/CustomerController.cs)** (Api) receives the HTTP request,
    checks the caller is allowed to see customer 1, and calls the facade.
-2. **[`CustomerFacade`](src/CF.Customer.Application/Facades/CustomerFacade.cs)** (Application) turns the request
-   DTO into a domain filter and calls the service.
+2. **[`CustomerFacade`](src/CF.Customer.Application/Facades/CustomerFacade.cs)** (Application) uses
+   [`CustomerMapper`](src/CF.Customer.Application/Mappers/CustomerMapper.cs) to turn the request DTO into a domain
+   filter, and calls the service.
 3. **[`CustomerService`](src/CF.Customer.Domain/Services/CustomerService.cs)** (Domain) applies the business rules,
-   such as page size limits, unique emails and password hashing, and asks the repository for the data.
+   such as page size limits, unique emails and password hashing, and asks the repository for the data. The rules
+   for a single customer (a valid email, a strong enough password) are methods on the
+   [`Customer`](src/CF.Customer.Domain/Entities/Customer.cs) entity itself.
 4. **[`CustomerRepository`](src/CF.Customer.Infrastructure/Repositories/CustomerRepository.cs)** (Infrastructure)
    queries SQL Server through EF Core's
    [`CustomerContext`](src/CF.Customer.Infrastructure/DbContext/CustomerContext.cs).
 5. The result goes back up the same way. The facade maps the `Customer` entity to a `CustomerResponseDto`, so
    fields like the password hash never leave the API.
+
+If a rule is broken, the service throws a `ValidationException` (or `EntityNotFoundException`), and
+[`ExceptionFilter`](src/CF.Api/Filters/ExceptionFilter.cs) turns it into a `400` (or `404`) response. That filter is
+the one place where exceptions become HTTP status codes.
 
 All of these classes are connected with dependency injection in one place:
 [`AddCustomerCore`](src/CF.Customer.Infrastructure/DependencyInjection/ServiceCollectionExtensions.cs).
@@ -155,15 +162,53 @@ ASP.NET. It's there to show that the business logic doesn't depend on the web la
 
 ### Where to start reading
 
-- [`Customer.cs`](src/CF.Customer.Domain/Entities/Customer.cs): the entity.
-- [`CustomerService.cs`](src/CF.Customer.Domain/Services/CustomerService.cs): the business rules.
+- [`Program.cs`](src/CF.Api/Program.cs): how the API starts, in about 40 lines.
+- [`Customer.cs`](src/CF.Customer.Domain/Entities/Customer.cs): the entity and its validation rules.
+- [`CustomerService.cs`](src/CF.Customer.Domain/Services/CustomerService.cs): the business rules that need the
+  database, such as "the email isn't taken".
 - [`CustomerController.cs`](src/CF.Api/Controllers/CustomerController.cs): the HTTP endpoints.
 - [`CustomerServiceTest.cs`](src/CF.Customer.UnitTest/Domain/Services/CustomerServiceTest.cs): how the rules are
   tested.
 
-[`Program.cs`](src/CF.Api/Program.cs) is long because it also sets up production concerns such as rate
-limiting, security headers and health checks. Read it last. Those concerns are explained in
+Skip [`Startup/ProductionSetup.cs`](src/CF.Api/Startup/ProductionSetup.cs) at first. It holds the production
+concerns, such as rate limiting, security headers and health checks, which are explained in
 [Going further](#going-further).
+
+### Adding another entity
+
+The project has one entity, but it's set up for more. Say you want customers to have addresses. You'd add an
+`Address` class and follow the same path through each layer:
+
+| Layer | Add |
+| --- | --- |
+| Domain | `Entities/Address.cs` with its validation rules; `Repositories/IAddressRepository.cs` extending `IRepositoryBase<Address>`; `Services/AddressService.cs` and its interface |
+| Infrastructure | a `DbSet<Address>` and its table mapping in `CustomerContext`; `Repositories/AddressRepository.cs`; registrations in `AddCustomerCore` |
+| Application | the DTOs, an `AddressMapper`, and `AddressFacade` with its interface |
+| Api | `Controllers/AddressController.cs` |
+| Migrations | a new migration (see below) |
+| Tests | the same kinds of tests that exist for `Customer` |
+
+[`RepositoryBase<T>`](src/CF.Customer.Infrastructure/Repositories/RepositoryBase.cs) is what saves you work here.
+It already has add, get, update, remove and save for any entity, so `AddressRepository` only needs the queries
+specific to addresses:
+
+```csharp
+public class AddressRepository(CustomerContext context)
+    : RepositoryBase<Address>(context), IAddressRepository
+{
+    // Only address-specific queries go here, e.g. GetByCustomerIdAsync.
+}
+```
+
+To create the migration, run this from the `src` folder. It needs the EF Core tool, which you can install with
+`dotnet tool install --global dotnet-ef`.
+
+```bash
+dotnet ef migrations add AddAddress --project CF.Migrations --startup-project CF.Api
+```
+
+A generic repository is one common way to organize data access, not the only one. EF Core's `DbContext` already
+works like a repository, and many projects use it directly from their services.
 
 ## Running the tests
 
@@ -185,6 +230,9 @@ You need the [.NET 10 SDK](https://dotnet.microsoft.com/download). The test proj
 
 Everything below is optional. It covers running the API without Docker, the details of authentication, and what
 the app does to be safe to deploy. You don't need any of it to understand how the code is organized.
+
+Most of the deployment and hardening code is in [`Startup/ProductionSetup.cs`](src/CF.Api/Startup/ProductionSetup.cs),
+and the authentication code is in [`Authentication/`](src/CF.Api/Authentication).
 
 ### Local development (without Docker)
 
