@@ -1,15 +1,13 @@
 ﻿using CF.Api.Authentication;
 using CF.Api.Filters;
-using CF.Api.Middleware;
 using CF.Api.Startup;
 using CF.Customer.Infrastructure.DependencyInjection;
-using CorrelationId;
-using CorrelationId.DependencyInjection;
 using NLog.Web;
-using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// NLog writes every log line (configured in appsettings.json); the default providers would print each one twice.
+builder.Logging.ClearProviders();
 builder.Host.UseNLog();
 builder.WebHost.ConfigureKestrel(options => options.AddServerHeader = false);
 
@@ -19,14 +17,6 @@ builder.Services.AddCustomerCore(builder.Configuration.GetConnectionString("DbCo
 // Controllers. ExceptionFilter turns domain exceptions (validation, not found) into HTTP responses.
 builder.Services.AddControllers(x => x.Filters.Add<ExceptionFilter>());
 builder.Services.AddProblemDetails();
-builder.Services.AddDefaultCorrelationId(options =>
-{
-    options.LogLevelOptions = new CorrelationIdLogLevelOptions
-    {
-        FoundCorrelationIdHeader = LogLevel.Debug,
-        MissingCorrelationIdHeader = LogLevel.Debug
-    };
-});
 
 builder.Services.AddJwtAuthentication(builder.Configuration);
 builder.Services.AddApiDocumentation();
@@ -37,10 +27,6 @@ await using var app = builder.Build();
 app.MigrateDatabaseIfEnabled();
 
 app.UseProductionSetup();
-app.UseCorrelationId();
-app.UseMiddleware<LogExceptionMiddleware>();
-app.UseMiddleware<LogRequestMiddleware>();
-app.UseMiddleware<LogResponseMiddleware>();
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();

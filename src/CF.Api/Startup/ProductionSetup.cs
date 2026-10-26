@@ -38,8 +38,10 @@ public static class ProductionSetup
         app.UseMiddleware<SecurityHeadersMiddleware>();
         app.UseRateLimiter();
 
+        // Anything ExceptionFilter didn't handle: log it and answer with a generic 500 ProblemDetails, never the
+        // exception itself. In Development the detailed developer exception page is shown instead.
         if (!app.Environment.IsDevelopment())
-            app.UseExceptionHandler(ConfigureExceptionHandler);
+            app.UseExceptionHandler();
 
         return app;
     }
@@ -143,18 +145,5 @@ public static class ProductionSetup
         services.AddHealthChecks()
             .AddDbContextCheck<CustomerContext>("database", HealthStatus.Unhealthy, ["db", "sql"])
             .AddCheck("self", () => HealthCheckResult.Healthy("API is running"), ["api"]);
-    }
-
-    private static void ConfigureExceptionHandler(IApplicationBuilder exceptionHandlerApp)
-    {
-        exceptionHandlerApp.Run(async context =>
-        {
-            context.Response.StatusCode = StatusCodes.Status500InternalServerError;
-
-            await context.Response.WriteAsJsonAsync(new
-            {
-                Message = "An unexpected internal exception occurred."
-            });
-        });
     }
 }

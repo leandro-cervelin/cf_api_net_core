@@ -1,5 +1,4 @@
 using CF.Customer.Domain.Exceptions;
-using CorrelationId.Abstractions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Data.SqlClient;
@@ -7,9 +6,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CF.Api.Filters;
 
-public class ExceptionFilter(
-    ILogger<ExceptionFilter> logger,
-    ICorrelationContextAccessor correlationContext) : IExceptionFilter
+/// <summary>
+///     The one place that turns exceptions thrown by controllers (and the layers below them) into HTTP responses:
+///     ValidationException → 400, EntityNotFoundException → 404, a unique-index violation → 409, anything else → 500.
+/// </summary>
+public class ExceptionFilter(ILogger<ExceptionFilter> logger) : IExceptionFilter
 {
     // SQL Server: 2601 = duplicate key in unique index, 2627 = unique/primary key constraint violation.
     private static readonly int[] UniqueViolationErrorNumbers = [2601, 2627];
@@ -88,8 +89,6 @@ public class ExceptionFilter(
 
     private void Log(Exception exception, string message)
     {
-        if (logger.IsEnabled(LogLevel.Error))
-            logger.LogError(exception, "{Message} CorrelationId: {CorrelationId}", message,
-                correlationContext.CorrelationContext?.CorrelationId);
+        logger.LogError(exception, "{Message}", message);
     }
 }
