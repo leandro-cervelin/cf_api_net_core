@@ -10,6 +10,8 @@
       # Least privilege: the API reads and writes data but can't change the schema or touch other databases.
       - ConnectionStrings__DbConnection=Data Source=db;Initial Catalog=CF;User ID=cf_app;Password=${APP_DB_PASSWORD};Trusted_Connection=False;TrustServerCertificate=True;
       - Jwt__SigningKey=${JWT_SIGNING_KEY}
+      # This local setup serves plain HTTP only, so there's no HTTPS port to redirect to.
+      - HttpsRedirection__Enabled=false
     depends_on:
       # Start only once the schema is up to date.
       migrate:

@@ -39,7 +39,6 @@ app.MigrateDatabaseIfEnabled();
 
 app.UseHttpLogging(); // first, so it logs the final status code of every request, including errors
 app.UseProductionSetup();
-app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 

@@ -283,7 +283,8 @@ Compose starts four services, in order:
 | `api` | Starts only after `migrate` has finished successfully. Listens on http://localhost:8888. | `cf_app` |
 
 Compose runs the API in the Production environment, so the Scalar docs page isn't served there. Use local
-development for that.
+development for that. It also serves plain HTTP only, so it turns off HTTPS redirection with
+`HttpsRedirection__Enabled=false`. Leave that setting on in a real deployment.
 
 ### Authentication in detail
 

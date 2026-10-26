@@ -11,8 +11,8 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 namespace CF.Api.Startup;
 
 /// <summary>
-///     What the API needs to run safely in production: rate limiting, trusted proxies, HSTS, security headers,
-///     a generic error response and health checks. None of it is needed to follow how a request reaches the
+///     What the API needs to run safely in production: rate limiting, trusted proxies, HTTPS redirection and HSTS,
+///     security headers, a generic error response and health checks. None of it is needed to follow how a request reaches the
 ///     business logic, so it's kept out of Program.cs. See "Going further" in the README.
 /// </summary>
 public static class ProductionSetup
@@ -42,6 +42,11 @@ public static class ProductionSetup
         // exception itself. In Development the detailed developer exception page is shown instead.
         if (!app.Environment.IsDevelopment())
             app.UseExceptionHandler();
+
+        // On by default. Turn it off (HttpsRedirection:Enabled=false) only where nothing serves HTTPS, such as the
+        // local Docker Compose setup; there it has no port to redirect to and just logs a warning on every start.
+        if (app.Configuration.GetValue("HttpsRedirection:Enabled", true))
+            app.UseHttpsRedirection();
 
         return app;
     }
