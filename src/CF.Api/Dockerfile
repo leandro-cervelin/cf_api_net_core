@@ -7,7 +7,13 @@ USER $APP_UID
 
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
+# Copy only the project files first and restore, so Docker can cache the NuGet packages until a .csproj changes.
+# Every project CF.Api references (directly or not) must be here, or restore skips it.
 COPY ["CF.Api/CF.Api.csproj", "CF.Api/"]
+COPY ["CF.Migrations/CF.Migrations.csproj", "CF.Migrations/"]
+COPY ["CF.Customer.Infrastructure/CF.Customer.Infrastructure.csproj", "CF.Customer.Infrastructure/"]
+COPY ["CF.Customer.Application/CF.Customer.Application.csproj", "CF.Customer.Application/"]
+COPY ["CF.Customer.Domain/CF.Customer.Domain.csproj", "CF.Customer.Domain/"]
 RUN dotnet restore "CF.Api/CF.Api.csproj"
 COPY . .
 WORKDIR "/src/CF.Api"     
