@@ -2,15 +2,12 @@ using CF.Customer.Application.Dtos;
 using CF.Customer.Application.Mappers;
 using CF.Customer.Domain.Entities;
 using CF.Customer.Domain.Models;
-using CF.Customer.Infrastructure.Mappers;
 using Xunit;
 
-namespace CF.Customer.UnitTest.Infrastructure.Mappers;
+namespace CF.Customer.UnitTest.Application.Mappers;
 
 public class CustomerMapperTest
 {
-    private readonly ICustomerMapper _mapper = new CustomerMapper();
-
     [Fact]
     public void CustomerRequestDtoToCustomer()
     {
@@ -24,7 +21,7 @@ public class CustomerMapperTest
         };
 
         //Act
-        var customer = _mapper.MapToCustomer(customerRequestDto);
+        var customer = CustomerMapper.MapToCustomer(customerRequestDto);
 
         //Assert
         Assert.Equal(customerRequestDto.FirstName, customer.FirstName);
@@ -48,7 +45,7 @@ public class CustomerMapperTest
         };
 
         //Act
-        var customerResponseDto = _mapper.MapToCustomerResponseDto(customer);
+        var customerResponseDto = CustomerMapper.MapToCustomerResponseDto(customer);
 
         //Assert
         Assert.Equal(customer.FirstName, customerResponseDto.FirstName);
@@ -84,7 +81,7 @@ public class CustomerMapperTest
         };
 
         //Act
-        var customerResponseDtoPagination = _mapper.MapToPaginationDto(customerPagination);
+        var customerResponseDtoPagination = CustomerMapper.MapToPaginationDto(customerPagination);
 
         //Assert
         Assert.Equal(customerList.First().FirstName, customerResponseDtoPagination.Result.First().FirstName);
@@ -112,7 +109,7 @@ public class CustomerMapperTest
         };
 
         //Act
-        var customerFilter = _mapper.MapToCustomerFilter(customerFilterDto);
+        var customerFilter = CustomerMapper.MapToCustomerFilter(customerFilterDto);
 
         //Assert
         Assert.Equal(customerFilterDto.FirstName, customerFilter.FirstName);

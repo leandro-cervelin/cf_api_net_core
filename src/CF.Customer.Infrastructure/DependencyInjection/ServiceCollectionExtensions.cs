@@ -1,11 +1,9 @@
 using CF.Customer.Application.Facades;
 using CF.Customer.Application.Facades.Interfaces;
-using CF.Customer.Application.Mappers;
 using CF.Customer.Domain.Repositories;
 using CF.Customer.Domain.Services;
 using CF.Customer.Domain.Services.Interfaces;
 using CF.Customer.Infrastructure.DbContext;
-using CF.Customer.Infrastructure.Mappers;
 using CF.Customer.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -27,7 +25,6 @@ public static class ServiceCollectionExtensions
         services.AddTransient<ICustomerService, CustomerService>();
         services.AddTransient<ICustomerRepository, CustomerRepository>();
         services.AddTransient<IPasswordHasherService, PasswordHasherService>();
-        services.AddSingleton<ICustomerMapper, CustomerMapper>();
 
         return services;
     }

@@ -1,13 +1,17 @@
 using CF.Customer.Application.Dtos;
-using CF.Customer.Application.Mappers;
 using CF.Customer.Domain.Entities;
 using CF.Customer.Domain.Models;
 
-namespace CF.Customer.Infrastructure.Mappers;
+namespace CF.Customer.Application.Mappers;
 
-public class CustomerMapper : ICustomerMapper
+/// <summary>
+///     Converts between the DTOs the API sends and receives and the domain types the business rules work with.
+///     Keeping this in one place means the entity (with its password hash) never leaves the Application layer by
+///     accident: callers only ever get DTOs back.
+/// </summary>
+public static class CustomerMapper
 {
-    public Domain.Entities.Customer MapToCustomer(CustomerRequestDto dto)
+    public static Domain.Entities.Customer MapToCustomer(CustomerRequestDto dto)
     {
         return new Domain.Entities.Customer
         {
@@ -18,7 +22,7 @@ public class CustomerMapper : ICustomerMapper
         };
     }
 
-    public CustomerResponseDto MapToCustomerResponseDto(Domain.Entities.Customer customer)
+    public static CustomerResponseDto MapToCustomerResponseDto(Domain.Entities.Customer customer)
     {
         return new CustomerResponseDto
         {
@@ -30,7 +34,7 @@ public class CustomerMapper : ICustomerMapper
         };
     }
 
-    public AuthenticatedCustomerDto MapToAuthenticatedCustomerDto(Domain.Entities.Customer customer)
+    public static AuthenticatedCustomerDto MapToAuthenticatedCustomerDto(Domain.Entities.Customer customer)
     {
         return new AuthenticatedCustomerDto
         {
@@ -40,7 +44,7 @@ public class CustomerMapper : ICustomerMapper
         };
     }
 
-    public CustomerFilter MapToCustomerFilter(CustomerFilterDto dto)
+    public static CustomerFilter MapToCustomerFilter(CustomerFilterDto dto)
     {
         return new CustomerFilter
         {
@@ -55,7 +59,8 @@ public class CustomerMapper : ICustomerMapper
         };
     }
 
-    public PaginationDto<CustomerResponseDto> MapToPaginationDto(Pagination<Domain.Entities.Customer> pagination)
+    public static PaginationDto<CustomerResponseDto> MapToPaginationDto(
+        Pagination<Domain.Entities.Customer> pagination)
     {
         return new PaginationDto<CustomerResponseDto>
         {

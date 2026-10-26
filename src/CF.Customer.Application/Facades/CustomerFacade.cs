@@ -5,16 +5,16 @@ using CF.Customer.Domain.Services.Interfaces;
 
 namespace CF.Customer.Application.Facades;
 
-public class CustomerFacade(ICustomerService customerService, ICustomerMapper mapper) : ICustomerFacade
+public class CustomerFacade(ICustomerService customerService) : ICustomerFacade
 {
     public async Task<PaginationDto<CustomerResponseDto>> GetListByFilterAsync(CustomerFilterDto filterDto,
         CancellationToken cancellationToken)
     {
-        var filter = mapper.MapToCustomerFilter(filterDto);
+        var filter = CustomerMapper.MapToCustomerFilter(filterDto);
 
         var result = await customerService.GetListByFilterAsync(filter, cancellationToken);
 
-        var paginationDto = mapper.MapToPaginationDto(result);
+        var paginationDto = CustomerMapper.MapToPaginationDto(result);
 
         return paginationDto;
     }
@@ -22,17 +22,17 @@ public class CustomerFacade(ICustomerService customerService, ICustomerMapper ma
     public async Task<CustomerResponseDto?> GetByFilterAsync(CustomerFilterDto filterDto,
         CancellationToken cancellationToken)
     {
-        var filter = mapper.MapToCustomerFilter(filterDto);
+        var filter = CustomerMapper.MapToCustomerFilter(filterDto);
 
         var result = await customerService.GetByFilterAsync(filter, cancellationToken);
 
-        return result is null ? null : mapper.MapToCustomerResponseDto(result);
+        return result is null ? null : CustomerMapper.MapToCustomerResponseDto(result);
     }
 
     public async Task UpdateAsync(long id, CustomerRequestDto customerRequestDto, bool verifyCurrentPassword,
         CancellationToken cancellationToken)
     {
-        var customer = mapper.MapToCustomer(customerRequestDto);
+        var customer = CustomerMapper.MapToCustomer(customerRequestDto);
 
         await customerService.UpdateAsync(id, customer, customerRequestDto.CurrentPassword, verifyCurrentPassword,
             cancellationToken);
@@ -40,7 +40,7 @@ public class CustomerFacade(ICustomerService customerService, ICustomerMapper ma
 
     public async Task<long> CreateAsync(CustomerRequestDto customerRequestDto, CancellationToken cancellationToken)
     {
-        var customer = mapper.MapToCustomer(customerRequestDto);
+        var customer = CustomerMapper.MapToCustomer(customerRequestDto);
 
         var id = await customerService.CreateAsync(customer, cancellationToken);
 
@@ -58,7 +58,7 @@ public class CustomerFacade(ICustomerService customerService, ICustomerMapper ma
         var customer = await customerService.AuthenticateAsync(loginRequestDto.Email, loginRequestDto.Password,
             cancellationToken);
 
-        return customer is null ? null : mapper.MapToAuthenticatedCustomerDto(customer);
+        return customer is null ? null : CustomerMapper.MapToAuthenticatedCustomerDto(customer);
     }
 
     public async Task<string?> GetSecurityStampAsync(long id, CancellationToken cancellationToken)
