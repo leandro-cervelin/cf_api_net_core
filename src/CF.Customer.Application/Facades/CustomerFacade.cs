@@ -5,6 +5,11 @@ using CF.Customer.Domain.Services.Interfaces;
 
 namespace CF.Customer.Application.Facades;
 
+/// <summary>
+///     The entry point into the customer core for any host (the API controllers, the console app). It speaks DTOs
+///     to the outside and domain types to CustomerService, so hosts never handle the Customer entity directly. Most
+///     methods are short on purpose: map the input, call the service, map the result.
+/// </summary>
 public class CustomerFacade(ICustomerService customerService) : ICustomerFacade
 {
     public async Task<PaginationDto<CustomerResponseDto>> GetListByFilterAsync(CustomerFilterDto filterDto,

@@ -1,5 +1,9 @@
 ﻿namespace CF.Customer.Domain.Repositories;
 
+/// <summary>
+///     The data access every entity shares. Declared here in Domain so the business rules depend only on this
+///     interface; the EF Core implementation is RepositoryBase in Infrastructure.
+/// </summary>
 public interface IRepositoryBase<TEntity> where TEntity : class
 {
     /// <summary>

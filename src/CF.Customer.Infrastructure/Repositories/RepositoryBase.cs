@@ -4,6 +4,15 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CF.Customer.Infrastructure.Repositories;
 
+/// <summary>
+///     The add / get / update / remove / save code every entity needs, written once. Each entity's repository
+///     inherits from it and adds only its own queries: CustomerRepository adds filtering and paging, and a second
+///     entity (say, Address) would get <c>AddressRepository : RepositoryBase&lt;Address&gt;</c> for free.
+///     <para>
+///         This is one common way to structure data access, not the only one: EF Core's DbContext and DbSet are
+///         already a repository and unit of work, and many projects use them directly from the services.
+///     </para>
+/// </summary>
 public class RepositoryBase<TEntity> : IRepositoryBase<TEntity>
     where TEntity : class
 {
