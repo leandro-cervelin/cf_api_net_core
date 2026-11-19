@@ -1,9 +1,9 @@
-FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base
+FROM mcr.microsoft.com/dotnet/aspnet:11.0 AS base
 WORKDIR /app
 # Run as the image's built-in unprivileged "app" user. It listens on 8080 (ASPNETCORE_HTTP_PORTS), not 80.
 USER $APP_UID
 
-FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:11.0 AS build
 WORKDIR /src
 # Copy only the project files first and restore, so Docker can cache the NuGet packages until a .csproj changes.
 # Every project CF.Api references (directly or not) must be here, or restore skips it.
@@ -23,7 +23,7 @@ RUN dotnet publish "CF.Api.csproj" -c Release -o /app/publish
 # EF Core migration bundle: a single executable that applies pending migrations, run as its own deploy step
 # (the API doesn't migrate on startup outside Development). It reads ConnectionStrings__DbConnection.
 FROM build AS migrations
-RUN dotnet tool install --global dotnet-ef --version 10.0.12
+RUN dotnet tool install --global dotnet-ef --version 11.0.0
 ENV PATH="$PATH:/root/.dotnet/tools"
 WORKDIR /src
 RUN dotnet ef migrations bundle --project CF.Migrations/CF.Migrations.csproj --startup-project CF.Api/CF.Api.csproj \

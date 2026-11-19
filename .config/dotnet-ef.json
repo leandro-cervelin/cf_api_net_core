@@ -1,0 +1,4 @@
+{
+  "project": "src/CF.Migrations/CF.Migrations.csproj",
+  "startupProject": "src/CF.Api/CF.Api.csproj"
+}

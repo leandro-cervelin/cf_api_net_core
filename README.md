@@ -1,6 +1,6 @@
-[![Build & Test .NET 10.0](https://github.com/leandro-cervelin/cf_api_net_core/actions/workflows/dotnet-core.yml/badge.svg)](https://github.com/leandro-cervelin/cf_api_net_core/actions/workflows/dotnet-core.yml) [![CodeQL .NET 10.0](https://github.com/leandro-cervelin/cf_api_net_core/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/leandro-cervelin/cf_api_net_core/actions/workflows/codeql-analysis.yml)
+[![Build & Test .NET 11.0](https://github.com/leandro-cervelin/cf_api_net_core/actions/workflows/dotnet-core.yml/badge.svg)](https://github.com/leandro-cervelin/cf_api_net_core/actions/workflows/dotnet-core.yml) [![CodeQL .NET 11.0](https://github.com/leandro-cervelin/cf_api_net_core/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/leandro-cervelin/cf_api_net_core/actions/workflows/codeql-analysis.yml)
 
-# .NET 10 Customer API: an example app
+# .NET 11 Customer API: an example app
 
 A small REST API for managing customers, built with ASP.NET Core, Entity Framework Core and SQL Server.
 You can sign up, log in to get a token, and read, update or delete your own customer record.
@@ -200,12 +200,15 @@ public class AddressRepository(CustomerContext context)
 }
 ```
 
-To create the migration, run this from the `src` folder. It needs the EF Core tool, which you can install with
-`dotnet tool install --global dotnet-ef`.
+To create the migration, run this from anywhere in the repository. It needs the EF Core tool (version 11 or later),
+which you can install with `dotnet tool install --global dotnet-ef`.
 
 ```bash
-dotnet ef migrations add AddAddress --project CF.Migrations --startup-project CF.Api
+dotnet ef migrations add AddAddress
 ```
+
+No `--project` or `--startup-project` is needed: `.config/dotnet-ef.json` sets them to `CF.Migrations` (where the
+migrations live) and `CF.Api` (whose configuration the tool reads). Passing either option still overrides it.
 
 A generic repository is one common way to organize data access, not the only one. EF Core's `DbContext` already
 works like a repository, and many projects use it directly from their services.
@@ -218,7 +221,7 @@ From the repository root:
 dotnet test
 ```
 
-You need the [.NET 10 SDK](https://dotnet.microsoft.com/download). The test projects:
+You need the [.NET 11 SDK](https://dotnet.microsoft.com/download). The test projects:
 
 - `CF.Customer.UnitTest` and `CF.Api.UnitTest`: unit tests. They don't need a database.
 - `CF.IntegrationTest`: starts a real SQL Server in Docker with [Testcontainers](https://testcontainers.com/) and
@@ -236,7 +239,7 @@ and the authentication code is in [`Authentication/`](src/CF.Api/Authentication)
 
 ### Local development (without Docker)
 
-You need the [.NET 10 SDK](https://dotnet.microsoft.com/download) and a SQL Server you can connect to.
+You need the [.NET 11 SDK](https://dotnet.microsoft.com/download) and a SQL Server you can connect to.
 
 The committed `appsettings.json` intentionally leaves out the database password and the signing key. Provide them
 with [user-secrets](https://learn.microsoft.com/aspnet/core/security/app-secrets), so no credential is committed.
@@ -349,7 +352,7 @@ docker build -f CF.Api/Dockerfile --target migrator -t cf-api-migrator .
 Without Docker, build a bundle and run it from your pipeline:
 
 ```bash
-dotnet ef migrations bundle --project CF.Migrations --startup-project CF.Api -o efbundle
+dotnet ef migrations bundle -o efbundle
 ```
 
 ```bash
@@ -399,7 +402,8 @@ their timings, so it's limited to admins.
 #### Rate limiting
 
 Each client IP gets `RateLimiting:PermitLimit` requests per `RateLimiting:WindowSeconds` (60 per 60 seconds by
-default). Beyond that the API answers `429 Too Many Requests`.
+default). Beyond that the API answers `429 Too Many Requests` with a `Retry-After` header: the seconds left until
+the window resets.
 
 #### Security headers
 

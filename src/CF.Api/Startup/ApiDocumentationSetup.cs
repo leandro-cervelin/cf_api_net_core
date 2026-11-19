@@ -10,6 +10,13 @@ namespace CF.Api.Startup;
 /// </summary>
 public static class ApiDocumentationSetup
 {
+    /// <summary>
+    ///     One OpenAPI document per API version. The name must match the ApiExplorer group name ('v'VVV, so "v1"):
+    ///     ASP.NET Core puts an endpoint in a document only when its group name equals the document name.
+    ///     Add a name here when a new version ships.
+    /// </summary>
+    private static readonly string[] DocumentNames = ["v1"];
+
     public static IServiceCollection AddApiDocumentation(this IServiceCollection services)
     {
         services.AddApiVersioning(options =>
@@ -20,11 +27,14 @@ public static class ApiDocumentationSetup
         {
             options.GroupNameFormat = "'v'VVV";
             options.SubstituteApiVersionInUrl = true;
-        }).AddOpenApi(options =>
-        {
-            options.Document.AddDocumentTransformer<BearerSecurityTransformer>();
-            options.Document.AddOperationTransformer<BearerSecurityTransformer>();
         });
+
+        foreach (var documentName in DocumentNames)
+            services.AddOpenApi(documentName, options =>
+            {
+                options.AddDocumentTransformer<BearerSecurityTransformer>();
+                options.AddOperationTransformer<BearerSecurityTransformer>();
+            });
 
         return services;
     }
@@ -33,7 +43,7 @@ public static class ApiDocumentationSetup
     {
         if (!app.Environment.IsDevelopment()) return app;
 
-        app.MapOpenApi().WithDocumentPerVersion();
+        app.MapOpenApi();
         app.MapScalarApiReference(options => options.AddPreferredSecuritySchemes(BearerSecurityTransformer.SchemeName));
 
         return app;

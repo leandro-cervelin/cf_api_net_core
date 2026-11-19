@@ -49,6 +49,11 @@ public class RateLimitingIntegrationTest : IAsyncLifetime
                 var content = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
                 Assert.Contains("Rate limit exceeded", content);
                 Assert.Contains("retryAfter", content);
+
+                // Seconds left in the current window: within (0, 60].
+                var retryAfter = response.Headers.RetryAfter?.Delta;
+                Assert.NotNull(retryAfter);
+                Assert.InRange(retryAfter.Value.TotalSeconds, 1, 60);
             }
         }
 
