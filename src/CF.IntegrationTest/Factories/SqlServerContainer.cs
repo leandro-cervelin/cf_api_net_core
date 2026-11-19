@@ -8,7 +8,7 @@ namespace CF.IntegrationTest.Factories;
 internal static class SqlServerContainer
 {
     private static readonly MsSqlContainer Container =
-        new MsSqlBuilder("mcr.microsoft.com/mssql/server:2022-latest").Build();
+        new MsSqlBuilder("mcr.microsoft.com/mssql/server:2025-latest").Build();
 
     private static readonly SemaphoreSlim StartLock = new(1, 1);
     private static bool _started;
