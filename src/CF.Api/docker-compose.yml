@@ -37,7 +37,7 @@
   # One-shot: creates the CF database and the API's cf_app login (data read/write only), then exits.
   # Idempotent; re-running it also resets the cf_app password to APP_DB_PASSWORD.
   db-init:
-    image: "mcr.microsoft.com/mssql/server:2022-latest"
+    image: "mcr.microsoft.com/mssql/server:2025-latest"
     entrypoint: ["/opt/mssql-tools18/bin/sqlcmd", "-S", "db", "-U", "sa", "-C", "-b", "-i", "/scripts/init-app-login.sql"]
     environment:
       # Read by sqlcmd from the environment, so neither password appears in the process arguments.
@@ -53,7 +53,7 @@
       - app-network
 
   db:
-    image: "mcr.microsoft.com/mssql/server:2022-latest"
+    image: "mcr.microsoft.com/mssql/server:2025-latest"
     environment:
       SA_PASSWORD: "${SA_PASSWORD}"
       ACCEPT_EULA: "Y"
