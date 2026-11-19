@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Net;
 using System.Text.Json;
 using System.Threading.RateLimiting;
@@ -128,16 +129,21 @@ public static class ProductionSetup
             options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
             options.OnRejected = async (context, cancellationToken) =>
             {
+                // Since .NET 11 the fixed-window limiter reports the time left in the current window, not the whole
+                // window, so it's accurate enough to send as the standard Retry-After header (whole seconds, rounded up).
+                var retryAfterSeconds = context.Lease.TryGetMetadata(MetadataName.RetryAfter, out var retryAfter)
+                    ? (int)Math.Ceiling(retryAfter.TotalSeconds)
+                    : windowSeconds;
+
                 context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
                 context.HttpContext.Response.ContentType = "application/json";
+                context.HttpContext.Response.Headers.RetryAfter = retryAfterSeconds.ToString(CultureInfo.InvariantCulture);
 
                 var response = new
                 {
                     statusCode = 429,
                     message = $"Rate limit exceeded. Maximum {permitLimit} requests per {windowSeconds} seconds allowed.",
-                    retryAfter = context.Lease.TryGetMetadata(MetadataName.RetryAfter, out var retryAfter)
-                        ? retryAfter.TotalSeconds
-                        : windowSeconds
+                    retryAfter = retryAfterSeconds
                 };
 
                 await context.HttpContext.Response.WriteAsJsonAsync(response, cancellationToken);
